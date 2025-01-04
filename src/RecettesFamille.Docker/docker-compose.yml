@@ -3,7 +3,9 @@ services:
     image: ${DOCKER_REGISTRY-}recettesfamille    
     user: "root"
     ports:
-      - "81:81"
+      - "9090:9090"
+    networks:
+      testnet:
 
     build:
       context: ..
@@ -27,4 +29,10 @@ services:
       - /home/data/dbRF:/var/lib/postgresql/data
     ports:
       - "5442:5442"
+    networks:
+      testnet:
+        
+networks:
+  testnet:
+    external: true
         
