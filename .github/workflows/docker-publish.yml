@@ -32,5 +32,5 @@ jobs:
         password: ${{ secrets.DEPLOY_PASSWORD }}  # Mot de passe pour l'authentification
         script: |
           cd ${{ secrets.DEPLOY_TARGET }}/src     
-          docker compose -f RecettesFamille.Docker/docker-compose.prod.yml down
-          docker compose -f RecettesFamille.Docker/docker-compose.prod.yml up --build -d
+          docker compose -f RecettesFamille.Docker/docker-compose.yml down
+          docker compose -f RecettesFamille.Docker/docker-compose.yml up --build -d
