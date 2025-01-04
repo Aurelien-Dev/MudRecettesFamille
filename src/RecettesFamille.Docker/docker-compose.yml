@@ -2,11 +2,13 @@ services:
   recettesfamille:
     image: ${DOCKER_REGISTRY-}recettesfamille    
     user: "root"
-    ports:
-      - "9090:9090"
+    
     networks:
       testnet:
         ipv4_address: 172.26.0.28
+    ports:
+      - "9090:9090"
+    restart: always
 
     build:
       context: ..
@@ -28,10 +30,13 @@ services:
       POSTGRES_DB: recettesfamilledb
     volumes:
       - /home/data/dbRF:/var/lib/postgresql/data
-    ports:
-      - "5442:5442"
+
     networks:
       testnet:
+        ipv4_address: 172.26.0.29
+    ports:
+      - "5442:5442"
+    restart: always
         
 networks:
   testnet:
