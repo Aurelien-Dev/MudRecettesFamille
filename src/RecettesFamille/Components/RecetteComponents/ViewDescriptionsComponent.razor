@@ -1,0 +1,16 @@
+@using RecettesFamille.Data.DtoModel
+
+<MudItem xs="12">
+    <MudGrid>
+        @foreach (var description in Descriptions)
+        {
+            <MudItem xs="12" Class="d-flex justify-left">
+                <MudText>@description.Instruction</MudText>
+            </MudItem>
+        }
+    </MudGrid>
+</MudItem>
+
+@code {
+    [Parameter] public List<DescriptionDto> Descriptions { get; set; } = null!;
+}

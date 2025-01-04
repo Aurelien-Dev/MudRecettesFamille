@@ -1,0 +1,52 @@
+@page "/recette"
+@using RecettesFamille.Data.DtoModel
+@using RecettesFamille.Components.RecetteComponents
+
+<MudContainer Class="mt-5" MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Title</MudText>
+
+    @* Details recette *@
+    <MudGrid Spacing="8" Class="mt-5">
+        <MudItem md="7" xs="12">
+            <MudImage
+                Src="https://static.750g.com/images/1200-675/9823eb627203c878f3e36d72f8ce6d1c/tarte-aux-pommes.jpg"
+                Elevation="25" Class="rounded-pill" Fluid="true" Alt="@Recette.Title"></MudImage>
+        </MudItem>
+
+        <ViewIngredientsComponent Ingredients="@Recette.Ingredients"/>
+    </MudGrid>
+
+    @* Description recette *@
+    <MudGrid Spacing="12" Class="mt-10">
+        <ViewDescriptionsComponent Descriptions="@Recette.Descriptions"/>
+    </MudGrid>
+</MudContainer>
+
+
+@code {
+    RecetteDto Recette { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        Recette = new RecetteDto
+        {
+            Title = "Tarte Tatin",
+            Ingredients = new List<IngredientDto>
+            {
+                new("Gateau", IngredientType.Divider),
+                new("Pommes", IngredientType.Ingredient) { Quantity = "6" },
+                new("Sucre", IngredientType.Ingredient) { Quantity = "150g" },
+                new("Beurre", IngredientType.Ingredient) { Quantity = "100g" },
+                new("Pâte feuilletée", IngredientType.Ingredient) { Quantity = "1 rouleau" }
+            },
+            Descriptions = new List<DescriptionDto>
+            {
+                new() { Instruction = "Préparez l’ensemble des ingrédients. Dans la cuve du robot ou dans un saladier, versez le sucre en poudre sur les oeufs entiers. Fouettez jusqu’à ce que le mélange blanchisse. Râpez finement le zeste du demi-citron et récupérez le jus. Si vous utilisez une orange, procédez de la même manière mais si l’orange est grosse, n’utilisez qu’une partie du jus (environ 2 cl). Ajoutez enfin les \u00be du lait et mélangez bien." },
+                new() { Instruction = "Mélangez la farine et la levure chimique ensemble puis tamisez-la. Ajoutez la farine au mélange précédent et mélangez au fouet. Ajoutez le beurre fondu et refroidi et enfin le reste du lait. Laissez reposer au frais pendant 15 minutes." },
+                new() { Instruction = "Pendant ce temps, beurrez les moules à madeleines s’il s’agit de moules métalliques. Dans le cas ou vous utilisez des moules en silicone, il n’est pas nécessaire de les graisser. Garnissez les empreintes à madeleines aux \u00be, à l’aide d’une poche à douille ou bien d’une cuillère." },
+                new() { Instruction = "Enfournez dans un four ventilé (pas obigatoire) préchauffé à 250\u00b0C puis baissez immédiatement à 200\u00b0C. Cuisez pendant 10 à 12 minutes environ. Les madeleines sont cuites lorsqu’elles sont gonflées et colorées. Au terme de la cuisson, retirez-les du four et laissez-les tiédir avant de les démouler." }
+            }
+        };
+    }
+
+}

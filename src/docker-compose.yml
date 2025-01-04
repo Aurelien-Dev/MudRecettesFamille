@@ -1,0 +1,30 @@
+services:
+  recettesfamille:
+    image: ${DOCKER_REGISTRY-}recettesfamille    
+    user: "root"
+    ports:
+      - "81:81"
+
+    build:
+      context: .
+      dockerfile: RecettesFamille/Dockerfile
+
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - recettesfamille.data
+    volumes:
+      - /home/data/client:/app/data:ro  # Mapping du volume
+      
+  recettesfamille.data:
+    image: postgres:latest
+    container_name: recettesfamille.data
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: PGUserPwd
+      POSTGRES_DB: recettesfamilledb
+    volumes:
+      - /home/data/dbRF:/var/lib/postgresql/data
+    ports:
+      - "5442:5442"
+        
