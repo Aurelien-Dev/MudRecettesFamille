@@ -18,21 +18,19 @@ jobs:
     - name: Copy files via SSH
       uses: appleboy/scp-action@v0.1.3
       with:
-        host: ${{ secrets.DEPLOY_HOST }}
-        username: ${{ secrets.DEPLOY_USER }}
-        key: ${{ secrets.DEPLOY_KEY }}
-        passphrase: ${{ secrets.DEPLOY_PASSPHRASE }}
-        source: "."
-        target: ${{ secrets.DEPLOY_TARGET }}
+        host: ${{ secrets.DEPLOY_HOST }}          # Adresse de l'hôte VPS où le déploiement doit avoir lieu
+        username: ${{ secrets.DEPLOY_USER }}      # Nom d'utilisateur pour se connecter à l'hôte VPS
+        password: ${{ secrets.DEPLOY_PASSWORD }}  # Mot de passe pour l'authentification
+        source: "."                               # Répertoire source à copier
+        target: ${{ secrets.DEPLOY_TARGET }}      # Répertoire cible sur l'hôte VPS où les fichiers seront copiés
 
     - name: Deploy with Docker Compose
       uses: appleboy/ssh-action@v0.1.5
       with:
-        host: ${{ secrets.DEPLOY_HOST }}
-        username: ${{ secrets.DEPLOY_USER }}
-        key: ${{ secrets.DEPLOY_KEY }}
-        passphrase: ${{ secrets.DEPLOY_PASSPHRASE }}
+        host: ${{ secrets.DEPLOY_HOST }}          # Adresse de l'hôte VPS où le déploiement doit avoir lieu
+        username: ${{ secrets.DEPLOY_USER }}      # Nom d'utilisateur pour se connecter à l'hôte VPS
+        password: ${{ secrets.DEPLOY_PASSWORD }}  # Mot de passe pour l'authentification
         script: |
-          cd ${{ secrets.DEPLOY_TARGET }}/src
-          docker compose -f MudCeramWorkshop.Docker/docker-compose.prod.yml down
-          docker compose -f MudCeramWorkshop.Docker/docker-compose.prod.yml up --build -d
+          cd ${{ secrets.DEPLOY_TARGET }}/src     
+          docker compose -f RecettesFamille.Docker/docker-compose.prod.yml down
+          docker compose -f RecettesFamille.Docker/docker-compose.prod.yml up --build -d
