@@ -2,6 +2,7 @@ services:
   recettesfamille:
     image: ${DOCKER_REGISTRY-}recettesfamille    
     user: "root"
+    container_name: recettesfamille.client
     
     networks:
       testnet:
