@@ -5,7 +5,7 @@ VisualStudioVersion = 17.12.35323.107
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecettesFamille", "RecettesFamille\RecettesFamille.csproj", "{F94EF257-FD46-482E-BDA7-BD312CB4F7F4}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{060D2D6A-478D-482F-B8D3-0230469D013A}"
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "RecettesFamille.Docker\docker-compose.dcproj", "{060D2D6A-478D-482F-B8D3-0230469D013A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,17 +1,17 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\Test\\RecettesFamille\\",
+  "WorkspaceRootPath": "D:\\01_dev\\MudRecettesFamille\\MudRecettesFamille\\src\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{060D2D6A-478D-482F-B8D3-0230469D013A}|docker-compose.dcproj|d:\\test\\recettesfamille\\docker-compose.yml||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{060D2D6A-478D-482F-B8D3-0230469D013A}|docker-compose.dcproj|solutionrelative:docker-compose.yml||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\01_dev\\MudRecettesFamille\\MudRecettesFamille\\src\\docker-compose.yml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:docker-compose.yml||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F94EF257-FD46-482E-BDA7-BD312CB4F7F4}|RecettesFamille\\RecettesFamille.csproj|d:\\test\\recettesfamille\\recettesfamille\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "AbsoluteMoniker": "D:0:0:{F94EF257-FD46-482E-BDA7-BD312CB4F7F4}|RecettesFamille\\RecettesFamille.csproj|d:\\01_dev\\mudrecettesfamille\\mudrecettesfamille\\src\\recettesfamille\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{F94EF257-FD46-482E-BDA7-BD312CB4F7F4}|RecettesFamille\\RecettesFamille.csproj|solutionrelative:recettesfamille\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F94EF257-FD46-482E-BDA7-BD312CB4F7F4}|RecettesFamille\\RecettesFamille.csproj|d:\\test\\recettesfamille\\recettesfamille\\components\\recettecomponents\\viewingredientscomponent.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{F94EF257-FD46-482E-BDA7-BD312CB4F7F4}|RecettesFamille\\RecettesFamille.csproj|d:\\01_dev\\mudrecettesfamille\\mudrecettesfamille\\src\\recettesfamille\\components\\recettecomponents\\viewingredientscomponent.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{F94EF257-FD46-482E-BDA7-BD312CB4F7F4}|RecettesFamille\\RecettesFamille.csproj|solutionrelative:recettesfamille\\components\\recettecomponents\\viewingredientscomponent.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
@@ -22,7 +22,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 1491,
-          "SelectedChildIndex": 16,
+          "SelectedChildIndex": 17,
           "Children": [
             {
               "$type": "Bookmark",
@@ -89,43 +89,43 @@
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "docker-compose.yml",
-              "DocumentMoniker": "D:\\Test\\RecettesFamille\\docker-compose.yml",
+              "DocumentMoniker": "D:\\01_dev\\MudRecettesFamille\\MudRecettesFamille\\src\\docker-compose.yml",
               "RelativeDocumentMoniker": "docker-compose.yml",
-              "ToolTip": "D:\\Test\\RecettesFamille\\docker-compose.yml",
+              "ToolTip": "D:\\01_dev\\MudRecettesFamille\\MudRecettesFamille\\src\\docker-compose.yml",
               "RelativeToolTip": "docker-compose.yml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003775|",
-              "WhenOpened": "2025-01-04T16:52:37.266Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-04T16:52:37.266Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "Dockerfile",
-              "DocumentMoniker": "D:\\Test\\RecettesFamille\\RecettesFamille\\Dockerfile",
+              "DocumentMoniker": "D:\\01_dev\\MudRecettesFamille\\MudRecettesFamille\\src\\RecettesFamille\\Dockerfile",
               "RelativeDocumentMoniker": "RecettesFamille\\Dockerfile",
-              "ToolTip": "D:\\Test\\RecettesFamille\\RecettesFamille\\Dockerfile",
+              "ToolTip": "D:\\01_dev\\MudRecettesFamille\\MudRecettesFamille\\src\\RecettesFamille\\Dockerfile",
               "RelativeToolTip": "RecettesFamille\\Dockerfile",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-01-04T16:48:52.587Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-04T16:48:52.587Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "ViewIngredientsComponent.razor",
-              "DocumentMoniker": "D:\\Test\\RecettesFamille\\RecettesFamille\\Components\\RecetteComponents\\ViewIngredientsComponent.razor",
+              "DocumentMoniker": "D:\\01_dev\\MudRecettesFamille\\MudRecettesFamille\\src\\RecettesFamille\\Components\\RecetteComponents\\ViewIngredientsComponent.razor",
               "RelativeDocumentMoniker": "RecettesFamille\\Components\\RecetteComponents\\ViewIngredientsComponent.razor",
-              "ToolTip": "D:\\Test\\RecettesFamille\\RecettesFamille\\Components\\RecetteComponents\\ViewIngredientsComponent.razor",
+              "ToolTip": "D:\\01_dev\\MudRecettesFamille\\MudRecettesFamille\\src\\RecettesFamille\\Components\\RecetteComponents\\ViewIngredientsComponent.razor",
               "RelativeToolTip": "RecettesFamille\\Components\\RecetteComponents\\ViewIngredientsComponent.razor",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2024-12-29T18:34:22.648Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-29T18:34:22.648Z"
             }
           ]
         }
