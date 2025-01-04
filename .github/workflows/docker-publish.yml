@@ -24,12 +24,12 @@ jobs:
         source: "."                               # Répertoire source à copier
         target: /home/recettesfamille/      # Répertoire cible sur l'hôte VPS où les fichiers seront copiés
 
-    - name: Deploy with Docker Compose
-      uses: appleboy/ssh-action@v0.1.5
-      with:
-        host: ${{ secrets.DEPLOY_HOST }}          # Adresse de l'hôte VPS où le déploiement doit avoir lieu
-        username: ${{ secrets.DEPLOY_USER }}      # Nom d'utilisateur pour se connecter à l'hôte VPS
-        password: ${{ secrets.DEPLOY_PASSWORD }}  # Mot de passe pour l'authentification
-        script: |
-          docker compose -f /home/recettesfamille/src/RecettesFamille.Docker/docker-compose.yml down
-          docker compose -f /home/recettesfamille/src/RecettesFamille.Docker/docker-compose.yml up --build -d
+    # - name: Deploy with Docker Compose
+    #   uses: appleboy/ssh-action@v0.1.5
+    #   with:
+    #     host: ${{ secrets.DEPLOY_HOST }}          # Adresse de l'hôte VPS où le déploiement doit avoir lieu
+    #     username: ${{ secrets.DEPLOY_USER }}      # Nom d'utilisateur pour se connecter à l'hôte VPS
+    #     password: ${{ secrets.DEPLOY_PASSWORD }}  # Mot de passe pour l'authentification
+    #     script: |
+    #       docker compose -f /home/recettesfamille/src/RecettesFamille.Docker/docker-compose.yml down
+    #       docker compose -f /home/recettesfamille/src/RecettesFamille.Docker/docker-compose.yml up --build -d
