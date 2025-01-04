@@ -31,6 +31,6 @@ jobs:
         username: ${{ secrets.DEPLOY_USER }}      # Nom d'utilisateur pour se connecter à l'hôte VPS
         password: ${{ secrets.DEPLOY_PASSWORD }}  # Mot de passe pour l'authentification
         script: |
-            ls -l
+            dir
     #       docker compose -f /home/recettesfamille/src/RecettesFamille.Docker/docker-compose.yml down
     #       docker compose -f /home/recettesfamille/src/RecettesFamille.Docker/docker-compose.yml up --build -d
