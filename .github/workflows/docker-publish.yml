@@ -1,0 +1,38 @@
+name: Deploy to VPS
+
+on:  
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Copy files via SSH
+      uses: appleboy/scp-action@v0.1.3
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_KEY }}
+        passphrase: ${{ secrets.DEPLOY_PASSPHRASE }}
+        source: "."
+        target: ${{ secrets.DEPLOY_TARGET }}
+
+    - name: Deploy with Docker Compose
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_KEY }}
+        passphrase: ${{ secrets.DEPLOY_PASSPHRASE }}
+        script: |
+          cd ${{ secrets.DEPLOY_TARGET }}/src
+          docker compose -f MudCeramWorkshop.Docker/docker-compose.prod.yml down
+          docker compose -f MudCeramWorkshop.Docker/docker-compose.prod.yml up --build -d

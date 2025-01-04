@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "52ewGM6veKE=",
+  "dgSpecHash": "xYYbf/i0ECE=",
   "success": true,
-  "projectFilePath": "D:\\Test\\RecettesFamille\\RecettesFamille\\RecettesFamille.csproj",
+  "projectFilePath": "D:\\01_dev\\MudRecettesFamille\\MudRecettesFamille\\src\\RecettesFamille\\RecettesFamille.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\acret\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\acret\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

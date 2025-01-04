@@ -4692,11 +4692,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Test\\RecettesFamille\\RecettesFamille\\RecettesFamille.csproj",
+      "projectUniqueName": "D:\\01_dev\\MudRecettesFamille\\MudRecettesFamille\\src\\RecettesFamille\\RecettesFamille.csproj",
       "projectName": "RecettesFamille",
-      "projectPath": "D:\\Test\\RecettesFamille\\RecettesFamille\\RecettesFamille.csproj",
+      "projectPath": "D:\\01_dev\\MudRecettesFamille\\MudRecettesFamille\\src\\RecettesFamille\\RecettesFamille.csproj",
       "packagesPath": "C:\\Users\\acret\\.nuget\\packages\\",
-      "outputPath": "D:\\Test\\RecettesFamille\\RecettesFamille\\obj\\",
+      "outputPath": "D:\\01_dev\\MudRecettesFamille\\MudRecettesFamille\\src\\RecettesFamille\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

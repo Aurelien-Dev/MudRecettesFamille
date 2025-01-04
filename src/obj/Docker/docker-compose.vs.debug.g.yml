@@ -15,8 +15,8 @@ services:
       - ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true
       - NUGET_FALLBACK_PACKAGES=/.nuget/fallbackpackages
     volumes:
-      - D:\Test\RecettesFamille\RecettesFamille:/app:rw
-      - D:\Test\RecettesFamille:/src:rw
+      - D:\01_dev\MudRecettesFamille\MudRecettesFamille\src\RecettesFamille:/app:rw
+      - D:\01_dev\MudRecettesFamille\MudRecettesFamille\src:/src:rw
       - C:\Users\acret\vsdbg\vs2017u5:/remote_debugger:rw
       - C:\Users\acret\.nuget\packages:/.nuget/packages:ro
       - C:\Program Files (x86)\Microsoft Visual Studio\Shared\NuGetPackages:/.nuget/fallbackpackages:ro
