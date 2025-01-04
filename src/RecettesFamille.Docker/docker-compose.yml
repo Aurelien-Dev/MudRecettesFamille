@@ -6,8 +6,8 @@ services:
       - "81:81"
 
     build:
-      context: .
-      dockerfile: RecettesFamille/Dockerfile
+      context: ..
+      dockerfile: ./RecettesFamille/Dockerfile
 
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
