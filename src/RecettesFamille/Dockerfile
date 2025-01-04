@@ -12,7 +12,7 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["RecettesFamille/RecettesFamille.csproj", "RecettesFamille/"]
+COPY ["../RecettesFamille/RecettesFamille.csproj", "RecettesFamille/"]
 RUN dotnet restore "./RecettesFamille/RecettesFamille.csproj"
 COPY . .
 WORKDIR "/src/RecettesFamille"
@@ -27,4 +27,6 @@ RUN dotnet publish "./RecettesFamille.csproj" -c $BUILD_CONFIGURATION -o /app/pu
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+VOLUME ["/app/data"]
+
 ENTRYPOINT ["dotnet", "RecettesFamille.dll"]
