@@ -29,6 +29,7 @@ _UpgradeReport_Files/
 Sources/Web/Client/wwwroot/ProductImages/
 */TestResults/
 */.vs/*
+*/.idea/*
 */*launchSettings.json
 ###################
 # Web publish log #
