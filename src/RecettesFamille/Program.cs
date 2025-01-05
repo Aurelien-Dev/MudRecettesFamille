@@ -12,10 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(8080); // HTTP
-    options.ListenAnyIP(8081, listenOptions =>
-    {
-        listenOptions.UseHttps();
-    });
+    //options.ListenAnyIP(8081, listenOptions =>
+    //{
+    //    listenOptions.UseHttps();
+    //});
 });
 
 // Add MudBlazor services
