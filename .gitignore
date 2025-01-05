@@ -24,11 +24,11 @@ _UpgradeReport_Files/
 ###############
 # Directories #
 ###############
-*/bin/
-*/obj/
+*/bin/*
+*/obj/*
 Sources/Web/Client/wwwroot/ProductImages/
-TestResults/
-*/.vs
+*/TestResults/
+*/.vs/*
 */*launchSettings.json
 ###################
 # Web publish log #
