@@ -8,6 +8,16 @@ using RecettesFamille.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Kestrel
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8080); // HTTP
+    options.ListenAnyIP(8081, listenOptions =>
+    {
+        listenOptions.UseHttps();
+    });
+});
+
 // Add MudBlazor services
 builder.Services.AddMudServices();
 
