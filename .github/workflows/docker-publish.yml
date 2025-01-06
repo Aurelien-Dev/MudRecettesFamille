@@ -33,5 +33,5 @@ jobs:
         script: |
             cd /home/recettesfamille/src
             docker compose -f RecettesFamille.Docker/docker-compose.yml down
-            docker compose -f RecettesFamille.Docker/docker-compose.yml up --build -d
+            OPENAI_SECRET=${{ secrets.OPENAI_SECRET }} docker compose -f RecettesFamille.Docker/docker-compose.yml up --build -d
  
