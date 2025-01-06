@@ -15,6 +15,7 @@ services:
 
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - OpenAiSecret=${OPENAI_SECRET}
     depends_on:
       - recettesfamille.data
     volumes:
