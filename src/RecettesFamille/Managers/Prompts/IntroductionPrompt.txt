@@ -1,0 +1,3 @@
+﻿﻿J'ai une recette, est-ce que tu peux m'extraire le nom de la recette, les ingredients et les instructions. 
+En gardant les instructions t'elle qu'elle sont écrite sans la transformer et en détailant les ingredients en Nom et Quantité.
+Il faudrait que tu corrige les incohérence d'écriture et les fautes d'orthographe.

@@ -1,0 +1,69 @@
+La r�ponse doit �tre au format Json.
+
+Le Json doit respecter ce schema :
+
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the recipe"
+    },
+    "servings": {
+      "type": "string",
+      "description": "Number of servings or people"
+    },
+    "time": {
+      "type": "object",
+      "properties": {
+        "preparation": {
+          "type": "string",
+          "description": "Preparation time"
+        },
+        "cooking": {
+          "type": "string",
+          "description": "Cooking time"
+        },
+        "refrigeration": {
+          "type": "string",
+          "description": "Refrigeration time"
+        },
+        "waiting": {
+          "type": "string",
+          "description": "Waiting time"
+        }
+      },
+      "required": ["preparation", "cooking", "refrigeration"],
+      "description": "Times required for the recipe"
+    },
+    "ingredients": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the ingredient"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "Quantity of the ingredient"
+          }
+        },
+        "required": ["name", "quantity"],
+        "description": "An ingredient and its quantity"
+      },
+      "description": "List of ingredients"
+    },
+    "instructions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "A step in the recipe instructions"
+      },
+      "description": "List of steps to prepare the recipe"
+    }
+  },
+  "required": ["name", "servings", "time", "ingredients", "instructions"],
+  "description": "Schema for a detailed recipe"
+}
