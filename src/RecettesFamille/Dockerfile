@@ -14,18 +14,6 @@ RUN apt-get update && apt-get install -y locales && \
     dpkg-reconfigure locales && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-USER root
-# This stage is used to build the service project
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["../RecettesFamille/RecettesFamille.csproj", "RecettesFamille/"]
-RUN dotnet restore "./RecettesFamille/RecettesFamille.csproj"
-COPY . .
-WORKDIR "/src/RecettesFamille"
-RUN dotnet build "./RecettesFamille.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-USER $APP_UID
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
