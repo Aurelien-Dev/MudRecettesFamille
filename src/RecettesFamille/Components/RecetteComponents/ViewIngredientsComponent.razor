@@ -1,29 +1,11 @@
 @using RecettesFamille.Data.DtoModel
 
-<MudList T="IngredientDto" Dense="true" Padding="false" ReadOnly="true" >
-    <MudListSubheader>Ingrédients</MudListSubheader>
-
-    @foreach (var item in Ingredients)
-    {
-        if (item.Type == IngredientType.Divider)
-        {
-            <MudListItem T="IngredientDto">
-                <div class="d-flex">
-                    <MudText Typo="Typo.subtitle2">@item.Name</MudText>
-                </div>
-            </MudListItem>
-        }
-        else
-        {
-            <MudListItem T="IngredientDto" Icon="@Icons.Material.Filled.ContentCut">
-                <div class="d-flex">
-                    <MudText>@item.Name</MudText>
-                    <MudText HtmlTag="span" Class="ml-auto">@item.Quantity</MudText>
-                </div>
-            </MudListItem>
-        }
-    }
-</MudList>
+<MudTable Items="@Ingredients" Dense="true" Hover="true" Striped="false">
+    <RowTemplate>
+        <MudTd DataLabel="Nr">@context.Name</MudTd>
+        <MudTd DataLabel="Sign">@context.Quantity</MudTd>
+    </RowTemplate>
+</MudTable>
 
 
 @code {

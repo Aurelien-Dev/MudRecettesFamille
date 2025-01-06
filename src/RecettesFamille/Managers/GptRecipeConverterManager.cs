@@ -1,22 +1,24 @@
 ﻿using OpenAI.Chat;
+using RecettesFamille.Data.DtoModel;
 using System.Reflection;
+using System.Text.Json;
 
 namespace RecettesFamille.Managers;
 
 public class GptRecipeConverterManager(IConfiguration Config)
 {
-    public async Task<(string, decimal)> GenerateDescription()
+    public async Task<(RecetteDto, decimal)> GenerateDescription()
     {
-        var client = new ChatClient(model: "gpt-4o-mini", apiKey: Config["OpenAiSecret"]);
-        
+        var client = new ChatClient(model: "gpt-4o", apiKey: Config["OPENAI_SECRET"]);
+
 
         string recetteTest = await ReadEmbeddedResourceAsync("RecetteTest");
 
         var messages = new ChatMessage[]
         {
-        new SystemChatMessage(await ReadEmbeddedResourceAsync("IntroductionPrompt")),
-        new SystemChatMessage(await ReadEmbeddedResourceAsync("ResponseAskedPrompt")),
-        new UserChatMessage(await ReadEmbeddedResourceAsync("RequestInformationPrompt", (s) => string.Format(s, recetteTest)))
+            new SystemChatMessage(await ReadEmbeddedResourceAsync("IntroductionPrompt")),
+            new SystemChatMessage(await ReadEmbeddedResourceAsync("ResponseAskedPrompt")),
+            new UserChatMessage(await ReadEmbeddedResourceAsync("RequestInformationPrompt", (s) => string.Format(s, recetteTest)))
         };
 
         ChatCompletion completion = await client.CompleteChatAsync(messages);
@@ -24,7 +26,26 @@ public class GptRecipeConverterManager(IConfiguration Config)
         string resultText = completion.Content[0].Text;
         decimal cost = CalculateCost(completion); // À implémenter selon tes besoins
 
-        return (resultText, cost);
+        //deserialise to Rootobject object
+        Rootobject obj = JsonSerializer.Deserialize<Rootobject>(resultText);
+        
+
+        return (ToRecetteDto(obj), cost);
+    }
+
+    public  RecetteDto ToRecetteDto(Rootobject root)
+    {
+        return new RecetteDto
+        {
+            Title = root.name,
+            Ingredients = root.ingredients.Select(i => new IngredientDto(i.name, IngredientType.Ingredient)
+            {
+                Quantity = i.quantity,
+                Order = 0, // Assurez-vous de mapper correctement l'ordre
+                Identifier = string.Empty // Assurez-vous de mapper correctement l'identifiant
+            }).ToList(),
+            Description = root.description
+        };
     }
 
 
@@ -61,7 +82,7 @@ public class GptRecipeConverterManager(IConfiguration Config)
 
     private async Task<string> ReadEmbeddedResourceAsync(string resourceName, Func<string, string>? textFormaterAction = null)
     {
-        string assistantPrompt = $"GptRecipeParser.Prompts.{resourceName}.txt";
+        string assistantPrompt = $"RecettesFamille.Managers.Prompts.{resourceName}.txt";
 
         var assembly = Assembly.GetExecutingAssembly();
         using (Stream? stream = assembly.GetManifestResourceStream(assistantPrompt))
@@ -83,4 +104,30 @@ public class GptRecipeConverterManager(IConfiguration Config)
         }
     }
 
+}
+
+
+
+public class Rootobject
+{
+    public string name { get; set; }
+    public string servings { get; set; }
+    public Time time { get; set; }
+    public Ingredient[] ingredients { get; set; }
+    public string description { get; set; }
+}
+
+public class Time
+{
+    public string preparation { get; set; }
+    public string cooking { get; set; }
+    public string refrigeration { get; set; }
+    public string waiting { get; set; }
+}
+
+public class Ingredient
+{
+    public string name { get; set; }
+    public string quantity { get; set; }
+    public string type { get; set; }
 }

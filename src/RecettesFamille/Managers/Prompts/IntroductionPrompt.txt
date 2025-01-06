@@ -1,3 +1,23 @@
-﻿﻿J'ai une recette, est-ce que tu peux m'extraire le nom de la recette, les ingredients et les instructions. 
-En gardant les instructions t'elle qu'elle sont écrite sans la transformer et en détailant les ingredients en Nom et Quantité.
-Il faudrait que tu corrige les incohérence d'écriture et les fautes d'orthographe.
+﻿Je dispose d'une recette, et je souhaite que tu en extraies les informations suivantes :
+
+### Détails à extraire :
+1. **Nom de la recette** : Identifie clairement le titre de la recette.
+2. **Liste des ingrédients** :
+   - Présente chaque ingrédient avec les informations suivantes :
+     - **Nom** : le nom exact de l'ingrédient.
+     - **Quantité** : si précisée dans la recette.
+   - Dans certaines recettes, les ingrédients sont regroupés par sections pour indiquer qu’ils appartiennent à une partie spécifique de la préparation (par exemple : "Pour la pâte :" ou "Pour la garniture :"). Ces sections doivent être identifiées comme des **délimiteurs**.
+   - Classe les ingrédients en deux catégories :
+     - **Ingrédients classiques** : les éléments utilisés dans la préparation.
+     - **Délimiteurs** : des titres ou séparateurs textuels qui organisent les ingrédients par groupes.
+   - Respecte l’ordre original des ingrédients et conserve les quantités telles qu’elles sont mentionnées.
+
+
+3. **Instructions** :
+   - Copie les étapes de préparation telles qu’elles sont rédigées, sans aucune modification ni reformulation.
+
+### Directives supplémentaires :
+- **Orthographe et grammaire** :
+   - Corrige les éventuelles fautes d'orthographe ou de syntaxe dans le texte.
+- **Présentation** :
+   - Structure le texte de manière claire et agréable à lire, avec des sauts de lignes adaptés pour une page web.

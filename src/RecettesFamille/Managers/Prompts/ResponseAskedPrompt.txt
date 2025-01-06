@@ -1,6 +1,6 @@
-La r�ponse doit �tre au format Json.
+La r�ponse doit �tre au format Json sans formattage et prêt à être déserialisé.
 
-Le Json doit respecter ce schema :
+Le Json doit correspondre ce schema :
 
 {
   "type": "object",
@@ -48,6 +48,10 @@ Le Json doit respecter ce schema :
           "quantity": {
             "type": "string",
             "description": "Quantity of the ingredient"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of the ingredient"
           }
         },
         "required": ["name", "quantity"],
@@ -55,15 +59,11 @@ Le Json doit respecter ce schema :
       },
       "description": "List of ingredients"
     },
-    "instructions": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "description": "A step in the recipe instructions"
-      },
-      "description": "List of steps to prepare the recipe"
+    "description": {
+      "type": "string",
+      "description": "All instruction to do the recipe"
     }
   },
-  "required": ["name", "servings", "time", "ingredients", "instructions"],
+  "required": ["name", "servings", "time", "ingredients", "description"],
   "description": "Schema for a detailed recipe"
 }

@@ -9,6 +9,20 @@
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Managers\Prompts\IntroductionPrompt.txt" />
+    <None Remove="Managers\Prompts\RecetteTest.txt" />
+    <None Remove="Managers\Prompts\RequestInformationPrompt.txt" />
+    <None Remove="Managers\Prompts\ResponseAskedPrompt.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Managers\Prompts\IntroductionPrompt.txt" />
+    <EmbeddedResource Include="Managers\Prompts\RecetteTest.txt" />
+    <EmbeddedResource Include="Managers\Prompts\RequestInformationPrompt.txt" />
+    <EmbeddedResource Include="Managers\Prompts\ResponseAskedPrompt.txt" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.*" />
