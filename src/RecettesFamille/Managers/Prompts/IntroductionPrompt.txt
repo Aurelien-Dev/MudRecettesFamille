@@ -2,7 +2,8 @@
 
 ### Détails à extraire :
 1. **Nom de la recette** : Identifie clairement le titre de la recette.
-2. **Liste des ingrédients** :
+2. **Information Preparation** : Récupérer les informations de préparation, nombre de personnes et divers temps (ex: cuisson, préparation)
+3. **Liste des ingrédients** :
    - Présente chaque ingrédient avec les informations suivantes :
      - **Nom** : le nom exact de l'ingrédient.
      - **Quantité** : si précisée dans la recette.
@@ -13,7 +14,7 @@
    - Respecte l’ordre original des ingrédients et conserve les quantités telles qu’elles sont mentionnées.
 
 
-3. **Instructions** :
+4. **Instructions** :
    - Copie les étapes de préparation telles qu’elles sont rédigées, sans aucune modification ni reformulation.
 
 ### Directives supplémentaires :

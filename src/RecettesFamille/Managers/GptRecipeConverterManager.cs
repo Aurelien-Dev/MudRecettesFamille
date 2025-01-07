@@ -1,7 +1,7 @@
-﻿using OpenAI.Chat;
-using RecettesFamille.Data.DtoModel;
+﻿using Newtonsoft.Json;
+using OpenAI.Chat;
+using RecettesFamille.Data.DtoModelInovate;
 using System.Reflection;
-using System.Text.Json;
 
 namespace RecettesFamille.Managers;
 
@@ -26,26 +26,32 @@ public class GptRecipeConverterManager(IConfiguration Config)
         string resultText = completion.Content[0].Text;
         decimal cost = CalculateCost(completion); // À implémenter selon tes besoins
 
-        //deserialise to Rootobject object
-        Rootobject obj = JsonSerializer.Deserialize<Rootobject>(resultText);
-        
+        JsonSerializerSettings withTypes = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Auto
+        };
 
-        return (ToRecetteDto(obj), cost);
+        var serialized = JsonConvert.DeserializeObject<RecetteDto>(resultText, withTypes);
+
+
+
+        return (serialized, cost);
     }
 
-    public  RecetteDto ToRecetteDto(Rootobject root)
+    public RecetteDto ToRecetteDto(Rootobject root)
     {
-        return new RecetteDto
-        {
-            Title = root.name,
-            Ingredients = root.ingredients.Select(i => new IngredientDto(i.name, IngredientType.Ingredient)
-            {
-                Quantity = i.quantity,
-                Order = 0, // Assurez-vous de mapper correctement l'ordre
-                Identifier = string.Empty // Assurez-vous de mapper correctement l'identifiant
-            }).ToList(),
-            Description = root.description
-        };
+        return null;
+        //return new RecetteDto
+        //{
+        //    Title = root.name,
+        //    Ingredients = root.ingredients.Select(i => new IngredientDto(i.name, IngredientType.Ingredient)
+        //    {
+        //        Quantity = i.quantity,
+        //        Order = 0, // Assurez-vous de mapper correctement l'ordre
+        //        Identifier = string.Empty // Assurez-vous de mapper correctement l'identifiant
+        //    }).ToList(),
+        //    Description = root.description
+        //};
     }
 
 

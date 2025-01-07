@@ -1,0 +1,21 @@
+﻿<!-- IngredientComponent.razor -->
+@using RecettesFamille.Data.DtoModelInovate
+
+<div class="d-flex justify-center">
+    <MudImage Src="@Block.Image"  >
+
+    </MudImage>
+</div>
+
+@code {
+    [Parameter]
+    public BlockImage Block { get; set; } = null!;
+
+    protected async override Task OnParametersSetAsync()
+    {
+        if (Block.Image is null)
+        {
+            Block.Image = "https://static.750g.com/images/1200-675/9823eb627203c878f3e36d72f8ce6d1c/tarte-aux-pommes.jpg";
+        }
+    }
+}

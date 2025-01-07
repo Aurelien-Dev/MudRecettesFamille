@@ -1,0 +1,21 @@
+﻿<!-- IngredientComponent.razor -->
+@using RecettesFamille.Data.DtoModelInovate
+
+@if (Block.Ingredients is null)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="110px" />
+}
+else
+{
+    <MudTable Items="@Block.Ingredients" Dense="true" Hover="true" Striped="false" RowClass="mud-table-extra-dense">
+        <RowTemplate>
+            <MudTd DataLabel="Nr">@context.Name</MudTd>
+            <MudTd DataLabel="Sign">@context.Quantity</MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    [Parameter]
+    public BlockIngredientList Block { get; set; } = null!;
+}

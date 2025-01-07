@@ -1,0 +1,12 @@
+﻿<!-- InstructionComponent.razor -->
+@using RecettesFamille.Data.DtoModelInovate
+
+<div>
+    <!-- Affichez les détails du bloc d'instruction ici -->
+    <p>@Block.Instruction</p>
+</div>
+
+@code {
+    [Parameter]
+    public BlockInstruction Block { get; set; } = null!;
+}

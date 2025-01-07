@@ -1,36 +1,58 @@
 @page "/recette"
 @rendermode InteractiveServer
-@using RecettesFamille.Data.DtoModel
-@using RecettesFamille.Components.RecetteComponents
+@using Newtonsoft.Json
+@using RecettesFamille.Components.RecetteBook.BlockDefinitions
+@using RecettesFamille.Data.DtoModelInovate
 @using RecettesFamille.Managers
+@using System.Text.Json
+@using System.Text.Json.Serialization.Metadata
 
-<MudContainer Class="mt-5" MaxWidth="MaxWidth.Large">
-    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Title</MudText>
-
-    @* Details recette *@
-    <MudGrid Spacing="8" Class="mt-5">
-        <MudItem md="7" xs="12">
-            <MudImage Src="https://static.750g.com/images/1200-675/9823eb627203c878f3e36d72f8ce6d1c/tarte-aux-pommes.jpg"
-                      Elevation="25" Class="rounded-pill" Fluid="true" Alt="@Recette.Title"></MudImage>
-        </MudItem>
-
-        <ViewIngredientsComponent Ingredients="@Recette.Ingredients" />
-    </MudGrid>
-
-    <MudButton OnClick="TestConverter">TestConverter</MudButton>
+@if (Recette is not null)
+{
+    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Name</MudText>
+    <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recette.InformationPreparation</MudText>
 
     @* Description recette *@
-    <MudGrid Spacing="12" Class="mt-10">
-        <MudItem xs="12">
-            <MudGrid>
-                <MudItem xs="12" Class="d-flex justify-left">
-                    @Recette.Description
-                </MudItem>
-            </MudGrid>
-        </MudItem>
-        @* <ViewDescriptionsComponent Descriptions="@Recette.Descriptions" /> *@
+    <MudGrid Spacing="5" Class="mt-10">
+        @foreach (var block in Recette.BlocksInstructions.OrderBy(o => o.Order))
+        {
+            @switch (block)
+            {
+                case BlockInstruction instructionBlock:
+                    <MudItem xs="12">
+                        <InstructionComponent Block="instructionBlock" />
+                    </MudItem>
+                    break;
+                case BlockIngredientList ingredientListBlock:
+                    <MudItem xs="6">
+                        <IngredientComponent Block="ingredientListBlock" />
+                    </MudItem>
+                    break;
+                case BlockImage imageBlock:
+                    <MudItem xs="6">
+                        <ImageComponent Block="imageBlock" />
+                    </MudItem>
+                    break;
+
+                // Ajoutez d'autres cas pour différents types de blocs ici
+                default:
+                    <MudItem xs="12">
+                        <p>Type de bloc non pris en charge</p>
+                    </MudItem>
+                    break;
+            }
+
+            <MudItem xs="12">
+                <ToolsComponent AddBlockCallback="AddNewBlock" PrecedentIndex="@block.Order" />
+            </MudItem>
+        }
     </MudGrid>
-</MudContainer>
+}
+else
+{
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GetRecipe">Chargement...</MudButton>
+    <MudSkeleton SkeletonType="SkeletonType.Text" Width="100%" Height="100px" />
+}
 
 
 @code {
@@ -38,28 +60,35 @@
 
     RecetteDto Recette { get; set; } = null!;
 
-    protected override void OnInitialized()
+    protected async override Task OnInitializedAsync()
     {
-        Recette = new RecetteDto
+    }
+
+    public async Task GetRecipe()
+    {
+        JsonSerializerSettings withTypes = new JsonSerializerSettings
             {
-                Title = "Tarte Tatin",
-                Ingredients = new List<IngredientDto>
+                TypeNameHandling = TypeNameHandling.Auto
+            };
+
+        var serialized = JsonConvert.SerializeObject(SampleData.GetSampleRecettes(), withTypes);
+        
+        (RecetteDto recette, decimal cost) = await gptRecipeConverterManager.GenerateDescription();
+        Recette = recette;
+    }
+
+    private void AddNewBlock(BlockBase block)
+    {
+        // Réordonner les items de BlocksInstructions
+        foreach (var item in Recette.BlocksInstructions.OrderBy(o => o.Order))
+        {
+            if (item.Order >= block.Order)
             {
-                new("Gateau", IngredientType.Divider),
-                new("Pommes", IngredientType.Ingredient) { Quantity = "6" },
-                new("Sucre", IngredientType.Ingredient) { Quantity = "150g" },
-                new("Beurre", IngredientType.Ingredient) { Quantity = "100g" },
-                new("Pâte feuilletée", IngredientType.Ingredient) { Quantity = "1 rouleau" }
+                item.Order++;
             }
-        };
+        }
+
+        Recette.BlocksInstructions.Add(block);
+        StateHasChanged();
     }
-
-    private async Task TestConverter()
-    {
-        var dd = await gptRecipeConverterManager.GenerateDescription();
-        Console.WriteLine("TestConverter");
-
-        Recette = dd.Item1;
-    }
-
 }

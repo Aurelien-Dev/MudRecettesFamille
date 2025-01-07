@@ -1,6 +1,15 @@
 ﻿@inherits LayoutComponentBase
 
+@* Required *@
 <MudThemeProvider />
+<MudPopoverProvider @rendermode="InteractiveServer" />
+
+@* Needed for dialogs *@
+<MudDialogProvider @rendermode="InteractiveServer" />
+
+@* Needed for snackbars *@
+<MudSnackbarProvider @rendermode="InteractiveServer" />
+
 <MudLayout>
     <MudAppBar Elevation="1">
         <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
@@ -9,7 +18,11 @@
         <NavMenu />
     </MudDrawer>
     <MudMainContent Class="mt-16 pa-4">
-        @Body
+        <MudContainer MaxWidth="MaxWidth.Large">
+
+            @Body
+
+        </MudContainer>
     </MudMainContent>
 </MudLayout>
 
