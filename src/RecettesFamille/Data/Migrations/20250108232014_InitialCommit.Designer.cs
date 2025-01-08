@@ -12,7 +12,7 @@ using RecettesFamille.Data;
 namespace RecettesFamille.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250107233926_InitialCommit")]
+    [Migration("20250108232014_InitialCommit")]
     partial class InitialCommit
     {
         /// <inheritdoc />
