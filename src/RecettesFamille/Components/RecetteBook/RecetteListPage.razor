@@ -1,19 +1,45 @@
-﻿@page "/recettes"
+﻿@page "/"
 @rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
-@using MudBlazor.Extensions.Core
 @using RecettesFamille.Data
 @using RecettesFamille.Data.EntityModel
 
-<MudExCardList ItemTemplate="RenderUser" TData="RecetteEntity" ItemsSource="@recetteEntities" HoverMode="MudExCardHoverMode.Zoom">
-
-</MudExCardList>
-
+@if (recetteEntities is null)
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="200px" Height="110px" />
+}
+else
+{
+    <MudGrid Spacing="5" Justify="Justify.Center">
+        @foreach (var item in recetteEntities)
+        {
+            <MudItem xs="12" sm="4" md="3" xl="2">
+                <MudCard Style="height:100%">
+                    @* <MudCardMedia Image="images/door.jpg" Height="200" /> *@
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.subtitle2">@item.Name</MudText>
+                        </CardHeaderContent>
+                        <CardHeaderActions>
+                            <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" />
+                        </CardHeaderActions>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudText Typo="Typo.body2">@item.InformationPreparation</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="(() => NavigateToRecipe(item.Id))">Open</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
 
 
 @code {
     [Inject] ApplicationDbContext applicationDbContext { get; set; } = null!;
-
+    [Inject] NavigationManager navigationManager { get; set; } = null!;
     List<RecetteEntity> recetteEntities { get; set; } = null!;
 
     protected async override Task OnInitializedAsync()
@@ -21,20 +47,5 @@
         recetteEntities = await applicationDbContext.Recettes.Include(s => s.BlocksInstructions).ToListAsync();
     }
 
-    private RenderFragment RenderUser(RecetteEntity user)
-    {
-        return @<MudCard>
-                    <MudCardHeader>
-                        <CardHeaderContent>
-                            <MudText Typo="Typo.h6">@user.Name</MudText>
-                        </CardHeaderContent>
-                        <CardHeaderActions>
-                        </CardHeaderActions>
-                    </MudCardHeader>
-                    <MudCardContent>
-
-                    </MudCardContent>
-                </MudCard>;
-    }
-
+    public void NavigateToRecipe(int idRecipe) => navigationManager.NavigateTo($"/recette/{idRecipe}");
 }

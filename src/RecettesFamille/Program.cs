@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using MudBlazor.Extensions;
+using MudBlazor.Services;
 using MudExtensions.Services;
 using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
@@ -16,7 +17,7 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 // Add MudBlazor services
-builder.Services.AddMudServicesWithExtensions();
+builder.Services.AddMudServices();
 builder.Services.AddMudExtensions();
 
 // Add services to the container.
@@ -61,7 +62,6 @@ else
     app.UseHsts();
 }
 
-app.Use(MudExWebApp.MudExMiddleware);
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();

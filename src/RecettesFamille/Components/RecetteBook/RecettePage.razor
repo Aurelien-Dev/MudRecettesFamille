@@ -1,5 +1,6 @@
-@page "/recette"
+@page "/recette/{IdRecette:int?}"
 @rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
 @using Newtonsoft.Json
 @using RecettesFamille.Components.RecetteBook.BlockDefinitions
 @using RecettesFamille.Data
@@ -15,37 +16,37 @@
 
     @* Description recette *@
     <MudGrid Spacing="5" Class="mt-10">
-        @foreach (var block in Recette.BlocksInstructions.OrderBy(o => o.Order))
+        @foreach (var block in Recette.BlocksInstructions?.OrderBy(o => o.Order))
         {
             @switch (block)
             {
                 case BlockInstruction instructionBlock:
-                    <MudItem xs="12">
+                    <MudItem xs="12" md="12" >
                         <InstructionComponent Block="instructionBlock" />
                     </MudItem>
                     break;
                 case BlockIngredientList ingredientListBlock:
-                    <MudItem xs="6">
+                    <MudItem xs="12" md="5" >
                         <IngredientComponent Block="ingredientListBlock" />
                     </MudItem>
                     break;
                 case BlockImage imageBlock:
-                    <MudItem xs="6">
+                    <MudItem xs="12" md="5" >
                         <ImageComponent Block="imageBlock" />
                     </MudItem>
                     break;
 
                 // Ajoutez d'autres cas pour différents types de blocs ici
                 default:
-                    <MudItem xs="12">
+                    <MudItem xs="5">
                         <p>Type de bloc non pris en charge</p>
                     </MudItem>
                     break;
             }
 
-            <MudItem xs="12">
+            @* <MudItem xs="5">
                 <ToolsComponent AddBlockCallback="AddNewBlock" PrecedentIndex="@block.Order" />
-            </MudItem>
+            </MudItem> *@
         }
     </MudGrid>
 }
@@ -60,7 +61,17 @@ else
     [Inject] GptRecipeConverterManager gptRecipeConverterManager { get; set; } = null!;
     [Inject] ApplicationDbContext applicationDbContext { get; set; } = null!;
 
-    RecetteEntity Recette { get; set; } = null!;
+    [Parameter] public int IdRecette { get; set; }
+
+    RecetteEntity? Recette { get; set; } = null!;
+
+    protected async override Task OnParametersSetAsync()
+    {
+        Recette = await applicationDbContext.Recettes.Include(s => s.BlocksInstructions)
+                                                     .ThenInclude(b => (b as BlockIngredientList).Ingredients)
+                                                     .Where(r => r.Id == IdRecette)
+                                                     .FirstOrDefaultAsync();
+    }
 
     public async Task GetRecipe()
     {

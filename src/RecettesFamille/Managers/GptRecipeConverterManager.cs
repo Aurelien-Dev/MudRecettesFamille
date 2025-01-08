@@ -11,7 +11,6 @@ public class GptRecipeConverterManager(IConfiguration Config)
     {
         var client = new ChatClient(model: "gpt-4o", apiKey: Config["OPENAI_SECRET"]);
 
-
         string recetteTest = await ReadEmbeddedResourceAsync("RecetteTest");
 
         var messages = new ChatMessage[]

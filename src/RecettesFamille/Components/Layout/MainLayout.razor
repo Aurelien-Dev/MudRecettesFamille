@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
 @* Required *@
-<MudThemeProvider />
+<MudThemeProvider IsDarkMode="true" />
 <MudPopoverProvider @rendermode="InteractiveServer" />
 
 @* Needed for dialogs *@
@@ -11,14 +11,16 @@
 <MudSnackbarProvider @rendermode="InteractiveServer" />
 
 <MudLayout>
-    <MudAppBar Elevation="1">
+    <MudAppBar Elevation="1" Dense="true">
         <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
     </MudDrawer>
     <MudMainContent Class="mt-16 pa-4">
-        <MudContainer MaxWidth="MaxWidth.Large">
+        <MudContainer MaxWidth="MaxWidth.Medium">
 
             @Body
 

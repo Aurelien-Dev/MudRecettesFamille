@@ -1,7 +1,7 @@
 ﻿@using RecettesFamille.Data.EntityModel
 
 <div class="d-flex justify-center">
-    <MudImage Src="@Block.Image"  >
+    <MudImage Src="@Block.Image" Fluid="true" Class="rounded-lg" >
 
     </MudImage>
 </div>
@@ -10,11 +10,11 @@
     [Parameter]
     public BlockImage Block { get; set; } = null!;
 
-    protected async override Task OnParametersSetAsync()
+    protected override void OnParametersSet()
     {
         if (Block.Image is null)
         {
-            Block.Image = "https://static.750g.com/images/1200-675/9823eb627203c878f3e36d72f8ce6d1c/tarte-aux-pommes.jpg";
+            Block.Image = "https://img.cuisineaz.com/660x495/2013/12/20/i62638-photo-de-cake-aux-tomates-confites.webp";
         }
     }
 }
