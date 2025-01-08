@@ -1,0 +1,40 @@
+﻿@page "/recettes"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using MudBlazor.Extensions.Core
+@using RecettesFamille.Data
+@using RecettesFamille.Data.EntityModel
+
+<MudExCardList ItemTemplate="RenderUser" TData="RecetteEntity" ItemsSource="@recetteEntities" HoverMode="MudExCardHoverMode.Zoom">
+
+</MudExCardList>
+
+
+
+@code {
+    [Inject] ApplicationDbContext applicationDbContext { get; set; } = null!;
+
+    List<RecetteEntity> recetteEntities { get; set; } = null!;
+
+    protected async override Task OnInitializedAsync()
+    {
+        recetteEntities = await applicationDbContext.Recettes.Include(s => s.BlocksInstructions).ToListAsync();
+    }
+
+    private RenderFragment RenderUser(RecetteEntity user)
+    {
+        return @<MudCard>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">@user.Name</MudText>
+                        </CardHeaderContent>
+                        <CardHeaderActions>
+                        </CardHeaderActions>
+                    </MudCardHeader>
+                    <MudCardContent>
+
+                    </MudCardContent>
+                </MudCard>;
+    }
+
+}

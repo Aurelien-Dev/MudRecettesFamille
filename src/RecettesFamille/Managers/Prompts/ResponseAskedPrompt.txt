@@ -1,19 +1,23 @@
 La réponse doit respecter le model DTO ci-dessous et être serialisé au format Json prêt à être déserialisé.
 En respectant ces types :
-    - "$type": "RecettesFamille.Data.DtoModelInovate.BlockImage, RecettesFamille",
-    - "$type": "RecettesFamille.Data.DtoModelInovate.BlockIngredientList, RecettesFamille",
-    - "$type": "RecettesFamille.Data.DtoModelInovate.BlockInstruction, RecettesFamille",
+    - "$type": "RecettesFamille.Data.EntityModel.BlockImage, RecettesFamille",
+    - "$type": "RecettesFamille.Data.EntityModel.BlockIngredientList, RecettesFamille",
+    - "$type": "RecettesFamille.Data.EntityModel.BlockInstruction, RecettesFamille",
 Pas de Markdown.
+Laisser les ID vides.
 
-public class RecetteDto
+public class RecetteEntity
 {
+    public int Id { get; set; }
     public string Name { get; set; }
     public string InformationPreparation { get; set; }
+
     public List<BlockBase> BlocksInstructions { get; set; }
 }
 
-public class BlockBase
+public abstract class BlockBase
 {
+    public int Id { get; set; }
     public int Order { get; set; }
 }
 
@@ -25,13 +29,11 @@ public class BlockInstruction : BlockBase
     public BlockInstruction(string instruction) => Instruction = instruction;
 }
 
-//Block image
 public class BlockImage : BlockBase
 {
     public string Image { get; set; }
 }
 
-//IngredientList
 public class BlockIngredientList : BlockBase
 {
     public List<IngredientDto> Ingredients { get; set; }
@@ -45,8 +47,10 @@ public enum IngredientType
 
 public record class IngredientDto(string Name, IngredientType Type)
 {
+    public int Id { get; set; }
     public int Order { get; set; }
     public string Name { get; set; } = Name;
     public string Quantity { get; set; } = string.Empty;
+    public IngredientType Type { get; set; } = Type;
     public string Identifier { get; set; } = "0";
 }

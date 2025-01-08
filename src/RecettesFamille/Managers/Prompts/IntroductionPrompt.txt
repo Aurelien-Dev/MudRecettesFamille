@@ -5,15 +5,10 @@
 2. **Information Preparation** : Récupérer les informations de préparation, nombre de personnes et divers temps (ex: cuisson, préparation)
 3. **Liste des ingrédients** :
    - Présente chaque ingrédient avec les informations suivantes :
-     - **Nom** : le nom exact de l'ingrédient.
-     - **Quantité** : si précisée dans la recette.
+     - **Nom** : le nom exact de l'ingrédient sans ces quantités.
+     - **Quantité** : Quantité nécessaire pour la recette.
    - Dans certaines recettes, les ingrédients sont regroupés par sections pour indiquer qu’ils appartiennent à une partie spécifique de la préparation (par exemple : "Pour la pâte :" ou "Pour la garniture :"). Ces sections doivent être identifiées comme des **délimiteurs**.
-   - Classe les ingrédients en deux catégories :
-     - **Ingrédients classiques** : les éléments utilisés dans la préparation.
-     - **Délimiteurs** : des titres ou séparateurs textuels qui organisent les ingrédients par groupes.
    - Respecte l’ordre original des ingrédients et conserve les quantités telles qu’elles sont mentionnées.
-
-
 4. **Instructions** :
    - Copie les étapes de préparation telles qu’elles sont rédigées, sans aucune modification ni reformulation.
 

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using MudBlazor.Services;
+using MudBlazor.Extensions;
 using MudExtensions.Services;
 using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
@@ -16,7 +16,7 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 // Add MudBlazor services
-builder.Services.AddMudServices();
+builder.Services.AddMudServicesWithExtensions();
 builder.Services.AddMudExtensions();
 
 // Add services to the container.
@@ -28,7 +28,6 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddManagers();
-
 
 builder.Services.AddAuthentication(options =>
     {
@@ -62,13 +61,13 @@ else
     app.UseHsts();
 }
 
+app.Use(MudExWebApp.MudExMiddleware);
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();

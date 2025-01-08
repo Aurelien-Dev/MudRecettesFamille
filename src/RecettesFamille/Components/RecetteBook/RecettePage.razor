@@ -2,7 +2,8 @@
 @rendermode InteractiveServer
 @using Newtonsoft.Json
 @using RecettesFamille.Components.RecetteBook.BlockDefinitions
-@using RecettesFamille.Data.DtoModelInovate
+@using RecettesFamille.Data
+@using RecettesFamille.Data.EntityModel
 @using RecettesFamille.Managers
 @using System.Text.Json
 @using System.Text.Json.Serialization.Metadata
@@ -57,23 +58,17 @@ else
 
 @code {
     [Inject] GptRecipeConverterManager gptRecipeConverterManager { get; set; } = null!;
+    [Inject] ApplicationDbContext applicationDbContext { get; set; } = null!;
 
-    RecetteDto Recette { get; set; } = null!;
-
-    protected async override Task OnInitializedAsync()
-    {
-    }
+    RecetteEntity Recette { get; set; } = null!;
 
     public async Task GetRecipe()
     {
-        JsonSerializerSettings withTypes = new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto
-            };
 
-        var serialized = JsonConvert.SerializeObject(SampleData.GetSampleRecettes(), withTypes);
-        
-        (RecetteDto recette, decimal cost) = await gptRecipeConverterManager.GenerateDescription();
+        (RecetteEntity recette, decimal cost) = await gptRecipeConverterManager.GenerateDescription();
+
+        var recetteEntity = await applicationDbContext.Recettes.AddAsync(recette);
+        await applicationDbContext.SaveChangesAsync();
         Recette = recette;
     }
 

@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
 using OpenAI.Chat;
-using RecettesFamille.Data.DtoModelInovate;
+using RecettesFamille.Data.EntityModel;
 using System.Reflection;
 
 namespace RecettesFamille.Managers;
 
 public class GptRecipeConverterManager(IConfiguration Config)
 {
-    public async Task<(RecetteDto, decimal)> GenerateDescription()
+    public async Task<(RecetteEntity, decimal)> GenerateDescription()
     {
         var client = new ChatClient(model: "gpt-4o", apiKey: Config["OPENAI_SECRET"]);
 
@@ -31,29 +31,12 @@ public class GptRecipeConverterManager(IConfiguration Config)
             TypeNameHandling = TypeNameHandling.Auto
         };
 
-        var serialized = JsonConvert.DeserializeObject<RecetteDto>(resultText, withTypes);
+        var serialized = JsonConvert.DeserializeObject<RecetteEntity>(resultText, withTypes);
 
 
 
         return (serialized, cost);
     }
-
-    public RecetteDto ToRecetteDto(Rootobject root)
-    {
-        return null;
-        //return new RecetteDto
-        //{
-        //    Title = root.name,
-        //    Ingredients = root.ingredients.Select(i => new IngredientDto(i.name, IngredientType.Ingredient)
-        //    {
-        //        Quantity = i.quantity,
-        //        Order = 0, // Assurez-vous de mapper correctement l'ordre
-        //        Identifier = string.Empty // Assurez-vous de mapper correctement l'identifiant
-        //    }).ToList(),
-        //    Description = root.description
-        //};
-    }
-
 
     private decimal CalculateCost(ChatCompletion result)
     {
@@ -109,31 +92,4 @@ public class GptRecipeConverterManager(IConfiguration Config)
             }
         }
     }
-
-}
-
-
-
-public class Rootobject
-{
-    public string name { get; set; }
-    public string servings { get; set; }
-    public Time time { get; set; }
-    public Ingredient[] ingredients { get; set; }
-    public string description { get; set; }
-}
-
-public class Time
-{
-    public string preparation { get; set; }
-    public string cooking { get; set; }
-    public string refrigeration { get; set; }
-    public string waiting { get; set; }
-}
-
-public class Ingredient
-{
-    public string name { get; set; }
-    public string quantity { get; set; }
-    public string type { get; set; }
 }
