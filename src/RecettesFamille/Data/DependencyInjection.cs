@@ -8,7 +8,7 @@ namespace RecettesFamille.Data
         {
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                var postgresCs = "Host=172.26.0.29;Port=5432;Database=recettesfamilledb2;Username=pguser;Password=PGUserPwd";
+                var postgresCs = "Host=172.26.0.29;Port=5432;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd";
                 options.UseNpgsql(postgresCs);
             }, ServiceLifetime.Transient);
 
@@ -16,7 +16,6 @@ namespace RecettesFamille.Data
             using var scope = services.BuildServiceProvider().CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             dbContext.Database.Migrate();
-            dbContext.SaveChanges();
 
 
             return services;
