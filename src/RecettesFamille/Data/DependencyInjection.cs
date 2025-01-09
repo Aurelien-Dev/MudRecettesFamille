@@ -8,7 +8,7 @@ namespace RecettesFamille.Data
         {
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                var postgresCs = "Host=172.26.0.29;Port=5432;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd";
+                var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd";
                 options.UseNpgsql(postgresCs);
             }, ServiceLifetime.Transient);
 

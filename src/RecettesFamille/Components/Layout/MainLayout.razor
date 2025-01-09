@@ -1,18 +1,14 @@
-﻿@inherits LayoutComponentBase
+﻿@using RecettesFamille.Managers
+@inherits LayoutComponentBase
 
-@* Required *@
-<MudThemeProvider IsDarkMode="true" />
-<MudPopoverProvider @rendermode="InteractiveServer" />
 
-@* Needed for dialogs *@
-<MudDialogProvider @rendermode="InteractiveServer" />
-
-@* Needed for snackbars *@
-<MudSnackbarProvider @rendermode="InteractiveServer" />
+<MudThemeProvider IsDarkMode="true" Theme="CustomThemeManager.Sandstonetheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
 <MudLayout>
     <MudAppBar Elevation="1" Dense="true">
-        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+        <MudText Typo="Typo.h5" Class="ml-3">Recettes famille</MudText>
         <MudSpacer />
         <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
     </MudAppBar>
@@ -42,4 +38,6 @@
     {
         _drawerOpen = !_drawerOpen;
     }
+
+
 }

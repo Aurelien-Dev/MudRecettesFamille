@@ -7,20 +7,18 @@ namespace RecettesFamille.Managers;
 
 public class GptRecipeConverterManager(IConfiguration Config)
 {
-    public async Task<(RecetteEntity, decimal)> GenerateDescription()
+    public async Task<(RecetteEntity, decimal)> Convert(string recipe, CancellationToken cancellationToken = default)
     {
         var client = new ChatClient(model: "gpt-4o", apiKey: Config["OPENAI_SECRET"]);
-
-        string recetteTest = await ReadEmbeddedResourceAsync("RecetteTest");
 
         var messages = new ChatMessage[]
         {
             new SystemChatMessage(await ReadEmbeddedResourceAsync("IntroductionPrompt")),
             new SystemChatMessage(await ReadEmbeddedResourceAsync("ResponseAskedPrompt")),
-            new UserChatMessage(await ReadEmbeddedResourceAsync("RequestInformationPrompt", (s) => string.Format(s, recetteTest)))
+            new UserChatMessage(await ReadEmbeddedResourceAsync("RequestInformationPrompt", (s) => string.Format(s, recipe)))
         };
 
-        ChatCompletion completion = await client.CompleteChatAsync(messages);
+        ChatCompletion completion = await client.CompleteChatAsync(messages, cancellationToken: cancellationToken);
 
         string resultText = completion.Content[0].Text;
         decimal cost = CalculateCost(completion); // À implémenter selon tes besoins
@@ -30,7 +28,7 @@ public class GptRecipeConverterManager(IConfiguration Config)
             TypeNameHandling = TypeNameHandling.Auto
         };
 
-        var serialized = JsonConvert.DeserializeObject<RecetteEntity>(resultText, withTypes);
+        var serialized = JsonConvert.DeserializeObject<RecetteEntity>(resultText.Replace("```json", string.Empty).Replace("```", string.Empty), withTypes);
 
 
 
