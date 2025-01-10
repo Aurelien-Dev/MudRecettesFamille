@@ -1,8 +1,8 @@
-﻿@using RecettesFamille.Data.EntityModel
+﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
 
 <MudText>@Block.Instruction</MudText>
 
 @code {
     [Parameter]
-    public BlockInstruction Block { get; set; } = null!;
+    public BlockInstructionEntity Block { get; set; } = null!;
 }

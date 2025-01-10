@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace RecettesFamille.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCommit : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,6 +52,21 @@ namespace RecettesFamille.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GptConsumptions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Cost = table.Column<decimal>(type: "numeric", nullable: false),
+                    UseCase = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GptConsumptions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -180,15 +195,15 @@ namespace RecettesFamille.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    RecetteEntityId = table.Column<int>(type: "integer", nullable: true),
+                    RecipeEntityId = table.Column<int>(type: "integer", nullable: true),
                     Image = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BlockImages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BlockImages_Recettes_RecetteEntityId",
-                        column: x => x.RecetteEntityId,
+                        name: "FK_BlockImages_Recettes_RecipeEntityId",
+                        column: x => x.RecipeEntityId,
                         principalTable: "Recettes",
                         principalColumn: "Id");
                 });
@@ -199,14 +214,14 @@ namespace RecettesFamille.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    RecetteEntityId = table.Column<int>(type: "integer", nullable: true)
+                    RecipeEntityId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BlockIngredientLists", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BlockIngredientLists_Recettes_RecetteEntityId",
-                        column: x => x.RecetteEntityId,
+                        name: "FK_BlockIngredientLists_Recettes_RecipeEntityId",
+                        column: x => x.RecipeEntityId,
                         principalTable: "Recettes",
                         principalColumn: "Id");
                 });
@@ -217,21 +232,21 @@ namespace RecettesFamille.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    RecetteEntityId = table.Column<int>(type: "integer", nullable: true),
+                    RecipeEntityId = table.Column<int>(type: "integer", nullable: true),
                     Instruction = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BlockInstructions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BlockInstructions_Recettes_RecetteEntityId",
-                        column: x => x.RecetteEntityId,
+                        name: "FK_BlockInstructions_Recettes_RecipeEntityId",
+                        column: x => x.RecipeEntityId,
                         principalTable: "Recettes",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "IngredientDtos",
+                name: "Ingredients",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -239,14 +254,14 @@ namespace RecettesFamille.Migrations
                     Order = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Quantity = table.Column<string>(type: "text", nullable: false),
-                    BlockIngredientListId = table.Column<int>(type: "integer", nullable: true)
+                    BlockIngredientListEntityId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_IngredientDtos", x => x.Id);
+                    table.PrimaryKey("PK_Ingredients", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_IngredientDtos_BlockIngredientLists_BlockIngredientListId",
-                        column: x => x.BlockIngredientListId,
+                        name: "FK_Ingredients_BlockIngredientLists_BlockIngredientListEntityId",
+                        column: x => x.BlockIngredientListEntityId,
                         principalTable: "BlockIngredientLists",
                         principalColumn: "Id");
                 });
@@ -289,24 +304,24 @@ namespace RecettesFamille.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlockImages_RecetteEntityId",
+                name: "IX_BlockImages_RecipeEntityId",
                 table: "BlockImages",
-                column: "RecetteEntityId");
+                column: "RecipeEntityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlockIngredientLists_RecetteEntityId",
+                name: "IX_BlockIngredientLists_RecipeEntityId",
                 table: "BlockIngredientLists",
-                column: "RecetteEntityId");
+                column: "RecipeEntityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlockInstructions_RecetteEntityId",
+                name: "IX_BlockInstructions_RecipeEntityId",
                 table: "BlockInstructions",
-                column: "RecetteEntityId");
+                column: "RecipeEntityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_IngredientDtos_BlockIngredientListId",
-                table: "IngredientDtos",
-                column: "BlockIngredientListId");
+                name: "IX_Ingredients_BlockIngredientListEntityId",
+                table: "Ingredients",
+                column: "BlockIngredientListEntityId");
         }
 
         /// <inheritdoc />
@@ -334,7 +349,10 @@ namespace RecettesFamille.Migrations
                 name: "BlockInstructions");
 
             migrationBuilder.DropTable(
-                name: "IngredientDtos");
+                name: "GptConsumptions");
+
+            migrationBuilder.DropTable(
+                name: "Ingredients");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

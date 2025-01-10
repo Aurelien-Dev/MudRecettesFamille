@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RecettesFamille.Data;
@@ -11,9 +12,11 @@ using RecettesFamille.Data;
 namespace RecettesFamille.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250110115720_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -220,31 +223,7 @@ namespace RecettesFamille.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("RecettesFamille.Data.EntityModel.BlockBase", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValueSql("nextval('\"BlockBaseSequence\"')");
-
-                    NpgsqlPropertyBuilderExtensions.UseSequence(b.Property<int>("Id"));
-
-                    b.Property<int>("Order")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("RecetteEntityId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RecetteEntityId");
-
-                    b.ToTable((string)null);
-
-                    b.UseTpcMappingStrategy();
-                });
-
-            modelBuilder.Entity("RecettesFamille.Data.EntityModel.IngredientDto", b =>
+            modelBuilder.Entity("RecettesFamille.Data.EntityModel.GptConsumptionEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -252,28 +231,22 @@ namespace RecettesFamille.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BlockIngredientListId")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("numeric");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Order")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Quantity")
+                    b.Property<string>("UseCase")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BlockIngredientListId");
-
-                    b.ToTable("IngredientDtos");
+                    b.ToTable("GptConsumptions");
                 });
 
-            modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecetteEntity", b =>
+            modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -294,9 +267,62 @@ namespace RecettesFamille.Migrations
                     b.ToTable("Recettes");
                 });
 
-            modelBuilder.Entity("RecettesFamille.Data.EntityModel.BlockImage", b =>
+            modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockBase", b =>
                 {
-                    b.HasBaseType("RecettesFamille.Data.EntityModel.BlockBase");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValueSql("nextval('\"BlockBaseSequence\"')");
+
+                    NpgsqlPropertyBuilderExtensions.UseSequence(b.Property<int>("Id"));
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("RecipeEntityId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecipeEntityId");
+
+                    b.ToTable((string)null);
+
+                    b.UseTpcMappingStrategy();
+                });
+
+            modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.IngredientEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BlockIngredientListEntityId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Quantity")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlockIngredientListEntityId");
+
+                    b.ToTable("Ingredients");
+                });
+
+            modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockImageEntity", b =>
+                {
+                    b.HasBaseType("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockBase");
 
                     b.Property<string>("Image")
                         .IsRequired()
@@ -305,16 +331,16 @@ namespace RecettesFamille.Migrations
                     b.ToTable("BlockImages");
                 });
 
-            modelBuilder.Entity("RecettesFamille.Data.EntityModel.BlockIngredientList", b =>
+            modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockIngredientListEntity", b =>
                 {
-                    b.HasBaseType("RecettesFamille.Data.EntityModel.BlockBase");
+                    b.HasBaseType("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockBase");
 
                     b.ToTable("BlockIngredientLists");
                 });
 
-            modelBuilder.Entity("RecettesFamille.Data.EntityModel.BlockInstruction", b =>
+            modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockInstructionEntity", b =>
                 {
-                    b.HasBaseType("RecettesFamille.Data.EntityModel.BlockBase");
+                    b.HasBaseType("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockBase");
 
                     b.Property<string>("Instruction")
                         .IsRequired()
@@ -374,26 +400,26 @@ namespace RecettesFamille.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RecettesFamille.Data.EntityModel.BlockBase", b =>
+            modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockBase", b =>
                 {
-                    b.HasOne("RecettesFamille.Data.EntityModel.RecetteEntity", null)
+                    b.HasOne("RecettesFamille.Data.EntityModel.RecipeEntity", null)
                         .WithMany("BlocksInstructions")
-                        .HasForeignKey("RecetteEntityId");
+                        .HasForeignKey("RecipeEntityId");
                 });
 
-            modelBuilder.Entity("RecettesFamille.Data.EntityModel.IngredientDto", b =>
+            modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.IngredientEntity", b =>
                 {
-                    b.HasOne("RecettesFamille.Data.EntityModel.BlockIngredientList", null)
+                    b.HasOne("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockIngredientListEntity", null)
                         .WithMany("Ingredients")
-                        .HasForeignKey("BlockIngredientListId");
+                        .HasForeignKey("BlockIngredientListEntityId");
                 });
 
-            modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecetteEntity", b =>
+            modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeEntity", b =>
                 {
                     b.Navigation("BlocksInstructions");
                 });
 
-            modelBuilder.Entity("RecettesFamille.Data.EntityModel.BlockIngredientList", b =>
+            modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockIngredientListEntity", b =>
                 {
                     b.Navigation("Ingredients");
                 });

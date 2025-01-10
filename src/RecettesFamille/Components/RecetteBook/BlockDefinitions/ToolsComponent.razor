@@ -1,13 +1,12 @@
-﻿<!-- InstructionComponent.razor -->
-@using RecettesFamille.Data.EntityModel
+﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
 @using RecettesFamille.Managers
 
 <div Class="relative pa-4 d-flex align-center">
     <MudSpeedDial Origin="Origin.CenterLeft" OpenOnHover="true" OpenOnClick="true" Color="Color.Primary" Size="Size.Small"
                   Icon="@Icons.Material.Filled.Add">
-        <MudFab Size="Size.Small" IconSize="Size.Small" StartIcon="@Icons.Material.Filled.Image" OnClick="@(() => AddNewBlock<BlockImage>())" Color="Color.Secondary" />
-        <MudFab Size="Size.Small" IconSize="Size.Small" StartIcon="@Icons.Material.Filled.Assignment" OnClick="@(() => AddNewBlock<BlockInstruction>())" Color="Color.Tertiary" />
-        <MudFab Size="Size.Small" IconSize="Size.Small" StartIcon="@Icons.Material.Filled.FormatListBulleted" OnClick="@(() => AddNewBlock<BlockIngredientList>())" Color="Color.Primary" />
+        <MudFab Size="Size.Small" IconSize="Size.Small" StartIcon="@Icons.Material.Filled.Image" OnClick="@(() => AddNewBlock<BlockImageEntity>())" Color="Color.Secondary" />
+        <MudFab Size="Size.Small" IconSize="Size.Small" StartIcon="@Icons.Material.Filled.Assignment" OnClick="@(() => AddNewBlock<BlockInstructionEntity>())" Color="Color.Tertiary" />
+        <MudFab Size="Size.Small" IconSize="Size.Small" StartIcon="@Icons.Material.Filled.FormatListBulleted" OnClick="@(() => AddNewBlock<BlockIngredientListEntity>())" Color="Color.Primary" />
     </MudSpeedDial>
 </div>
 

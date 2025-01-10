@@ -1,4 +1,4 @@
-﻿@using RecettesFamille.Data.EntityModel
+﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
 
 @if (Block.Ingredients is null)
 {
@@ -20,5 +20,5 @@ else
 
 @code {
     [Parameter]
-    public BlockIngredientList Block { get; set; } = null!;
+    public BlockIngredientListEntity Block { get; set; } = null!;
 }

@@ -1,13 +1,15 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using OpenAI.Chat;
+using RecettesFamille.Data;
 using RecettesFamille.Data.EntityModel;
 using System.Reflection;
 
 namespace RecettesFamille.Managers;
 
-public class GptRecipeConverterManager(IConfiguration Config)
+public class GptRecipeConverterManager(IConfiguration Config, ApplicationDbContext dbContext)
 {
-    public async Task<(RecetteEntity, decimal)> Convert(string recipe, CancellationToken cancellationToken = default)
+    public async Task<(RecipeEntity, decimal)> Convert(string recipe, CancellationToken cancellationToken = default)
     {
         var client = new ChatClient(model: "gpt-4o", apiKey: Config["OPENAI_SECRET"]);
 
@@ -23,37 +25,50 @@ public class GptRecipeConverterManager(IConfiguration Config)
         string resultText = completion.Content[0].Text;
         decimal cost = CalculateCost(completion); // À implémenter selon tes besoins
 
+        await ReportConsumption(cost);
+
         JsonSerializerSettings withTypes = new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.Auto
         };
 
-        var serialized = JsonConvert.DeserializeObject<RecetteEntity>(resultText.Replace("```json", string.Empty).Replace("```", string.Empty), withTypes);
+        var serialized = JsonConvert.DeserializeObject<RecipeEntity>(resultText.Replace("```json", string.Empty).Replace("```", string.Empty), withTypes);
 
 
 
         return (serialized, cost);
     }
 
+    private async Task ReportConsumption(decimal cost)
+    {
+        dbContext.GptConsumptions.Add(new GptConsumptionEntity()
+        {
+            Date = DateTime.UtcNow,
+            Cost = cost,
+            UseCase = "RecipeConverter"
+        });
+        await dbContext.SaveChangesAsync();
+    }
+
     private decimal CalculateCost(ChatCompletion result)
     {
-        ////gpt-4o-mini
-        //// Tarifs en dollars par token (à ajuster selon les tarifs actuels)
-        //decimal costPerInputTokenUSD = 0.150m / 1000000m; // $0.150 / 1M input tokens
-        //decimal costPerOutputTokenUSD = 0.600m / 1000000m; // $0.600 / 1M output tokens
-
-        ////gpt-4o
-        //// Tarifs en dollars par token (à ajuster selon les tarifs actuels)
-        //decimal costPerInputTokenUSD = 5m / 1000000m; // $0.150 / 1M input tokens
-        //decimal costPerOutputTokenUSD = 15m / 1000000m; // $0.600 / 1M output tokens
-
-        //gpt-4o-2024-08-06
+        //gpt-4o-mini
         // Tarifs en dollars par token (à ajuster selon les tarifs actuels)
-        decimal costPerInputTokenUsd = 0.150m / 1000000m; // $0.150 / 1M input tokens
-        decimal costPerOutputTokenUsd = 0.600m / 1000000m; // $0.600 / 1M output tokens
+        //decimal costPerInputTokenUsd = 0.150m / 1000000m; // $0.150 / 1M input tokens
+        //decimal costPerOutputTokenUsd = 0.600m / 1000000m; // $0.600 / 1M output tokens
+
+        //gpt-4o
+        // Tarifs en dollars par token (à ajuster selon les tarifs actuels)
+        decimal costPerInputTokenUsd = 2.50m / 1000000m; // $0.150 / 1M input tokens
+        decimal costPerOutputTokenUsd = 10.00m / 1000000m; // $0.600 / 1M output tokens
+
+        ////gpt-4o-2024-08-06
+        //// Tarifs en dollars par token (à ajuster selon les tarifs actuels)
+        //decimal costPerInputTokenUsd = 0.150m / 1000000m; // $0.150 / 1M input tokens
+        //decimal costPerOutputTokenUsd = 0.600m / 1000000m; // $0.600 / 1M output tokens
 
         // Taux de conversion USD -> EUR
-        decimal conversionRate = 0.85m;
+        decimal conversionRate = 0.970771m;
 
         // Obtenir le nombre de tokens utilisés
         int inputTokens = result.Usage.InputTokenCount;

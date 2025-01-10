@@ -61,7 +61,7 @@
 
         try
         {
-            (RecetteEntity recette, decimal cost) = await gptRecipeConverterManager.Convert(recipeDescription, cancellationTokenSource.Token);
+            (RecipeEntity recette, decimal cost) = await gptRecipeConverterManager.Convert(recipeDescription, cancellationTokenSource.Token);
 
             applicationDbContext.Recettes.Add(recette);
             await applicationDbContext.SaveChangesAsync(cancellationTokenSource.Token);

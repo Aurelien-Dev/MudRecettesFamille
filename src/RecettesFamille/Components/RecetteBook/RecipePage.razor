@@ -5,6 +5,7 @@
 @using RecettesFamille.Components.RecetteBook.BlockDefinitions
 @using RecettesFamille.Data
 @using RecettesFamille.Data.EntityModel
+@using RecettesFamille.Data.EntityModel.RecipeSubEntity
 @using RecettesFamille.Managers
 @using System.Text.Json
 @using System.Text.Json.Serialization.Metadata
@@ -21,17 +22,17 @@
         {
             @switch (block)
             {
-                case BlockInstruction instructionBlock:
+                case BlockInstructionEntity instructionBlock:
                     <MudItem xs="12" md="12">
                         <InstructionComponent Block="instructionBlock" />
                     </MudItem>
                     break;
-                case BlockIngredientList ingredientListBlock:
+                case BlockIngredientListEntity ingredientListBlock:
                     <MudItem xs="12" md="5">
                         <IngredientComponent Block="ingredientListBlock" />
                     </MudItem>
                     break;
-                case BlockImage imageBlock:
+                case BlockImageEntity imageBlock:
                     <MudItem xs="12" md="5">
                         <ImageComponent Block="imageBlock" />
                     </MudItem>
@@ -59,12 +60,12 @@
 
     [Parameter] public int IdRecette { get; set; }
 
-    RecetteEntity? Recette { get; set; } = null!;
+    RecipeEntity? Recette { get; set; } = null!;
 
     protected async override Task OnParametersSetAsync()
     {
         Recette = await applicationDbContext.Recettes.Include(s => s.BlocksInstructions)
-                                                     .ThenInclude(b => (b as BlockIngredientList).Ingredients)
+                                                     .ThenInclude(b => (b as BlockIngredientListEntity).Ingredients)
                                                      .Where(r => r.Id == IdRecette)
                                                      .FirstOrDefaultAsync();
     }
