@@ -14,6 +14,16 @@ jobs:
     
     - name: Checkout code
       uses: actions/checkout@v4
+      
+    - name: Clear folder
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}          # Adresse de l'hôte VPS où le déploiement doit avoir lieu
+        username: ${{ secrets.DEPLOY_USER }}      # Nom d'utilisateur pour se connecter à l'hôte VPS
+        password: ${{ secrets.DEPLOY_PASSWORD }}  # Mot de passe pour l'authentification
+        script: |
+            cd /home
+            rm recettesfamille -r
     
     - name: Copy files via SSH
       uses: appleboy/scp-action@v0.1.3
