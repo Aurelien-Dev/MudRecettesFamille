@@ -11,4 +11,5 @@ public record class IngredientEntity()
     public int Order { get; set; }
     public string Name { get; set; }
     public string Quantity { get; set; } = string.Empty;
+    public BlockIngredientListEntity IngredientList { get; set; }
 }

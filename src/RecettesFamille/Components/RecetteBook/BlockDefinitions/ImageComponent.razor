@@ -1,4 +1,5 @@
 ﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+@inherits BaseBlockDefinition<BlockImageEntity>
 
 <div class="d-flex justify-center">
     <MudImage Src="@Block.Image" Fluid="true" Class="rounded-lg" >
@@ -7,9 +8,6 @@
 </div>
 
 @code {
-    [Parameter]
-    public BlockImageEntity Block { get; set; } = null!;
-
     protected override void OnParametersSet()
     {
         if (Block.Image is null)

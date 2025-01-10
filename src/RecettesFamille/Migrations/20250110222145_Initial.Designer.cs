@@ -12,7 +12,7 @@ using RecettesFamille.Data;
 namespace RecettesFamille.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250110115720_Initial")]
+    [Migration("20250110222145_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -279,12 +279,12 @@ namespace RecettesFamille.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("RecipeEntityId")
+                    b.Property<int>("RecipeId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RecipeEntityId");
+                    b.HasIndex("RecipeId");
 
                     b.ToTable((string)null);
 
@@ -299,7 +299,7 @@ namespace RecettesFamille.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BlockIngredientListEntityId")
+                    b.Property<int>("IngredientListId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
@@ -315,7 +315,7 @@ namespace RecettesFamille.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BlockIngredientListEntityId");
+                    b.HasIndex("IngredientListId");
 
                     b.ToTable("Ingredients");
                 });
@@ -402,16 +402,24 @@ namespace RecettesFamille.Migrations
 
             modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockBase", b =>
                 {
-                    b.HasOne("RecettesFamille.Data.EntityModel.RecipeEntity", null)
+                    b.HasOne("RecettesFamille.Data.EntityModel.RecipeEntity", "Recipe")
                         .WithMany("BlocksInstructions")
-                        .HasForeignKey("RecipeEntityId");
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Recipe");
                 });
 
             modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.IngredientEntity", b =>
                 {
-                    b.HasOne("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockIngredientListEntity", null)
+                    b.HasOne("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockIngredientListEntity", "IngredientList")
                         .WithMany("Ingredients")
-                        .HasForeignKey("BlockIngredientListEntityId");
+                        .HasForeignKey("IngredientListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("IngredientList");
                 });
 
             modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeEntity", b =>

@@ -1,8 +1,32 @@
-﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+﻿@using RecettesFamille.Data
+@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+@inherits BaseBlockDefinition<BlockInstructionEntity>
 
-<MudText>@Block.Instruction</MudText>
+@if (string.IsNullOrEmpty(Block.Instruction))
+{
+    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="110px" />
+}
+else
+{
+    <MudMenu FullWidth="false" AnchorOrigin="Origin.CenterLeft" TransformOrigin="Origin.CenterRight" Class="me-5">
+        <ActivatorContent>
+            <MudText Typo="Typo.body2" Style="white-space: pre-line;">
+                @Block.Instruction
+            </MudText>
+        </ActivatorContent>
+        <ChildContent>
+            <MudMenuItem OnClick="OpenEditor">Modifier</MudMenuItem>
+            <MudMenuItem OnClick="Delete">Delete</MudMenuItem>
+        </ChildContent>
+    </MudMenu>
+}
 
 @code {
-    [Parameter]
-    public BlockInstructionEntity Block { get; set; } = null!;
+    [Inject] ApplicationDbContext dbContext { get; set; }
+
+    private async Task Delete()
+    {
+        dbContext.Remove(Block);
+        await dbContext.SaveChangesAsync();
+    }
 }

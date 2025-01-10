@@ -1,20 +1,14 @@
 @page "/recette/{IdRecette:int?}"
-@rendermode InteractiveServer
-@using Microsoft.EntityFrameworkCore
-@using Newtonsoft.Json
 @using RecettesFamille.Components.RecetteBook.BlockDefinitions
 @using RecettesFamille.Data
 @using RecettesFamille.Data.EntityModel
 @using RecettesFamille.Data.EntityModel.RecipeSubEntity
 @using RecettesFamille.Managers
-@using System.Text.Json
-@using System.Text.Json.Serialization.Metadata
 
 @if (Recette is not null)
 {
     <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Name</MudText>
     <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recette.InformationPreparation</MudText>
-    @* <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="UpdateRecipe">Update...</MudButton> *@
 
     @* Description recette *@
     <MudGrid Spacing="5" Class="mt-10">
@@ -46,9 +40,12 @@
                     break;
             }
 
-            @* <MudItem xs="5">
-                <ToolsComponent AddBlockCallback="AddNewBlock" PrecedentIndex="@block.Order" />
-            </MudItem> *@
+         @*    <div Class="absolute pa-4 d-flex align-center justify-center">
+                <MudItem xs="5">
+                    <ToolsComponent AddBlockCallback="AddNewBlock" PrecedentIndex="@block.Order" />
+                </MudItem>
+            </div> *@
+
         }
     </MudGrid>
 }
@@ -68,14 +65,6 @@
                                                      .ThenInclude(b => (b as BlockIngredientListEntity).Ingredients)
                                                      .Where(r => r.Id == IdRecette)
                                                      .FirstOrDefaultAsync();
-    }
-
-    public async Task UpdateRecipe()
-    {
-        // (RecetteEntity recette, decimal cost) = await gptRecipeConverterManager.GenerateDescription();
-
-        applicationDbContext.Recettes.Update(Recette);
-        await applicationDbContext.SaveChangesAsync();
     }
 
     private void AddNewBlock(BlockBase block)

@@ -1,0 +1,35 @@
+﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+<MudDialog>
+    <DialogContent>
+
+        <MudTextField T="string" Variant="Variant.Filled" Lines="10"
+                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.CenterFocusWeak"
+                      @bind-Value="@blockInstructionEntity.Instruction" />
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" OnClick="@(() => MudDialog.Close())">Enregistrer</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; }
+    [Parameter] public BlockInstructionEntity blockInstructionEntity { get; set; } = new BlockInstructionEntity();
+
+    string originalValue = string.Empty;
+
+
+    private void Cancel()
+    {
+        blockInstructionEntity.Instruction = originalValue;
+
+        MudDialog.Cancel();
+    }
+
+    protected async override Task OnParametersSetAsync()
+    {
+        originalValue = blockInstructionEntity.Instruction;
+    }
+}

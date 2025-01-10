@@ -195,17 +195,18 @@ namespace RecettesFamille.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    RecipeEntityId = table.Column<int>(type: "integer", nullable: true),
+                    RecipeId = table.Column<int>(type: "integer", nullable: false),
                     Image = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BlockImages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BlockImages_Recettes_RecipeEntityId",
-                        column: x => x.RecipeEntityId,
+                        name: "FK_BlockImages_Recettes_RecipeId",
+                        column: x => x.RecipeId,
                         principalTable: "Recettes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -214,16 +215,17 @@ namespace RecettesFamille.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    RecipeEntityId = table.Column<int>(type: "integer", nullable: true)
+                    RecipeId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BlockIngredientLists", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BlockIngredientLists_Recettes_RecipeEntityId",
-                        column: x => x.RecipeEntityId,
+                        name: "FK_BlockIngredientLists_Recettes_RecipeId",
+                        column: x => x.RecipeId,
                         principalTable: "Recettes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -232,17 +234,18 @@ namespace RecettesFamille.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    RecipeEntityId = table.Column<int>(type: "integer", nullable: true),
+                    RecipeId = table.Column<int>(type: "integer", nullable: false),
                     Instruction = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BlockInstructions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BlockInstructions_Recettes_RecipeEntityId",
-                        column: x => x.RecipeEntityId,
+                        name: "FK_BlockInstructions_Recettes_RecipeId",
+                        column: x => x.RecipeId,
                         principalTable: "Recettes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -254,16 +257,17 @@ namespace RecettesFamille.Migrations
                     Order = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Quantity = table.Column<string>(type: "text", nullable: false),
-                    BlockIngredientListEntityId = table.Column<int>(type: "integer", nullable: true)
+                    IngredientListId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Ingredients", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Ingredients_BlockIngredientLists_BlockIngredientListEntityId",
-                        column: x => x.BlockIngredientListEntityId,
+                        name: "FK_Ingredients_BlockIngredientLists_IngredientListId",
+                        column: x => x.IngredientListId,
                         principalTable: "BlockIngredientLists",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -304,24 +308,24 @@ namespace RecettesFamille.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlockImages_RecipeEntityId",
+                name: "IX_BlockImages_RecipeId",
                 table: "BlockImages",
-                column: "RecipeEntityId");
+                column: "RecipeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlockIngredientLists_RecipeEntityId",
+                name: "IX_BlockIngredientLists_RecipeId",
                 table: "BlockIngredientLists",
-                column: "RecipeEntityId");
+                column: "RecipeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlockInstructions_RecipeEntityId",
+                name: "IX_BlockInstructions_RecipeId",
                 table: "BlockInstructions",
-                column: "RecipeEntityId");
+                column: "RecipeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ingredients_BlockIngredientListEntityId",
+                name: "IX_Ingredients_IngredientListId",
                 table: "Ingredients",
-                column: "BlockIngredientListEntityId");
+                column: "IngredientListId");
         }
 
         /// <inheritdoc />
