@@ -1,21 +1,23 @@
 ﻿@using RecettesFamille.Managers
 @inherits LayoutComponentBase
 
-
 <MudThemeProvider IsDarkMode="false" Theme="CustomThemeManager.Sandstonetheme" />
-<MudDialogProvider @rendermode="InteractiveServer" />
-<MudSnackbarProvider @rendermode="InteractiveServer" />
-<MudPopoverProvider @rendermode="InteractiveServer" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
 
 <MudLayout>
     <MudAppBar Elevation="1" Dense="true">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
         <MudText Typo="Typo.h5" Class="ml-3">Recettes famille</MudText>
         <MudSpacer />
         <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
     </MudAppBar>
+
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
     </MudDrawer>
+
     <MudMainContent Class="mt-16 pa-4">
         <MudContainer MaxWidth="MaxWidth.Medium">
 
@@ -39,6 +41,4 @@
     {
         _drawerOpen = !_drawerOpen;
     }
-
-
 }
