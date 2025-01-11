@@ -2,31 +2,22 @@
 @using RecettesFamille.Data.EntityModel.RecipeSubEntity
 @inherits BaseBlockDefinition<BlockInstructionEntity>
 
-@if (string.IsNullOrEmpty(Block.Instruction))
+@if (EditMode)
 {
-    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="110px" />
+    <MudTextField @bind-Value="@Block.Instruction" T="string" Label="Manual focus" Variant="Variant.Filled"
+                  Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.CenterFocusWeak" FullWidth="true"
+                  AutoGrow
+                  OnBlur="LostFocus"
+                  OnAdornmentClick="AdornmentClick" />
 }
 else
 {
-    <MudMenu FullWidth="false" AnchorOrigin="Origin.CenterLeft" TransformOrigin="Origin.CenterRight" Class="me-5">
-        <ActivatorContent>
-            <MudText Typo="Typo.body2" Style="white-space: pre-line;">
-                @Block.Instruction
-            </MudText>
-        </ActivatorContent>
-        <ChildContent>
-            <MudMenuItem OnClick="OpenEditor">Modifier</MudMenuItem>
-            <MudMenuItem OnClick="Delete">Delete</MudMenuItem>
-        </ChildContent>
-    </MudMenu>
+    <MudText Typo="Typo.body2" Style="white-space: pre-line;">
+        @Block.Instruction
+    </MudText>
 }
 
 @code {
-    [Inject] ApplicationDbContext dbContext { get; set; }
-
-    private async Task Delete()
-    {
-        dbContext.Remove(Block);
-        await dbContext.SaveChangesAsync();
-    }
+    private void AdornmentClick() => OnBlockDeleted?.Invoke(Block);
+    public void LostFocus() => OnBlockUpdated?.Invoke(Block);
 }

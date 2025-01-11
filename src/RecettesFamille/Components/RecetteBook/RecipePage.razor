@@ -9,7 +9,12 @@
 {
     <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Name</MudText>
     <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recette.InformationPreparation</MudText>
-
+    <MudToolBar Class="justify-center">
+        <MudIconButton Icon="@Icons.Material.Outlined.Add" />
+        <MudToggleIconButton @bind-Toggled="editorMode" Icon="@Icons.Material.Outlined.Edit"
+                             ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
+        <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" />
+    </MudToolBar>
     @* Description recette *@
     <MudGrid Spacing="5" Class="mt-10">
         @foreach (var block in Recette.BlocksInstructions?.OrderBy(o => o.Order))
@@ -18,17 +23,18 @@
             {
                 case BlockInstructionEntity instructionBlock:
                     <MudItem xs="12" md="12">
-                        <InstructionComponent Block="instructionBlock" />
+                        <InstructionComponent EditMode="editorMode" Block="instructionBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
+
                     </MudItem>
                     break;
                 case BlockIngredientListEntity ingredientListBlock:
                     <MudItem xs="12" md="5">
-                        <IngredientComponent Block="ingredientListBlock" />
+                        <IngredientComponent Block="ingredientListBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
                     </MudItem>
                     break;
                 case BlockImageEntity imageBlock:
                     <MudItem xs="12" md="5">
-                        <ImageComponent Block="imageBlock" />
+                        <ImageComponent Block="imageBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
                     </MudItem>
                     break;
 
@@ -40,11 +46,11 @@
                     break;
             }
 
-         @*    <div Class="absolute pa-4 d-flex align-center justify-center">
-                <MudItem xs="5">
-                    <ToolsComponent AddBlockCallback="AddNewBlock" PrecedentIndex="@block.Order" />
-                </MudItem>
-            </div> *@
+            @*    <div Class="absolute pa-4 d-flex align-center justify-center">
+    <MudItem xs="5">
+    <ToolsComponent AddBlockCallback="AddNewBlock" PrecedentIndex="@block.Order" />
+    </MudItem>
+    </div> *@
 
         }
     </MudGrid>
@@ -53,18 +59,33 @@
 
 @code {
     [Inject] GptRecipeConverterManager gptRecipeConverterManager { get; set; } = null!;
-    [Inject] ApplicationDbContext applicationDbContext { get; set; } = null!;
+    [Inject] ApplicationDbContext dbContext { get; set; } = null!;
 
     [Parameter] public int IdRecette { get; set; }
 
     RecipeEntity? Recette { get; set; } = null!;
+    public bool editorMode { get; set; } = false;
 
     protected async override Task OnParametersSetAsync()
     {
-        Recette = await applicationDbContext.Recettes.Include(s => s.BlocksInstructions)
+        Recette = await dbContext.Recettes.Include(s => s.BlocksInstructions)
                                                      .ThenInclude(b => (b as BlockIngredientListEntity).Ingredients)
                                                      .Where(r => r.Id == IdRecette)
                                                      .FirstOrDefaultAsync();
+    }
+
+
+    private async Task OnBlockDeleted(BlockBase s)
+    {
+        dbContext.Remove(s);
+        await dbContext.SaveChangesAsync();
+        StateHasChanged();
+    }
+
+    private async Task OnBlockUpdated(BlockBase s)
+    {
+        dbContext.Update(s);
+        await dbContext.SaveChangesAsync();
     }
 
     private void AddNewBlock(BlockBase block)
