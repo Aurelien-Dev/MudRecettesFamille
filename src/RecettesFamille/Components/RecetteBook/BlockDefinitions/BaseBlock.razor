@@ -1,0 +1,36 @@
+﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+@inherits BaseBlockDefinition<BlockBase>
+
+@if (Block.HalfPage.HasValue && Block.HalfPage.Value)
+{
+    md = 6;
+}
+
+<MudItem xs="xs" md="md">
+    @switch (Block)
+    {
+        case BlockInstructionEntity instructionBlock:
+            <InstructionComponent EditMode="EditMode" Block="instructionBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
+            break;
+        case BlockIngredientListEntity ingredientListBlock:
+            <IngredientComponent EditMode="EditMode" Block="ingredientListBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
+            break;
+        case BlockImageEntity imageBlock:
+            <ImageComponent EditMode="EditMode" Block="imageBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
+            break;
+
+        // Ajoutez d'autres cas pour différents types de blocs ici
+        default:
+            <p>Type de bloc non pris en charge</p>
+            break;
+    }
+</MudItem>
+@* <MudButtonGroup Color="Color.Primary" Variant="Variant.Text" Vertical="true">
+    <MudButton>One</MudButton>
+    <MudButton>Two</MudButton>
+    <MudButton>Three</MudButton>
+</MudButtonGroup> *@
+@code {
+    public int xs { get; set; } = 12;
+    public int md { get; set; } = 12;
+}

@@ -7,18 +7,8 @@
 
 @if (Recette is not null)
 {
-
-    @if (editorMode)
-    {
-        <MudTextField @bind-Value="@Recette.Name" Typo="Typo.h3" T="string" Variant="Variant.Outlined" />
-        <MudTextField @bind-Value="@Recette.InformationPreparation" T="string" Variant="Variant.Outlined" />
-    }
-    else
-    {
-        <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Name</MudText>
-        <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recette.InformationPreparation</MudText>
-    }
-
+    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Name</MudText>
+    <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recette.InformationPreparation</MudText>
 
     <MudToolBar Class="justify-center">
         <MudIconButton Icon="@Icons.Material.Outlined.Add" />
@@ -27,42 +17,10 @@
         <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" />
     </MudToolBar>
     @* Description recette *@
-    <MudGrid Spacing="5" Class="mt-10">
+    <MudGrid Spacing="5" Class="mt-10 mb-12">
         @foreach (var block in Recette.BlocksInstructions?.OrderBy(o => o.Order))
         {
-            @switch (block)
-            {
-                case BlockInstructionEntity instructionBlock:
-                    <MudItem xs="12" md="12">
-                        <InstructionComponent EditMode="editorMode" Block="instructionBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
-
-                    </MudItem>
-                    break;
-                case BlockIngredientListEntity ingredientListBlock:
-                    <MudItem xs="12" md="5">
-                        <IngredientComponent EditMode="editorMode" Block="ingredientListBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
-                    </MudItem>
-                    break;
-                case BlockImageEntity imageBlock:
-                    <MudItem xs="12" md="5">
-                        <ImageComponent EditMode="editorMode" Block="imageBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
-                    </MudItem>
-                    break;
-
-                // Ajoutez d'autres cas pour différents types de blocs ici
-                default:
-                    <MudItem xs="5">
-                        <p>Type de bloc non pris en charge</p>
-                    </MudItem>
-                    break;
-            }
-
-            @*    <div Class="absolute pa-4 d-flex align-center justify-center">
-    <MudItem xs="5">
-    <ToolsComponent AddBlockCallback="AddNewBlock" PrecedentIndex="@block.Order" />
-    </MudItem>
-    </div> *@
-
+            <BaseBlock EditMode="editorMode" Block="block" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" OnBlockHasChanged="OnBlockHasChanged" />
         }
     </MudGrid>
 }
@@ -84,20 +42,40 @@
                                                      .Where(r => r.Id == IdRecette)
                                                      .FirstOrDefaultAsync();
     }
+    
 
-
-    private async Task OnBlockDeleted(BlockBase s)
+    private async Task OnBlockHasChanged()
     {
-        dbContext.Remove(s);
+        StateHasChanged();
+    }
+
+    private async Task OnBlockDeleted(BlockBase block)
+    {
+        dbContext.Remove(block);
         await dbContext.SaveChangesAsync();
         StateHasChanged();
     }
 
-    private async Task OnBlockUpdated(BlockBase s)
+    private async Task OnBlockUpdated(BlockBase block)
     {
-        dbContext.Update(s);
+        dbContext.Update(block);
         await dbContext.SaveChangesAsync();
+        StateHasChanged();
     }
+
+    // private void MoveBlock(BlockBase block)
+    // {
+    //     block.Order = --block.Order;
+
+    //     // Réordonner les items de BlocksInstructions
+    //     foreach (var item in Recette.BlocksInstructions.OrderBy(o => o.Order))
+    //     {
+    //         if (item.Order >= block.Order)
+    //         {
+    //             item.Order++;
+    //         }
+    //     }
+    // }
 
     private void AddNewBlock(BlockBase block)
     {

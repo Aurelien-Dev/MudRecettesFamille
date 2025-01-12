@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using MudBlazor.Services;
 using MudExtensions.Services;
+using RecettesFamille;
 using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
 using RecettesFamille.Data;
-using RecettesFamille.Managers;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -4,16 +4,12 @@
 
 @if (EditMode)
 {
-    <MudStack Row="true" Spacing="0" >
+    <MudStack Row="true" Spacing="0">
 
         <MudTextField @bind-Value="@Block.Instruction" T="string" Variant="Variant.Outlined" FullWidth="true" AutoGrow OnBlur="LostFocus"
                       OnAdornmentClick="AdornmentClick" AdornmentIcon="@Icons.Material.Outlined.Delete" Adornment="Adornment.End" AdornmentColor="Color.Error" />
 
-        <MudButtonGroup Color="Color.Primary" Variant="Variant.Text" Vertical="true">
-            <MudButton>One</MudButton>
-            <MudButton>Two</MudButton>
-            <MudButton>Three</MudButton>
-        </MudButtonGroup>
+
 
     </MudStack>
 }
@@ -25,6 +21,19 @@ else
 }
 
 @code {
+    public string OriginalInstruction { get; set; } = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        OriginalInstruction = Block.Instruction;
+    }
+
     private void AdornmentClick() => OnBlockDeleted?.Invoke(Block);
-    public void LostFocus() => OnBlockUpdated?.Invoke(Block);
+    public void LostFocus()
+    {
+        if (Block.Instruction == OriginalInstruction)
+            return;
+
+        OnBlockUpdated?.Invoke(Block);
+    }
 }

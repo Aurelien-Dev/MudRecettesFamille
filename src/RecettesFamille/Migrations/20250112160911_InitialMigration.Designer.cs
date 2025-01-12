@@ -12,8 +12,8 @@ using RecettesFamille.Data;
 namespace RecettesFamille.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250111231613_Initial")]
-    partial class Initial
+    [Migration("20250112160911_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -276,6 +276,11 @@ namespace RecettesFamille.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseSequence(b.Property<int?>("Id"));
 
+                    b.Property<bool>("HalfPage")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<int>("Order")
                         .HasColumnType("integer");
 
@@ -317,7 +322,7 @@ namespace RecettesFamille.Migrations
 
                     b.HasIndex("IngredientListId");
 
-                    b.ToTable("Ingredients");
+                    b.ToTable("IngredientEntity");
                 });
 
             modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockImageEntity", b =>
@@ -328,14 +333,14 @@ namespace RecettesFamille.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.ToTable("BlockImages");
+                    b.ToTable("BlockImageEntity");
                 });
 
             modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockIngredientListEntity", b =>
                 {
                     b.HasBaseType("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockBase");
 
-                    b.ToTable("BlockIngredientLists");
+                    b.ToTable("BlockIngredientListEntity");
                 });
 
             modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockInstructionEntity", b =>
@@ -346,7 +351,7 @@ namespace RecettesFamille.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.ToTable("BlockInstructions");
+                    b.ToTable("BlockInstructionEntity");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

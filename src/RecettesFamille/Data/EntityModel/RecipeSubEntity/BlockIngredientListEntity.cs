@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
+﻿using MudBlazor;
 using System.Text.Json.Serialization;
 
 namespace RecettesFamille.Data.EntityModel.RecipeSubEntity;

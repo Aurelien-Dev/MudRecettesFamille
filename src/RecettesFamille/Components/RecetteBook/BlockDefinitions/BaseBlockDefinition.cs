@@ -12,7 +12,7 @@ public abstract class BaseBlockDefinition<TBlock> : ComponentBase where TBlock :
 
     [Parameter] public TBlock Block { get; set; }
     [Parameter] public bool EditMode { get; set; }
-
     [Parameter] public Func<BlockBase, Task> OnBlockUpdated { get; set; }
     [Parameter] public Func<BlockBase, Task> OnBlockDeleted { get; set; }
+    [Parameter] public Func<Task> OnBlockHasChanged { get; set; }
 }

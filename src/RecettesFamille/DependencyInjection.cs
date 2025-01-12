@@ -1,9 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RecettesFamille.Data;
+using RecettesFamille.Managers;
 
-namespace RecettesFamille.Data
+namespace RecettesFamille
 {
     public static class DependencyInjection
     {
+        public static IServiceCollection AddManagers(this IServiceCollection services)
+        {
+            services.AddScoped<GptRecipeConverterManager>();
+
+            return services;
+        }
+
         public static IServiceCollection AddCustomDbContext(this IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -12,12 +21,6 @@ namespace RecettesFamille.Data
                 options.UseNpgsql(postgresCs);
                 options.EnableSensitiveDataLogging();
             }, ServiceLifetime.Transient);
-
-            //Apply DB Migration
-            using var scope = services.BuildServiceProvider().CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            dbContext.Database.Migrate();
-
 
             return services;
         }
