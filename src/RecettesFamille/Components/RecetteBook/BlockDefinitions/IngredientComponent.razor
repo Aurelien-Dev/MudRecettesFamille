@@ -1,24 +1,48 @@
-﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+﻿@using RecettesFamille.Data
+@using RecettesFamille.Data.EntityModel.RecipeSubEntity
 @inherits BaseBlockDefinition<BlockIngredientListEntity>
 
-@if (Block.Ingredients is null)
-{
-    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="100%" Height="110px" />
-}
-else
-{
-    <MudTable Items="@Block.Ingredients" Dense="true" Hover="true" Striped="false" Class="mx-7 mb-2 rounded-lg"
-              MultiSelection="false" Style="height:100%" RowClass="mud-table-extra-dense" >
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Ingrédients</MudText>
-        </ToolBarContent>
-        <RowTemplate>
-            <MudTd>@context.Name</MudTd>
-            <MudTd>@context.Quantity</MudTd>
-        </RowTemplate>
-    </MudTable>
-}
+<MudDataGrid Items="@Block.Ingredients" T="IngredientEntity" Dense="true" Hover="true" Striped="false" Class="mx-7 mb-2 rounded-lg" HeaderClass="hide-header"
+             MultiSelection="false" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false"
+             EditMode="DataGridEditMode.Form" edit EditTrigger="DataGridEditTrigger.Manual"
+             CommittedItemChanges="@CommittedItemChanges" >
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Ingrédients</MudText>
+        <MudSpacer />
+        @if (EditMode)
+        {
+            <MudIconButton Icon="@Icons.Material.Outlined.Add" Size="Size.Small" />
+        }
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Name" Editable="true" />
+        <PropertyColumn Property="x => x.Quantity" Editable="true" />
+        <TemplateColumn CellClass="d-flex justify-end" Hidden="!EditMode">
+            <CellTemplate>
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
+
+<style>
+    .hide-header {
+        display: none !important;
+    }
+
+</style>
 
 @code {
+    [Inject] ApplicationDbContext dbContext { get; set; } = null!;
 
+    DialogOptions dialogOptions = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true };
+
+
+    public async Task CommittedItemChanges(IngredientEntity item)
+    {
+        // Obligé de mettre à jour l'ingrédient ici en raison de l'attribut [JsonIgnore] sur la propriété de navigation IngredientList, ce qui entraîne une perte de liaison entre le bloc IngredientList et l'ingrédient
+        // L'attribut [JsonIgnore] a été ajouté car le DataGrid entraînait une boucle infinie en raison de la propriété de navigation
+        dbContext.Update(item);
+        await dbContext.SaveChangesAsync();
+    }
 }

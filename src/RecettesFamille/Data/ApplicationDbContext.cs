@@ -16,7 +16,6 @@ namespace RecettesFamille.Data
 
         public DbSet<GptConsumptionEntity> GptConsumptions { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<RecipeEntity>().HasKey(c => c.Id);
@@ -28,12 +27,9 @@ namespace RecettesFamille.Data
             builder.Entity<BlockBase>().Property(b => b.Id).ValueGeneratedOnAdd();
             builder.Entity<BlockBase>().HasOne(b => b.Recipe).WithMany(c => c.BlocksInstructions).IsRequired();
 
-
             builder.Entity<IngredientEntity>().HasKey(c => c.Id);
             builder.Entity<IngredientEntity>().Property(b => b.Id).ValueGeneratedOnAdd();
-
-            builder.Entity<BlockIngredientListEntity>().HasMany(c => c.Ingredients).WithOne(c => c.IngredientList);
-
+            builder.Entity<IngredientEntity>().HasOne(c => c.IngredientList).WithMany(c => c.Ingredients).HasForeignKey(c => c.IngredientListId);
 
             base.OnModelCreating(builder);
         }

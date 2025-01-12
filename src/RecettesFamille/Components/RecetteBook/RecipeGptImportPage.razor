@@ -23,7 +23,7 @@
                                 <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
                             </MudOverlay>
 
-                            <MudTextField @ref="multilineReference" T="string" Label="Manual focus" Variant="Variant.Filled" Lines="40"
+                            <MudTextField @ref="multilineReference" T="string" Label="Recette" Variant="Variant.Outlined" Lines="40"
                                           Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.CenterFocusWeak"
                                           OnAdornmentClick="@(() => multilineReference.Clear())" @bind-Value="@recipeDescription" />
                         </MudPaper>
@@ -45,7 +45,7 @@
 @code {
     [Inject] NavigationManager navigationManager { get; set; } = null!;
     [Inject] GptRecipeConverterManager gptRecipeConverterManager { get; set; } = null!;
-    [Inject] ApplicationDbContext applicationDbContext { get; set; } = null!;
+    [Inject] ApplicationDbContext dbContext { get; set; } = null!;
 
     private MudTextField<string> multilineReference;
 
@@ -62,14 +62,20 @@
         {
             (RecipeEntity recette, decimal cost) = await gptRecipeConverterManager.Convert(recipeDescription, cancellationTokenSource.Token);
 
-            applicationDbContext.Recettes.Add(recette);
-            await applicationDbContext.SaveChangesAsync(cancellationTokenSource.Token);
+            //applicationDbContext.Entry(recette).State = EntityState.Added;
+
+            dbContext.Recettes.Update(recette);
+            await dbContext.SaveChangesAsync(cancellationTokenSource.Token);
 
             navigationManager.NavigateTo($"/recette/{recette.Id}");
         }
         catch (OperationCanceledException)
         {
             // Handle cancellation
+        }
+        catch (Exception)
+        {
+            throw;
         }
         finally
         {

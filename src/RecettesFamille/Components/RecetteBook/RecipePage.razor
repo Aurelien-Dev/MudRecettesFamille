@@ -7,8 +7,19 @@
 
 @if (Recette is not null)
 {
-    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Name</MudText>
-    <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recette.InformationPreparation</MudText>
+
+    @if (editorMode)
+    {
+        <MudTextField @bind-Value="@Recette.Name" Typo="Typo.h3" T="string" Variant="Variant.Outlined" />
+        <MudTextField @bind-Value="@Recette.InformationPreparation" T="string" Variant="Variant.Outlined" />
+    }
+    else
+    {
+        <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Name</MudText>
+        <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recette.InformationPreparation</MudText>
+    }
+
+
     <MudToolBar Class="justify-center">
         <MudIconButton Icon="@Icons.Material.Outlined.Add" />
         <MudToggleIconButton @bind-Toggled="editorMode" Icon="@Icons.Material.Outlined.Edit"
@@ -29,12 +40,12 @@
                     break;
                 case BlockIngredientListEntity ingredientListBlock:
                     <MudItem xs="12" md="5">
-                        <IngredientComponent Block="ingredientListBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
+                        <IngredientComponent EditMode="editorMode" Block="ingredientListBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
                     </MudItem>
                     break;
                 case BlockImageEntity imageBlock:
                     <MudItem xs="12" md="5">
-                        <ImageComponent Block="imageBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
+                        <ImageComponent EditMode="editorMode" Block="imageBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
                     </MudItem>
                     break;
 

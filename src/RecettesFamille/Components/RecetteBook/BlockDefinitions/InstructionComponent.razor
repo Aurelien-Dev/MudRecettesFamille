@@ -4,11 +4,18 @@
 
 @if (EditMode)
 {
-    <MudTextField @bind-Value="@Block.Instruction" T="string" Label="Manual focus" Variant="Variant.Filled"
-                  Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.CenterFocusWeak" FullWidth="true"
-                  AutoGrow
-                  OnBlur="LostFocus"
-                  OnAdornmentClick="AdornmentClick" />
+    <MudStack Row="true" Spacing="0" >
+
+        <MudTextField @bind-Value="@Block.Instruction" T="string" Variant="Variant.Outlined" FullWidth="true" AutoGrow OnBlur="LostFocus"
+                      OnAdornmentClick="AdornmentClick" AdornmentIcon="@Icons.Material.Outlined.Delete" Adornment="Adornment.End" AdornmentColor="Color.Error" />
+
+        <MudButtonGroup Color="Color.Primary" Variant="Variant.Text" Vertical="true">
+            <MudButton>One</MudButton>
+            <MudButton>Two</MudButton>
+            <MudButton>Three</MudButton>
+        </MudButtonGroup>
+
+    </MudStack>
 }
 else
 {

@@ -266,12 +266,12 @@ namespace RecettesFamille.Migrations
 
             modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockBase", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValueSql("nextval('\"BlockBaseSequence\"')");
 
-                    NpgsqlPropertyBuilderExtensions.UseSequence(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseSequence(b.Property<int?>("Id"));
 
                     b.Property<int>("Order")
                         .HasColumnType("integer");
@@ -290,11 +290,11 @@ namespace RecettesFamille.Migrations
 
             modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.IngredientEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int?>("Id"));
 
                     b.Property<int>("IngredientListId")
                         .HasColumnType("integer");
