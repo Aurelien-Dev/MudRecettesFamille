@@ -4,14 +4,7 @@
 
 @if (EditMode)
 {
-    <MudStack Row="true" Spacing="0">
-
-        <MudTextField @bind-Value="@Block.Instruction" T="string" Variant="Variant.Outlined" FullWidth="true" AutoGrow OnBlur="LostFocus"
-                      OnAdornmentClick="AdornmentClick" AdornmentIcon="@Icons.Material.Outlined.Delete" Adornment="Adornment.End" AdornmentColor="Color.Error" />
-
-
-
-    </MudStack>
+    <MudTextField @bind-Value="@Block.Instruction" T="string" Variant="Variant.Outlined" FullWidth="true" AutoGrow OnBlur="LostFocus" />
 }
 else
 {

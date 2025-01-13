@@ -7,30 +7,50 @@
 }
 
 <MudItem xs="xs" md="md">
-    @switch (Block)
-    {
-        case BlockInstructionEntity instructionBlock:
-            <InstructionComponent EditMode="EditMode" Block="instructionBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
-            break;
-        case BlockIngredientListEntity ingredientListBlock:
-            <IngredientComponent EditMode="EditMode" Block="ingredientListBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
-            break;
-        case BlockImageEntity imageBlock:
-            <ImageComponent EditMode="EditMode" Block="imageBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
-            break;
+    <MudStack Row="true">
+        @switch (Block)
+        {
+            case BlockInstructionEntity instructionBlock:
+                <InstructionComponent EditMode="EditMode" Block="instructionBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
+                break;
+            case BlockIngredientListEntity ingredientListBlock:
+                <IngredientComponent EditMode="EditMode" Block="ingredientListBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
+                break;
+            case BlockImageEntity imageBlock:
+                <ImageComponent EditMode="EditMode" Block="imageBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
+                break;
 
-        // Ajoutez d'autres cas pour différents types de blocs ici
-        default:
-            <p>Type de bloc non pris en charge</p>
-            break;
-    }
+            // Ajoutez d'autres cas pour différents types de blocs ici
+            default:
+                <p>Type de bloc non pris en charge</p>
+                break;
+        }
+
+        @if (EditMode)
+        {
+            <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Vertical="true" Size="Size.Small">
+                @* <MudIconButton Icon="@Icons.Material.Filled.ArrowDropUp" OnClick="OnMoveUp"></MudIconButton> *@
+                <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="@Color.Error" OnClick="OnBlockDelete"> </MudIconButton>
+                @* <MudIconButton Icon="@Icons.Material.Filled.ArrowDropDown"></MudIconButton> *@
+            </MudButtonGroup>
+        }
+    </MudStack>
 </MudItem>
-@* <MudButtonGroup Color="Color.Primary" Variant="Variant.Text" Vertical="true">
-    <MudButton>One</MudButton>
-    <MudButton>Two</MudButton>
-    <MudButton>Three</MudButton>
-</MudButtonGroup> *@
 @code {
+    [Inject] private IDialogService DialogService { get; set; }
+
     public int xs { get; set; } = 12;
     public int md { get; set; } = 12;
+
+    private void OnMoveUp() => base.MoveUp?.Invoke(Block);
+
+    private async Task OnBlockDelete()
+    {
+        bool? result = await DialogService.ShowMessageBox("Warning", "Deleting can not be undone!", yesText: "Delete!", cancelText: "Cancel");
+
+        if (result is null)
+            return;
+
+        OnBlockDeleted?.Invoke(Block);
+    }
 }

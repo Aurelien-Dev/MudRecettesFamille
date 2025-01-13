@@ -20,7 +20,11 @@
     <MudGrid Spacing="5" Class="mt-10 mb-12">
         @foreach (var block in Recette.BlocksInstructions?.OrderBy(o => o.Order))
         {
-            <BaseBlock EditMode="editorMode" Block="block" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" OnBlockHasChanged="OnBlockHasChanged" />
+            <BaseBlock EditMode="editorMode" Block="block" 
+                       OnBlockUpdated="OnBlockUpdated" 
+                       OnBlockDeleted="OnBlockDeleted" 
+                       OnBlockHasChanged="OnBlockHasChanged"
+                       MoveUp="MoveUp" />
         }
     </MudGrid>
 }
@@ -42,7 +46,7 @@
                                                      .Where(r => r.Id == IdRecette)
                                                      .FirstOrDefaultAsync();
     }
-    
+
 
     private async Task OnBlockHasChanged()
     {
@@ -63,19 +67,21 @@
         StateHasChanged();
     }
 
-    // private void MoveBlock(BlockBase block)
-    // {
-    //     block.Order = --block.Order;
+    private async Task MoveUp(BlockBase block)
+    {
+        block.Order = --block.Order;
 
-    //     // Réordonner les items de BlocksInstructions
-    //     foreach (var item in Recette.BlocksInstructions.OrderBy(o => o.Order))
-    //     {
-    //         if (item.Order >= block.Order)
-    //         {
-    //             item.Order++;
-    //         }
-    //     }
-    // }
+        // Réordonner les items de BlocksInstructions
+        foreach (var item in Recette.BlocksInstructions.OrderBy(o => o.Order))
+        {
+            if (item.Order >= block.Order)
+            {
+                item.Order++;
+            }
+        }
+        await dbContext.SaveChangesAsync();
+        StateHasChanged();
+    }
 
     private void AddNewBlock(BlockBase block)
     {
