@@ -4,7 +4,7 @@
 
 <MudDataGrid @ref="_dataGrid" Items="@Block.Ingredients" T="IngredientEntity" Dense="true" Hover="true" Striped="false" Class="mx-3 mb-2 rounded-lg"
              HeaderClass="hide-header"
-             MultiSelection="true" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false"
+             MultiSelection="EditMode" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false"
              EditMode="DataGridEditMode.Form" edit EditTrigger="DataGridEditTrigger.Manual"
              CommittedItemChanges="@CommittedItemChanges">
     <ToolBarContent>

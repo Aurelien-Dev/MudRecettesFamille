@@ -1,4 +1,4 @@
-@page "/recette/import/"
+@page "/gpt/import/"
 
 @using Microsoft.EntityFrameworkCore
 @using Newtonsoft.Json
@@ -24,7 +24,7 @@
                             </MudOverlay>
 
                             <MudTextField @ref="multilineReference" T="string" Label="Recette" Variant="Variant.Outlined" Lines="40"
-                                          Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.CenterFocusWeak"
+                                          Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Delete" AdornmentColor="Color.Error"
                                           OnAdornmentClick="@(() => multilineReference.Clear())" @bind-Value="@recipeDescription" />
                         </MudPaper>
                     </MudItem>
