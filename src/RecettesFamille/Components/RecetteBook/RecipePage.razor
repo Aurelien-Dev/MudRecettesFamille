@@ -14,15 +14,15 @@
         <MudIconButton Icon="@Icons.Material.Outlined.Add" />
         <MudToggleIconButton @bind-Toggled="editorMode" Icon="@Icons.Material.Outlined.Edit"
                              ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
-        <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" />
+        <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
     </MudToolBar>
     @* Description recette *@
     <MudGrid Spacing="5" Class="mt-10 mb-12">
         @foreach (var block in Recette.BlocksInstructions?.OrderBy(o => o.Order))
         {
-            <BaseBlock EditMode="editorMode" Block="block" 
-                       OnBlockUpdated="OnBlockUpdated" 
-                       OnBlockDeleted="OnBlockDeleted" 
+            <BaseBlock EditMode="editorMode" Block="block"
+                       OnBlockUpdated="OnBlockUpdated"
+                       OnBlockDeleted="OnBlockDeleted"
                        OnBlockHasChanged="OnBlockHasChanged"
                        MoveUp="MoveUp" />
         }
@@ -33,6 +33,8 @@
 @code {
     [Inject] GptRecipeConverterManager gptRecipeConverterManager { get; set; } = null!;
     [Inject] ApplicationDbContext dbContext { get; set; } = null!;
+    [Inject] IDialogService dialogService { get; set; }
+    [Inject] NavigationManager navigationManager { get; set; }
 
     [Parameter] public int IdRecette { get; set; }
 
@@ -47,7 +49,23 @@
                                                      .FirstOrDefaultAsync();
     }
 
+    public async Task DeleteRecipe()
+    {
+        bool? result = await dialogService.ShowMessageBox("Warning", "Deleting can not be undone!", yesText: "Delete!", cancelText: "Cancel");
 
+        if (result is null || (result.HasValue && !result.Value))
+            return;
+
+        if (Recette is null)
+            return;
+
+        dbContext.Recettes.Remove(Recette);
+        await dbContext.SaveChangesAsync();
+
+        navigationManager.NavigateTo("/");
+    }
+
+    #region Block edition
     private async Task OnBlockHasChanged()
     {
         StateHasChanged();
@@ -66,7 +84,9 @@
         await dbContext.SaveChangesAsync();
         StateHasChanged();
     }
+    #endregion
 
+    #region Block move
     private async Task MoveUp(BlockBase block)
     {
         block.Order = --block.Order;
@@ -82,19 +102,21 @@
         await dbContext.SaveChangesAsync();
         StateHasChanged();
     }
+    #endregion
 
-    private void AddNewBlock(BlockBase block)
-    {
-        // Réordonner les items de BlocksInstructions
-        foreach (var item in Recette.BlocksInstructions.OrderBy(o => o.Order))
-        {
-            if (item.Order >= block.Order)
-            {
-                item.Order++;
-            }
-        }
 
-        Recette.BlocksInstructions.Add(block);
-        StateHasChanged();
-    }
+    // private void AddNewBlock(BlockBase block)
+    // {
+    //     // Réordonner les items de BlocksInstructions
+    //     foreach (var item in Recette.BlocksInstructions.OrderBy(o => o.Order))
+    //     {
+    //         if (item.Order >= block.Order)
+    //         {
+    //             item.Order++;
+    //         }
+    //     }
+
+    //     Recette.BlocksInstructions.Add(block);
+    //     StateHasChanged();
+    // }
 }
