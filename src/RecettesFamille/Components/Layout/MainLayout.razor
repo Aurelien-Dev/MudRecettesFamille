@@ -1,7 +1,7 @@
 ﻿@using RecettesFamille.Managers
 @inherits LayoutComponentBase
 
-<MudThemeProvider IsDarkMode="false" Theme="CustomThemeManager.Sandstonetheme" />
+<MudThemeProvider IsDarkMode="isDarkMode" Theme="CustomThemeManager.Literatheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudPopoverProvider />
@@ -11,7 +11,11 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
         <MudText Typo="Typo.h5" Class="ml-3">Recettes famille</MudText>
         <MudSpacer />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
+        <MudToggleIconButton @bind-Toggled="isDarkMode"
+                             Icon="@Icons.Material.Outlined.LightMode"
+                             ToggledIcon="@Icons.Material.Filled.DarkMode" 
+                             ToggledColor="@Color.Error" />
+
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
@@ -36,6 +40,7 @@
 
 @code {
     private bool _drawerOpen = true;
+    private bool isDarkMode = true;
 
     private void DrawerToggle()
     {
