@@ -12,7 +12,7 @@ using RecettesFamille.Data;
 namespace RecettesFamille.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250112160911_InitialMigration")]
+    [Migration("20250116221429_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -276,7 +276,7 @@ namespace RecettesFamille.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseSequence(b.Property<int?>("Id"));
 
-                    b.Property<bool>("HalfPage")
+                    b.Property<bool?>("HalfPage")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
@@ -339,6 +339,10 @@ namespace RecettesFamille.Migrations
             modelBuilder.Entity("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockIngredientListEntity", b =>
                 {
                     b.HasBaseType("RecettesFamille.Data.EntityModel.RecipeSubEntity.BlockBase");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.ToTable("BlockIngredientListEntity");
                 });

@@ -5,6 +5,10 @@
 {
     md = 6;
 }
+else
+{
+    md = 12;
+}
 
 <MudItem xs="xs" md="md">
     <MudStack Row="true" StretchItems="StretchItems.Start">
@@ -29,9 +33,12 @@
         @if (EditMode)
         {
             <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Vertical="true" Size="Size.Small">
-                @* <MudIconButton Icon="@Icons.Material.Filled.ArrowDropUp" OnClick="OnMoveUp"></MudIconButton> *@
-                <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="@Color.Error" OnClick="OnBlockDelete"> </MudIconButton>
-                @* <MudIconButton Icon="@Icons.Material.Filled.ArrowDropDown"></MudIconButton> *@
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="@Color.Error" OnClick="OnBlockDelete" Size="Size.Small" />
+
+                <MudToggleIconButton ToggledChanged="OnToggledChanged" Toggled="Block.HalfPage.Value" Icon="@Icons.Material.Filled.Fullscreen" ToggledIcon="@Icons.Material.Filled.FullscreenExit" />
+
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowDropUp" OnClick="OnMoveUp"></MudIconButton>
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowDropDown" OnClick="OnMoveDown"></MudIconButton>
             </MudButtonGroup>
         }
     </MudStack>
@@ -43,6 +50,15 @@
     public int md { get; set; } = 12;
 
     private void OnMoveUp() => base.MoveUp?.Invoke(Block);
+    private void OnMoveDown() => base.MoveDown?.Invoke(Block);
+
+
+    public void OnToggledChanged(bool toggled)
+    {
+        Block.HalfPage = toggled;
+        OnBlockUpdated?.Invoke(Block);
+    }
+
 
     private async Task OnBlockDelete()
     {

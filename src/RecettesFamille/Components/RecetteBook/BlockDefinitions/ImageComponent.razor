@@ -1,8 +1,8 @@
 ﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
 @inherits BaseBlockDefinition<BlockImageEntity>
 
-<div class="d-flex justify-center">
-    <MudImage Src="@Block.Image" Fluid="true" Class="rounded-lg" >
+<div class="d-flex justify-center ">
+    <MudImage Src="@Block.Image" Fluid="true" Class="rounded-lg" Style="opacity: 0.2;">
 
     </MudImage>
 </div>
@@ -12,7 +12,7 @@
     {
         if (Block.Image is null)
         {
-            Block.Image = "https://img.cuisineaz.com/660x495/2013/12/20/i62638-photo-de-cake-aux-tomates-confites.webp";
+            Block.Image = "DALL·E.webp";
         }
     }
 }

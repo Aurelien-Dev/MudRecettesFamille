@@ -4,7 +4,8 @@ using System.Text.Json.Serialization;
 namespace RecettesFamille.Data.EntityModel.RecipeSubEntity;
 public class BlockIngredientListEntity : BlockBase
 {
-    public List<IngredientEntity> Ingredients { get; set; }
+    public string Name { get; set; } = "Ingrédients";
+    public List<IngredientEntity> Ingredients { get; set; } = new List<IngredientEntity>();
 }
 
 

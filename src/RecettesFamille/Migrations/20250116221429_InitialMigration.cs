@@ -195,7 +195,7 @@ namespace RecettesFamille.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    HalfPage = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    HalfPage = table.Column<bool>(type: "boolean", nullable: true, defaultValue: false),
                     RecipeId = table.Column<int>(type: "integer", nullable: false),
                     Image = table.Column<string>(type: "text", nullable: false)
                 },
@@ -216,8 +216,9 @@ namespace RecettesFamille.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    HalfPage = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
-                    RecipeId = table.Column<int>(type: "integer", nullable: false)
+                    HalfPage = table.Column<bool>(type: "boolean", nullable: true, defaultValue: false),
+                    RecipeId = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -236,7 +237,7 @@ namespace RecettesFamille.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    HalfPage = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    HalfPage = table.Column<bool>(type: "boolean", nullable: true, defaultValue: false),
                     RecipeId = table.Column<int>(type: "integer", nullable: false),
                     Instruction = table.Column<string>(type: "text", nullable: false)
                 },

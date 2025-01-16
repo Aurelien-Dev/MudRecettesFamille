@@ -8,12 +8,16 @@
              EditMode="DataGridEditMode.Form" edit EditTrigger="DataGridEditTrigger.Manual"
              CommittedItemChanges="@CommittedItemChanges">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Ingrédients</MudText>
-        <MudSpacer />
         @if (EditMode)
         {
+            <MudTextField @bind-Value="Block.Name" Margin="Margin.Dense" Typo="Typo.h6" OnBlur="OnNameUpdated" />
+            <MudSpacer />
             <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="DeleteItems" />
             <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="OpenDialogNewItem" />
+        }
+        else
+        {
+            <MudText Typo="Typo.h6">@Block.Name</MudText>
         }
     </ToolBarContent>
     <Columns>
@@ -42,6 +46,10 @@
     DialogOptions dialogOptions = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true };
     MudDataGrid<IngredientEntity> _dataGrid = null!;
 
+    public void OnNameUpdated()
+    {
+        OnBlockUpdated?.Invoke(Block);
+    }
 
     public async Task OpenDialogNewItem()
     {

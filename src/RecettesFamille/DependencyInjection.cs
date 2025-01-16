@@ -19,7 +19,6 @@ namespace RecettesFamille
             {
                 var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd";
                 options.UseNpgsql(postgresCs);
-                options.EnableSensitiveDataLogging();
             }, ServiceLifetime.Transient);
 
             return services;

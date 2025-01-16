@@ -3,6 +3,7 @@
 @using RecettesFamille.Data
 @using RecettesFamille.Data.EntityModel
 @using RecettesFamille.Data.EntityModel.RecipeSubEntity
+@using RecettesFamille.Extensions
 @using RecettesFamille.Managers
 
 @if (Recette is not null)
@@ -10,21 +11,27 @@
     <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Name</MudText>
     <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recette.InformationPreparation</MudText>
 
-    <MudToolBar Class="justify-center">
-        <MudIconButton Icon="@Icons.Material.Outlined.Add" />
+    <MudToolBar Class="justify-center mt-0 mb-0" >
         <MudToggleIconButton @bind-Toggled="editorMode" Icon="@Icons.Material.Outlined.Edit"
                              ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
         <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
     </MudToolBar>
+
     @* Description recette *@
-    <MudGrid Spacing="5" Class="mt-10 mb-12">
+    <MudGrid Spacing="5" Class="mt-0 mb-12">
         @foreach (var block in Recette.BlocksInstructions?.OrderBy(o => o.Order))
         {
             <BaseBlock EditMode="editorMode" Block="block"
                        OnBlockUpdated="OnBlockUpdated"
                        OnBlockDeleted="OnBlockDeleted"
                        OnBlockHasChanged="OnBlockHasChanged"
-                       MoveUp="MoveUp" />
+                       MoveUp="MoveUp"
+                       MoveDown="MoveDown" />
+        }
+
+        @if (editorMode)
+        {
+            <ToolsComponent PrecedentIndex="@Recette.BlocksInstructions.Count" AddBlockCallback="AddNewBlock" />
         }
     </MudGrid>
 }
@@ -89,8 +96,30 @@
     #region Block move
     private async Task MoveUp(BlockBase block)
     {
-        block.Order = --block.Order;
+        Recette.BlocksInstructions.MoveUp<BlockBase>(block.Order);
+        await UpdateOrder();
+    }
 
+    private async Task MoveDown(BlockBase block)
+    {
+        Recette.BlocksInstructions.MoveDown<BlockBase>(block.Order);
+        await UpdateOrder();
+    }
+
+    private async Task UpdateOrder()
+    {
+        for (int i = 0; i < Recette.BlocksInstructions.Count; i++)
+        {
+            Recette.BlocksInstructions[i].Order = i;
+        }
+        await dbContext.SaveChangesAsync();
+        StateHasChanged();
+    }
+    #endregion
+
+
+    private async void AddNewBlock(BlockBase block)
+    {
         // Réordonner les items de BlocksInstructions
         foreach (var item in Recette.BlocksInstructions.OrderBy(o => o.Order))
         {
@@ -99,24 +128,12 @@
                 item.Order++;
             }
         }
+
+        Recette.BlocksInstructions.Add(block);
+
+        dbContext.Update(Recette);
         await dbContext.SaveChangesAsync();
+
         StateHasChanged();
     }
-    #endregion
-
-
-    // private void AddNewBlock(BlockBase block)
-    // {
-    //     // Réordonner les items de BlocksInstructions
-    //     foreach (var item in Recette.BlocksInstructions.OrderBy(o => o.Order))
-    //     {
-    //         if (item.Order >= block.Order)
-    //         {
-    //             item.Order++;
-    //         }
-    //     }
-
-    //     Recette.BlocksInstructions.Add(block);
-    //     StateHasChanged();
-    // }
 }

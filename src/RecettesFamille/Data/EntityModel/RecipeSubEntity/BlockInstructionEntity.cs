@@ -3,4 +3,9 @@
 public class BlockInstructionEntity : BlockBase
 {
     public string Instruction { get; set; }
+
+    public BlockInstructionEntity()
+    {
+        HalfPage = true;
+    }
 }
