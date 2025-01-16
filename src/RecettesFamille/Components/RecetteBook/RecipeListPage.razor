@@ -51,7 +51,7 @@ else
     else if (viewMode == Icons.Material.Filled.List)
     {
         <MudPaper Elevation="1" Style="">
-            <MudTable Items="recetteEntities" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info"
+            <MudTable Items="recetteEntities" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
                       Filter="new Func<RecipeEntity,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)" >
                 <ToolBarContent>
                     <MudSpacer />
