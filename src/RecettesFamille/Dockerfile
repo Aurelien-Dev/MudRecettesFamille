@@ -9,7 +9,13 @@ EXPOSE 8081
 
 # Installer le client SSH pour pouvoir exécuter des commandes SSH vers l’hôte
 USER root
-RUN apt-get update && apt-get install -y postgresql-client-17 && rm -rf /var/lib/apt/lists/*
+# Ajouter le dépôt officiel PostgreSQL
+RUN apt-get update && apt-get install -y wget gnupg2 \
+    && echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list \
+    && wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+    && apt-get update \
+    && apt-get install -y postgresql-client-17 \
+    && rm -rf /var/lib/apt/lists/*
 USER $APP_UID  # Revenir à l'utilisateur non root après l'installation
 
 # Étape 2 : Build l’application
