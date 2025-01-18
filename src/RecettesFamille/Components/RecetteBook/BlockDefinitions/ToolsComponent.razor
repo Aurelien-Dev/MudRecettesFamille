@@ -1,15 +1,6 @@
 ﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
 @using RecettesFamille.Managers
 
-@* <MudSpeedDial Origin="Origin.CenterLeft" Open="true" Color="Color.Primary" Size="Size.Small"
-              Icon="@Icons.Material.Filled.Edit">
-    <MudFab Size="Size.Small" IconSize="Size.Small" StartIcon="@Icons.Material.Filled.Image" OnClick="@(() => AddNewBlock<BlockImageEntity>())" Color="Color.Secondary" />
-    <MudFab Size="Size.Small" IconSize="Size.Small" StartIcon="@Icons.Material.Filled.Assignment" OnClick="@(() => AddNewBlock<BlockInstructionEntity>())" Color="Color.Tertiary" />
-    <MudFab Size="Size.Small" IconSize="Size.Small" StartIcon="@Icons.Material.Filled.FormatListBulleted" OnClick="@(() => AddNewBlock<BlockIngredientListEntity>())" Color="Color.Primary" />
-</MudSpeedDial> *@
-
-
-
 <MudItem xs="12" md="12" Class="d-flex justify-center flex-grow-1" >
     <MudButtonGroup OverrideStyles="false" Variant="Variant.Outlined">
         <MudIconButton Variant="Variant.Filled" Color="Color.Tertiary" Icon="@Icons.Material.Filled.Image" aria-label="delete"
@@ -21,11 +12,9 @@
     </MudButtonGroup>
 </MudItem>
 
-
 @code {
     [Parameter] public Action<BlockBase> AddBlockCallback { get; set; } = null!;
     [Parameter] public int? PrecedentIndex { get; set; } = null!;
-
 
     public void AddNewBlock<T>() where T : BlockBase, new()
     {

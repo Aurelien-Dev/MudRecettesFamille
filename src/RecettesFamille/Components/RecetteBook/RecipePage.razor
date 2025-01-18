@@ -11,7 +11,7 @@
     <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Name</MudText>
     <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recette.InformationPreparation</MudText>
 
-    <MudToolBar Class="justify-center mt-0 mb-0" >
+    <MudToolBar Class="justify-center mt-0 mb-0">
         <MudToggleIconButton @bind-Toggled="editorMode" Icon="@Icons.Material.Outlined.Edit"
                              ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
         <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
@@ -38,10 +38,10 @@
 
 
 @code {
-    [Inject] GptRecipeConverterManager gptRecipeConverterManager { get; set; } = null!;
+    [Inject] IDialogService dialogService { get; set; } = null!;
     [Inject] ApplicationDbContext dbContext { get; set; } = null!;
-    [Inject] IDialogService dialogService { get; set; }
-    [Inject] NavigationManager navigationManager { get; set; }
+    [Inject] NavigationManager navigationManager { get; set; } = null!;
+    [Inject] GptRecipeConverterManager gptRecipeConverterManager { get; set; } = null!;
 
     [Parameter] public int IdRecette { get; set; }
 
@@ -51,9 +51,9 @@
     protected async override Task OnParametersSetAsync()
     {
         Recette = await dbContext.Recettes.Include(s => s.BlocksInstructions)
-                                                     .ThenInclude(b => (b as BlockIngredientListEntity).Ingredients)
-                                                     .Where(r => r.Id == IdRecette)
-                                                     .FirstOrDefaultAsync();
+                                          .ThenInclude(b => ((BlockIngredientListEntity)b).Ingredients)
+                                          .Where(r => r.Id == IdRecette)
+                                          .FirstOrDefaultAsync();
     }
 
     public async Task DeleteRecipe()
@@ -73,9 +73,10 @@
     }
 
     #region Block edition
-    private async Task OnBlockHasChanged()
+    private Task OnBlockHasChanged()
     {
         StateHasChanged();
+        return Task.CompletedTask;
     }
 
     private async Task OnBlockDeleted(BlockBase block)
@@ -91,43 +92,11 @@
         await dbContext.SaveChangesAsync();
         StateHasChanged();
     }
-    #endregion
-
-    #region Block move
-    private async Task MoveUp(BlockBase block)
-    {
-        Recette.BlocksInstructions.MoveUp<BlockBase>(block.Order);
-        await UpdateOrder();
-    }
-
-    private async Task MoveDown(BlockBase block)
-    {
-        Recette.BlocksInstructions.MoveDown<BlockBase>(block.Order);
-        await UpdateOrder();
-    }
-
-    private async Task UpdateOrder()
-    {
-        for (int i = 0; i < Recette.BlocksInstructions.Count; i++)
-        {
-            Recette.BlocksInstructions[i].Order = i;
-        }
-        await dbContext.SaveChangesAsync();
-        StateHasChanged();
-    }
-    #endregion
-
 
     private async void AddNewBlock(BlockBase block)
     {
-        // Réordonner les items de BlocksInstructions
-        foreach (var item in Recette.BlocksInstructions.OrderBy(o => o.Order))
-        {
-            if (item.Order >= block.Order)
-            {
-                item.Order++;
-            }
-        }
+        if (Recette is null)
+            return;
 
         Recette.BlocksInstructions.Add(block);
 
@@ -136,4 +105,38 @@
 
         StateHasChanged();
     }
+    #endregion
+
+    #region Block move
+    private async Task MoveUp(BlockBase block)
+    {
+        if (Recette is null)
+            return;
+
+        Recette.BlocksInstructions.MoveUp<BlockBase>(block.Order);
+        await UpdateOrder();
+    }
+
+    private async Task MoveDown(BlockBase block)
+    {
+        if (Recette is null)
+            return;
+
+        Recette.BlocksInstructions.MoveDown<BlockBase>(block.Order);
+        await UpdateOrder();
+    }
+
+    private async Task UpdateOrder()
+    {
+        if (Recette is null)
+            return;
+
+        for (int i = 0; i < Recette.BlocksInstructions.Count; i++)
+        {
+            Recette.BlocksInstructions[i].Order = i;
+        }
+        await dbContext.SaveChangesAsync();
+        StateHasChanged();
+    }
+    #endregion
 }

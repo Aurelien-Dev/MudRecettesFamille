@@ -3,8 +3,7 @@
 @inherits BaseBlockDefinition<BlockIngredientListEntity>
 
 <MudDataGrid @ref="_dataGrid" Items="@Block.Ingredients" T="IngredientEntity" Dense="true" Hover="true" Striped="false" Class="mx-3 mb-2 rounded-lg"
-             HeaderClass="hide-header"
-             Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false"
+             HeaderClass="hide-header" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false"
              EditMode="DataGridEditMode.Form" edit EditTrigger="DataGridEditTrigger.Manual"
              CommittedItemChanges="@CommittedItemChanges">
     <ToolBarContent>
@@ -12,7 +11,6 @@
         {
             <MudTextField @bind-Value="Block.Name" Margin="Margin.Dense" Typo="Typo.h6" OnBlur="OnNameUpdated" />
             <MudSpacer />
-            @* <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="DeleteItems" /> *@
             <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="OpenDialogNewItem" />
         }
         else
@@ -23,9 +21,9 @@
     <Columns>
         <PropertyColumn Property="x => x.Name" Editable="true" />
         <PropertyColumn Property="x => x.Quantity" Editable="true" />
-        <TemplateColumn Hidden="!EditMode">
+        <TemplateColumn Hidden="!EditMode" CellClass="d-flex justify-end">
             <CellTemplate>
-                <MudStack Row="true" Spacing="0">
+                <MudStack Row="true" Spacing="0" AlignItems="AlignItems.End">
                     <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
                     <MudToggleIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Delete" ToggledIcon="@Icons.Material.Filled.Check" Color="Color.Error" ToggledColor="Color.Warning" ToggledChanged="@(async (b) => await ToggleChanged(b, context.Item))" />
                 </MudStack>
@@ -71,32 +69,20 @@
 
     public async Task CommittedItemChanges(IngredientEntity item)
     {
+        if (!Block.Id.HasValue)
+            return;
+
         item.IngredientListId = Block.Id.Value;
 
+        //Cas d'un nouvelle item
         if (!item.Id.HasValue)
-        {
             Block.Ingredients.Add(item);
-        }
 
         // Obligé de mettre à jour l'ingrédient ici en raison de l'attribut [JsonIgnore] sur la propriété de navigation IngredientList, ce qui entraîne une perte de liaison entre le bloc IngredientList et l'ingrédient
         // L'attribut [JsonIgnore] a été ajouté car le DataGrid entraînait une boucle infinie en raison de la propriété de navigation
         dbContext.Update(item);
+
         await dbContext.SaveChangesAsync();
-
-        OnBlockHasChanged?.Invoke();
-    }
-
-    public async Task DeleteItems()
-    {
-        var dd = _dataGrid.SelectedItems;
-
-        foreach (var item in dd)
-        {
-            dbContext.Entry(item).State = EntityState.Deleted;
-            Block.Ingredients.Remove(item);
-        }
-        await dbContext.SaveChangesAsync();
-
         OnBlockHasChanged?.Invoke();
     }
 }

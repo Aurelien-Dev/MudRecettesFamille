@@ -21,7 +21,6 @@ else
         OriginalInstruction = Block.Instruction;
     }
 
-    private void AdornmentClick() => OnBlockDeleted?.Invoke(Block);
     public void LostFocus()
     {
         if (Block.Instruction == OriginalInstruction)

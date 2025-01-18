@@ -2,10 +2,10 @@
 
 public class BlockInstructionEntity : BlockBase
 {
-    public string Instruction { get; set; }
+    public string Instruction { get; set; } = string.Empty;
 
     public BlockInstructionEntity()
     {
-        HalfPage = true;
+        HalfPage = false;
     }
 }
