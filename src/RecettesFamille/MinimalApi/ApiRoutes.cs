@@ -10,7 +10,7 @@ public static class ApiRoutes
 
         apiGroup.MapGet("DownloadBackup", async () =>
         {
-            var filePath = Path.Combine("/app/wwwroot/", "backup_2025-01-18.sql");
+            var filePath = "/app/wwwroot/backup_2025-01-18.sql";
 
             if (!System.IO.File.Exists(filePath))
             {
