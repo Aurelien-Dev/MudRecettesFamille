@@ -45,7 +45,7 @@ namespace RecettesFamille.Data
             var processInfo = new ProcessStartInfo
             {
                 FileName = "/bin/sh",
-                Arguments = "-c \"ssh root@184.174.35.235 '/home/recettesfamille/backup.sh'\"",
+                Arguments = "-c \"ssh -i /root/.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null user@host '/home/scripts/backup.sh'\"",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
