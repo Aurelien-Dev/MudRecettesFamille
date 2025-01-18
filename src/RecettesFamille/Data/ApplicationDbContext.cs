@@ -45,7 +45,7 @@ namespace RecettesFamille.Data
 
             try
             {
-                string command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -U pguser -d recettesfamilledb -F c -f backup.sql";
+                string command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -p 5442 -U pguser -d recettesfamilledb -F c -f backup.sql";
 
                 var processInfo = new ProcessStartInfo
                 {
