@@ -6,7 +6,6 @@ using RecettesFamille;
 using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
 using RecettesFamille.Data;
-using RecettesFamille.MinimalApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,7 +65,6 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
-app.MapPageRoute();
 
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 

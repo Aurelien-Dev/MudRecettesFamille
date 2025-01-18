@@ -10,13 +10,8 @@ namespace RecettesFamille.Data
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
         public DbSet<RecipeEntity> Recettes { get; set; }
-
-        //public DbSet<BlockInstructionEntity> BlockInstructions { get; set; }
-        //public DbSet<BlockImageEntity> BlockImages { get; set; }
-        //public DbSet<BlockIngredientListEntity> BlockIngredientLists { get; set; }
-        //public DbSet<IngredientEntity> Ingredients { get; set; }
-
         public DbSet<GptConsumptionEntity> GptConsumptions { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -41,12 +36,12 @@ namespace RecettesFamille.Data
             base.OnModelCreating(builder);
         }
 
-        public void TriggerBackup()
+        public (bool, string) TriggerBackup()
         {
-
             try
             {
-                string command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -p 5442 -U pguser -d recettesfamilledb -F c -f wwwroot/backup_{DateTime.UtcNow.ToIsoDateString()}-{DateTime.UtcNow.ToShortTimeString()}.sql";
+                string fileName = $"backup_{DateTime.UtcNow.ToIsoDateString()}-{DateTime.UtcNow.ToShortTimeString()}.backup";
+                string command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -p 5442 -U pguser -d recettesfamilledb -F c -f wwwroot/{fileName}";
 
                 var processInfo = new ProcessStartInfo
                 {
@@ -66,17 +61,17 @@ namespace RecettesFamille.Data
 
                     if (process.ExitCode == 0)
                     {
-                        Console.WriteLine($"✅ Backup terminé avec succès : ");
+                        Console.WriteLine($"Backup terminé avec succès : {fileName}");
+                        return (true, "Backup terminé avec succès : {fileName}");
                     }
                     else
-                    {
-                        throw new Exception($"❌ Erreur lors du backup : {error}");
-                    }
+                        throw new Exception($"Erreur lors du backup : {error}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Exception lors du backup : {ex.Message}");
+                Console.WriteLine($"Exception lors du backup : {ex.Message}");
+                return (false, $"Exception lors du backup : {ex.Message}");
             }
         }
     }

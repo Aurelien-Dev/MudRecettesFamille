@@ -7,33 +7,28 @@
 @using RecettesFamille.Managers
 @using System.Text
 
-<MudDataGrid Items="fileInfos">
-    <Columns>
-        <PropertyColumn Property="x => x.Name" Title="Nr" />
-        <TemplateColumn T="FileInfo">
-            <CellTemplate>
-                <MudLink Href="@($"api/DownloadFile/{context.Item.Name}")">@context.Item.Name</MudLink>
-            </CellTemplate>
-        </TemplateColumn>
-        <TemplateColumn>
-            <CellTemplate>
-                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Download" OnClick="@(async () => await DownloadFile(context.Item))" />
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
-</MudDataGrid>
+<MudStack Spacing="5">
 
+    <MudDataGrid Items="fileInfos">
+        <Columns>
+            <PropertyColumn Property="x => x.Name" Title="FileName" />
+            <TemplateColumn Title="Actions">
+                <CellTemplate>
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Download" OnClick="@(async () => await DownloadFile(context.Item))" />
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
 
-<MudButton Variant="Variant.Filled" OnClick="CreateBackup">Create a backup</MudButton>
+    <MudButton Variant="Variant.Filled" OnClick="CreateBackup">Create a backup</MudButton>
 
+</MudStack>
 
 @code {
-    [Inject] IDialogService dialogService { get; set; } = null!;
     [Inject] ApplicationDbContext dbContext { get; set; } = null!;
-    [Inject] NavigationManager navigationManager { get; set; } = null!;
     [Inject] IJSRuntime jSRuntime { get; set; } = null!;
+    [Inject] ISnackbar snackbar { get; set; } = null!;
 
-    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
 
     private List<FileInfo> fileInfos { get; set; } = new List<FileInfo>();
 
@@ -44,7 +39,14 @@
 
     public async Task CreateBackup()
     {
-        dbContext.TriggerBackup();
+        (bool success, string message) = dbContext.TriggerBackup();
+
+        if (success)
+            ListFolder();
+
+        snackbar.Clear();
+        snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomEnd;
+        snackbar.Add(message, success ? Severity.Info : Severity.Error);
     }
 
     public async Task DownloadFile(FileInfo fileInfo)
@@ -61,6 +63,7 @@
         var folderPath = "wwwroot"; // Replace with the actual folder path
         var files = Directory.GetFiles(folderPath);
 
+        fileInfos = new List<FileInfo>();
         foreach (var file in files)
         {
             fileInfos.Add(new FileInfo(file));
