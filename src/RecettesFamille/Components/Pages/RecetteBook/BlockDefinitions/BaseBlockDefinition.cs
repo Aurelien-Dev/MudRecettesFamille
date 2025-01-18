@@ -3,7 +3,7 @@ using MudBlazor;
 using RecettesFamille.Data;
 using RecettesFamille.Data.EntityModel.RecipeSubEntity;
 
-namespace RecettesFamille.Components.RecetteBook.BlockDefinitions;
+namespace RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions;
 
 public abstract class BaseBlockDefinition<TBlock> : ComponentBase where TBlock : BlockBase
 {
@@ -18,5 +18,5 @@ public abstract class BaseBlockDefinition<TBlock> : ComponentBase where TBlock :
     [Parameter] public Func<BlockBase, Task> MoveDown { get; set; } = null!;
     [Parameter] public Func<Task> OnBlockHasChanged { get; set; } = null!;
 
-    
+
 }
