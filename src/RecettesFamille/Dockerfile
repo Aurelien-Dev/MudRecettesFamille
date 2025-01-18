@@ -9,7 +9,7 @@ EXPOSE 8081
 
 # Installer le client SSH pour pouvoir exécuter des commandes SSH vers l’hôte
 USER root
-RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y postgresql-client-17 && rm -rf /var/lib/apt/lists/*
 USER $APP_UID  # Revenir à l'utilisateur non root après l'installation
 
 # Étape 2 : Build l’application
