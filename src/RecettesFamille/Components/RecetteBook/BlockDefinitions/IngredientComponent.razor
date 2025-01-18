@@ -4,7 +4,7 @@
 
 <MudDataGrid @ref="_dataGrid" Items="@Block.Ingredients" T="IngredientEntity" Dense="true" Hover="true" Striped="false" Class="mx-3 mb-2 rounded-lg"
              HeaderClass="hide-header"
-             MultiSelection="EditMode" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false"
+             Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false"
              EditMode="DataGridEditMode.Form" edit EditTrigger="DataGridEditTrigger.Manual"
              CommittedItemChanges="@CommittedItemChanges">
     <ToolBarContent>
@@ -12,7 +12,7 @@
         {
             <MudTextField @bind-Value="Block.Name" Margin="Margin.Dense" Typo="Typo.h6" OnBlur="OnNameUpdated" />
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="DeleteItems" />
+            @* <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="DeleteItems" /> *@
             <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="OpenDialogNewItem" />
         }
         else
@@ -21,13 +21,14 @@
         }
     </ToolBarContent>
     <Columns>
-        <SelectColumn T="IngredientEntity" Hidden="!EditMode" />
-
         <PropertyColumn Property="x => x.Name" Editable="true" />
         <PropertyColumn Property="x => x.Quantity" Editable="true" />
-        <TemplateColumn CellClass="d-flex justify-end" Hidden="!EditMode">
+        <TemplateColumn Hidden="!EditMode">
             <CellTemplate>
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
+                <MudStack Row="true" Spacing="0">
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
+                    <MudToggleIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Delete" ToggledIcon="@Icons.Material.Filled.Check" Color="Color.Error" ToggledColor="Color.Warning" ToggledChanged="@(async (b) => await ToggleChanged(b, context.Item))" />
+                </MudStack>
             </CellTemplate>
         </TemplateColumn>
     </Columns>
@@ -50,6 +51,18 @@
     {
         OnBlockUpdated?.Invoke(Block);
     }
+
+    private async Task ToggleChanged(bool value, IngredientEntity ingredientEntity)
+    {
+        if (value)
+            return;
+
+        dbContext.Entry(ingredientEntity).State = EntityState.Deleted;
+        Block.Ingredients.Remove(ingredientEntity);
+
+        await dbContext.SaveChangesAsync();
+    }
+
 
     public async Task OpenDialogNewItem()
     {
