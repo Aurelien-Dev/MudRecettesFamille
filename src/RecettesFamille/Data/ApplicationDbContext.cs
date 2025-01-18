@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Extensions;
 using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.EntityModel.RecipeSubEntity;
 using System.Diagnostics;
@@ -45,7 +46,7 @@ namespace RecettesFamille.Data
 
             try
             {
-                string command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -p 5442 -U pguser -d recettesfamilledb -F c -f backup.sql";
+                string command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -p 5442 -U pguser -d recettesfamilledb -F c -f wwwroot/backup_{DateTime.UtcNow.ToIsoDateString()}.sql";
 
                 var processInfo = new ProcessStartInfo
                 {
@@ -78,8 +79,5 @@ namespace RecettesFamille.Data
                 Console.WriteLine($"❌ Exception lors du backup : {ex.Message}");
             }
         }
-
-
-
     }
 }
