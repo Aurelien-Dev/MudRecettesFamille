@@ -11,8 +11,9 @@ EXPOSE 8081
 USER root
 # Ajouter le dépôt officiel PostgreSQL pour Debian 12 (Bookworm)
 RUN apt-get update && apt-get install -y wget gnupg2 \
-    && wget -qO /etc/apt/trusted.gpg.d/pgdg-keyring.gpg https://www.postgresql.org/media/keys/ACCC4CF8.asc \
-    && echo "deb http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list \
+    && mkdir -p /etc/apt/keyrings \
+    && wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | tee /etc/apt/keyrings/pgdg-keyring.gpg > /dev/null \
+    && echo "deb [signed-by=/etc/apt/keyrings/pgdg-keyring.gpg] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list \
     && apt-get update \
     && apt-get install -y postgresql-client-17 \
     && rm -rf /var/lib/apt/lists/*
