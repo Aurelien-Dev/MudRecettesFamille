@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.EntityModel.RecipeSubEntity;
@@ -42,26 +42,40 @@ namespace RecettesFamille.Data
 
         public void TriggerBackup()
         {
-            var processInfo = new ProcessStartInfo
-            {
-                FileName = "/bin/sh",
-                Arguments = "-c \"ssh -i /root/.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null user@host '/home/scripts/backup.sh'\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
 
-            using (var process = Process.Start(processInfo))
+            try
             {
-                string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
-                process.WaitForExit();
+                string command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -U pguser -d recettesfamilledb -F c -f backup.sql";
 
-                if (process.ExitCode != 0)
+                var processInfo = new ProcessStartInfo
                 {
-                    throw new Exception($"Erreur lors du backup : {error}");
+                    FileName = "/bin/sh",
+                    Arguments = $"-c \"{command}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using (var process = Process.Start(processInfo))
+                {
+                    string output = process.StandardOutput.ReadToEnd();
+                    string error = process.StandardError.ReadToEnd();
+                    process.WaitForExit();
+
+                    if (process.ExitCode == 0)
+                    {
+                        Console.WriteLine($"✅ Backup terminé avec succès : ");
+                    }
+                    else
+                    {
+                        throw new Exception($"❌ Erreur lors du backup : {error}");
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Exception lors du backup : {ex.Message}");
             }
         }
 
