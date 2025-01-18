@@ -9,10 +9,11 @@ EXPOSE 8081
 
 # Installer le client SSH pour pouvoir exécuter des commandes SSH vers l’hôte
 USER root
-# Ajouter le dépôt officiel PostgreSQL
+# Ajouter le dépôt officiel PostgreSQL pour Debian 12 (Bookworm)
 RUN apt-get update && apt-get install -y wget gnupg2 \
-    && echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list \
-    && wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+    && echo "deb http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list \
+    && mkdir -p /etc/apt/keyrings \
+    && wget -qO /etc/apt/keyrings/pgdg-keyring.gpg https://www.postgresql.org/media/keys/ACCC4CF8.asc \
     && apt-get update \
     && apt-get install -y postgresql-client-17 \
     && rm -rf /var/lib/apt/lists/*
