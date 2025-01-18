@@ -5,6 +5,23 @@
 @using RecettesFamille.Data.EntityModel
 @using RecettesFamille.Data.EntityModel.RecipeSubEntity
 @using RecettesFamille.Managers
+@using System.Text
+
+<MudDataGrid Items="fileInfos">
+    <Columns>
+        <PropertyColumn Property="x => x.Name" Title="Nr" />
+        <TemplateColumn T="FileInfo">
+            <CellTemplate>
+                <MudLink Href="@($"api/DownloadFile/{context.Item.Name}")">@context.Item.Name</MudLink>
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn>
+            <CellTemplate>
+                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Download" OnClick="@(async () => await DownloadFile(context.Item))" />
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
 
 
 <MudButton Variant="Variant.Filled" OnClick="CreateBackup">Create a backup</MudButton>
@@ -14,10 +31,40 @@
     [Inject] IDialogService dialogService { get; set; } = null!;
     [Inject] ApplicationDbContext dbContext { get; set; } = null!;
     [Inject] NavigationManager navigationManager { get; set; } = null!;
+    [Inject] IJSRuntime jSRuntime { get; set; } = null!;
 
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+
+    private List<FileInfo> fileInfos { get; set; } = new List<FileInfo>();
+
+    protected override void OnInitialized()
+    {
+        ListFolder();
+    }
 
     public async Task CreateBackup()
     {
         dbContext.TriggerBackup();
     }
+
+    public async Task DownloadFile(FileInfo fileInfo)
+    {
+        var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
+        using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+        await jSRuntime.InvokeVoidAsync("downloadFileFromStream", fileInfo.Name, streamRef);
+    }
+
+
+    public void ListFolder()
+    {
+        var folderPath = "wwwroot"; // Replace with the actual folder path
+        var files = Directory.GetFiles(folderPath);
+
+        foreach (var file in files)
+        {
+            fileInfos.Add(new FileInfo(file));
+        }
+    }
+
 }
