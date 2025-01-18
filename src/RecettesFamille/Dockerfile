@@ -8,7 +8,7 @@ EXPOSE 8080
 EXPOSE 8081
 
 # Installer le client SSH pour pouvoir exécuter des commandes SSH vers l’hôte
-RUN apt-get update && apt-get install -y openssh-client && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y openssh-client
 
 # Étape 2 : Build l’application
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
