@@ -1,0 +1,23 @@
+@page "/Admin"
+@using RecettesFamille.Extensions
+@using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
+@using RecettesFamille.Data
+@using RecettesFamille.Data.EntityModel
+@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+@using RecettesFamille.Managers
+
+
+<MudButton Variant="Variant.Filled" OnClick="CreateBackup">Create a backup</MudButton>
+
+
+@code {
+    [Inject] IDialogService dialogService { get; set; } = null!;
+    [Inject] ApplicationDbContext dbContext { get; set; } = null!;
+    [Inject] NavigationManager navigationManager { get; set; } = null!;
+
+
+    public async Task CreateBackup()
+    {
+        dbContext.TriggerBackup();
+    }
+}

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.EntityModel.RecipeSubEntity;
+using System.Diagnostics;
 
 namespace RecettesFamille.Data
 {
@@ -38,6 +39,33 @@ namespace RecettesFamille.Data
 
             base.OnModelCreating(builder);
         }
+
+        public void TriggerBackup()
+        {
+            var processInfo = new ProcessStartInfo
+            {
+                FileName = "/bin/sh",
+                Arguments = "-c \"ssh root@184.174.35.235 '/home/scripts/backup.sh'\"",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using (var process = Process.Start(processInfo))
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                {
+                    throw new Exception($"Erreur lors du backup : {error}");
+                }
+            }
+        }
+
+
 
     }
 }
