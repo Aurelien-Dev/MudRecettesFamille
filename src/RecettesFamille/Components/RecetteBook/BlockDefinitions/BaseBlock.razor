@@ -1,7 +1,7 @@
 ﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
 @inherits BaseBlockDefinition<BlockBase>
 
-@if (Block.HalfPage.HasValue && Block.HalfPage.Value)
+@if (Block.HalfPage)
 {
     md = 6;
 }
@@ -35,7 +35,7 @@ else
             <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Vertical="true" Size="Size.Small">
                 <MudIconButton Class="@toolsPaddings" Icon="@Icons.Material.Filled.Delete" Color="@Color.Error" OnClick="OnBlockDelete" Size="Size.Small" />
 
-                <MudToggleIconButton Class="@toolsPaddings" ToggledChanged="OnToggledChanged" Toggled="Block.HalfPage.Value" Icon="@Icons.Material.Filled.Fullscreen" ToggledIcon="@Icons.Material.Filled.FullscreenExit" />
+                <MudToggleIconButton Class="@toolsPaddings" ToggledChanged="OnToggledChanged" Toggled="Block.HalfPage" Icon="@Icons.Material.Filled.Fullscreen" ToggledIcon="@Icons.Material.Filled.FullscreenExit" />
 
                 <MudIconButton Class="@toolsPaddings" Icon="@Icons.Material.Filled.ArrowDropUp" OnClick="OnMoveUp"></MudIconButton>
                 <MudIconButton Class="@toolsPaddings" Icon="@Icons.Material.Filled.ArrowDropDown" OnClick="OnMoveDown"></MudIconButton>
@@ -44,7 +44,7 @@ else
     </MudStack>
 </MudItem>
 @code {
-    [Inject] private IDialogService DialogService { get; set; }
+    [Inject] private IDialogService DialogService { get; set; } = null!;
 
     public int xs { get; set; } = 12;
     public int md { get; set; } = 12;

@@ -47,17 +47,15 @@
     [Inject] GptRecipeConverterManager gptRecipeConverterManager { get; set; } = null!;
     [Inject] ApplicationDbContext dbContext { get; set; } = null!;
 
-    private MudTextField<string> multilineReference;
+    private MudTextField<string> multilineReference = null!; // Reference to the multiline text field
 
     bool isWorkInProgress = false;
     [Required] string recipeDescription = string.Empty;
-    CancellationTokenSource cancellationTokenSource;
+    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
     public async Task ImportRecipe()
     {
         isWorkInProgress = true;
-        cancellationTokenSource = new CancellationTokenSource();
-
         try
         {
             (RecipeEntity recette, decimal cost) = await gptRecipeConverterManager.Convert(recipeDescription, cancellationTokenSource.Token);

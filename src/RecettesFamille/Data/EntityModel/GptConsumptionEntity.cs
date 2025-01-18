@@ -8,6 +8,6 @@ namespace RecettesFamille.Data.EntityModel
         public int Id { get; set; }
         public DateTime Date { get; set; }
         public Decimal Cost { get; set; }
-        public string UseCase { get; set; }
+        public string UseCase { get; set; } = string.Empty;
     }
 }

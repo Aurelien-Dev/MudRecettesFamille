@@ -1,9 +1,9 @@
 @page "/recette/{IdRecette:int?}"
+@using RecettesFamille.Extensions
 @using RecettesFamille.Components.RecetteBook.BlockDefinitions
 @using RecettesFamille.Data
 @using RecettesFamille.Data.EntityModel
 @using RecettesFamille.Data.EntityModel.RecipeSubEntity
-@using RecettesFamille.Extensions
 @using RecettesFamille.Managers
 
 @if (Recette is not null)
@@ -19,7 +19,7 @@
 
     @* Description recette *@
     <MudGrid Spacing="5" Class="mt-0 mb-12">
-        @foreach (var block in Recette.BlocksInstructions?.OrderBy(o => o.Order))
+        @foreach (var block in Recette.BlocksInstructions.OrderBy(c => c.Order).EmptyIfNull())
         {
             <BaseBlock EditMode="editorMode" Block="block"
                        OnBlockUpdated="OnBlockUpdated"
@@ -31,7 +31,7 @@
 
         @if (editorMode)
         {
-            <ToolsComponent PrecedentIndex="@Recette.BlocksInstructions.Count" AddBlockCallback="AddNewBlock" />
+            <ToolsComponent PrecedentIndex="@(Recette.BlocksInstructions.Count - 1)" AddBlockCallback="AddNewBlock" />
         }
     </MudGrid>
 }
@@ -113,8 +113,9 @@
         if (Recette is null)
             return;
 
-        Recette.BlocksInstructions.MoveUp<BlockBase>(block.Order);
-        await UpdateOrder();
+        Recette.BlocksInstructions.MoveUp(block);
+        await dbContext.SaveChangesAsync();
+        StateHasChanged();
     }
 
     private async Task MoveDown(BlockBase block)
@@ -122,8 +123,10 @@
         if (Recette is null)
             return;
 
-        Recette.BlocksInstructions.MoveDown<BlockBase>(block.Order);
-        await UpdateOrder();
+
+        Recette.BlocksInstructions.MoveDown(block);
+        await dbContext.SaveChangesAsync();
+        StateHasChanged();
     }
 
     private async Task UpdateOrder()
@@ -131,10 +134,10 @@
         if (Recette is null)
             return;
 
-        for (int i = 0; i < Recette.BlocksInstructions.Count; i++)
-        {
-            Recette.BlocksInstructions[i].Order = i;
-        }
+        // for (int i = 0; i < Recette.BlocksInstructions.Count; i++)
+        // {
+        //     Recette.BlocksInstructions[i].Order = i;
+        // }
         await dbContext.SaveChangesAsync();
         StateHasChanged();
     }
