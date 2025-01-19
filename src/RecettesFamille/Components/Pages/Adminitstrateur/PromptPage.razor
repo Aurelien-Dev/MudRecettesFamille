@@ -1,0 +1,74 @@
+@page "/admin/prompt"
+@layout AdminLayout
+@using RecettesFamille.Components.Layout
+@using RecettesFamille.Extensions
+@using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
+@using RecettesFamille.Data
+@using RecettesFamille.Data.EntityModel
+@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+@using RecettesFamille.Managers
+@using System.Text
+
+<MudGrid>
+    <MudItem xs="12" md="4">
+        <MudList T="string">
+            <MudListItem Text="Prompt list :" Disabled />
+
+            @foreach (var item in Prompts)
+            {
+                <MudListItem Dense="true" Text="@item.Name" Icon="@Icons.Material.Filled.UploadFile" OnClick="@(() => ShowPrompt(item))" />
+            }
+            @{
+                PromptEntity newPrompt = new() { Name = "NewPrompt" };
+            }
+            <MudListItem Dense="true" Text="@newPrompt.Name" Icon="@Icons.Material.Filled.NewLabel" OnClick="@(() => ShowPrompt(newPrompt))" />
+
+        </MudList>
+    </MudItem>
+    <MudItem xs="12" md="8">
+        <MudStack>
+            <MudTextField T="string" Label="Prompt name" Variant="Variant.Outlined" @bind-Value="CurrentPrompt.Name" />
+            <MudTextField T="string" Label="@CurrentPrompt.Name" Variant="Variant.Outlined" Lines="30"
+                          @bind-Value="CurrentPrompt.Prompt" />
+
+            <MudButton Variant="Variant.Filled" OnClick="SavePrompt">Save</MudButton>
+        </MudStack>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Inject] ApplicationDbContext dbContext { get; set; } = null!;
+    [Inject] ISnackbar snackbar { get; set; } = null!;
+
+    private List<PromptEntity> Prompts { get; set; } = new List<PromptEntity>();
+
+    private PromptEntity CurrentPrompt { get; set; } = new PromptEntity();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    public async Task Load()
+    {
+        Prompts = await dbContext.Prompts.ToListAsync();
+    }
+
+    public async Task SavePrompt()
+    {
+        dbContext.Update(CurrentPrompt);
+        await dbContext.SaveChangesAsync();
+
+        snackbar.Clear();
+        snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+        snackbar.Add("SaveChanges OK.", Severity.Success);
+
+        await Load();
+        StateHasChanged();
+    }
+
+    public async Task ShowPrompt(PromptEntity promptEntity)
+    {
+        CurrentPrompt = promptEntity;
+    }
+}

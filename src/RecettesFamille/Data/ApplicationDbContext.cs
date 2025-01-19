@@ -11,6 +11,7 @@ namespace RecettesFamille.Data
     {
         public DbSet<RecipeEntity> Recettes { get; set; }
         public DbSet<GptConsumptionEntity> GptConsumptions { get; set; }
+        public DbSet<PromptEntity> Prompts { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -32,6 +33,9 @@ namespace RecettesFamille.Data
             builder.Entity<IngredientEntity>().HasKey(c => c.Id);
             builder.Entity<IngredientEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
             builder.Entity<IngredientEntity>().HasOne(c => c.IngredientList).WithMany(c => c.Ingredients).HasForeignKey(c => c.IngredientListId);
+
+            builder.Entity<PromptEntity>().HasKey(c => c.Id);
+            builder.Entity<BlockBase>().Property(c => c.Id).ValueGeneratedOnAdd();
 
             base.OnModelCreating(builder);
         }

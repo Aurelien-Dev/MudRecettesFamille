@@ -40,7 +40,6 @@
 
 
   <ItemGroup>
-    <Folder Include="Data\DtoModel\" />
     <Folder Include="Data\Mappers\" />
     <Folder Include="Data\Migrations\" />
     <Folder Include="Migrations\" />
