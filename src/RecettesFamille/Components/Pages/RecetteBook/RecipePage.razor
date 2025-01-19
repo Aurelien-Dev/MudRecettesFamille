@@ -8,8 +8,17 @@
 
 @if (Recette is not null)
 {
-    <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Name</MudText>
-    <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recette.InformationPreparation</MudText>
+    @if (editorMode)
+    {
+        <MudTextField @bind-Value="Recette.Name" Typo="Typo.h3" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
+        <MudTextField @bind-Value="Recette.InformationPreparation" Typo="Typo.subtitle1" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
+
+    }
+    else
+    {
+        <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true">@Recette.Name</MudText>
+        <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recette.InformationPreparation</MudText>
+    }
 
     <MudToolBar Class="justify-center mt-0 mb-0">
         <MudToggleIconButton @bind-Toggled="editorMode" Icon="@Icons.Material.Outlined.Edit"
@@ -36,6 +45,11 @@
     </MudGrid>
 }
 
+<style>
+    .text-end input {
+        text-align: center !important;
+    }
+</style>
 
 @code {
     [Inject] IDialogService dialogService { get; set; } = null!;
@@ -70,6 +84,16 @@
         await dbContext.SaveChangesAsync();
 
         navigationManager.NavigateTo("/");
+    }
+
+    private async Task UpdateGeneralRecipeInformation()
+    {
+        if (Recette is null)
+            return;
+
+        dbContext.Update(Recette);
+        await dbContext.SaveChangesAsync();
+        StateHasChanged();
     }
 
     #region Block edition
