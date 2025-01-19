@@ -42,6 +42,9 @@ jobs:
         password: ${{ secrets.DEPLOY_PASSWORD }}  # Mot de passe pour l'authentification
         script: |
             cd /home/recettesfamille/src
+            echo "OPENAI_SECRET=${{ secrets.OPENAI_SECRET }}" > .env
+            echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
+            echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
+
             docker compose -f RecettesFamille.Docker/docker-compose.yml down
-            OPENAI_SECRET=${{ secrets.OPENAI_SECRET }} docker compose -f RecettesFamille.Docker/docker-compose.yml up --build -d
- 
+            docker compose -f RecettesFamille.Docker/docker-compose.yml --env-file .env up --build -d
