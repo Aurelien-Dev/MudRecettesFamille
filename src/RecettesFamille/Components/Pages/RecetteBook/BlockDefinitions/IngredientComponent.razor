@@ -19,6 +19,7 @@
         }
     </ToolBarContent>
     <Columns>
+        <PropertyColumn Property="x=>x.Id" Hidden InitialDirection="SortDirection.Ascending" />
         <PropertyColumn Property="x => x.Name" Editable="true" />
         <PropertyColumn Property="x => x.Quantity" Editable="true" />
         <TemplateColumn Hidden="!EditMode" CellClass="d-flex justify-end">
@@ -43,7 +44,7 @@
     [Inject] ApplicationDbContext dbContext { get; set; } = null!;
 
     DialogOptions dialogOptions = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true };
-    MudDataGrid<IngredientEntity> _dataGrid = null!;
+    MudDataGrid<IngredientEntity> _dataGrid = null!; 
 
     public void OnNameUpdated()
     {
