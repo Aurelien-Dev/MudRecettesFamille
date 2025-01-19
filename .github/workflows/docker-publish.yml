@@ -43,7 +43,8 @@ jobs:
         script: |
             cd /home/recettesfamille/src
             echo "OPENAI_SECRET=${{ secrets.OPENAI_SECRET }}" > .env
-            echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
+            echo "EMAIL_BACKUP_DEST=${{ vars.EMAIL_BACKUP_DEST }}" >> .env
+            echo "EMAIL_BACKUP_FROM=${{ vars.EMAIL_BACKUP_FROM }}" >> .env
             echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
 
             docker compose -f RecettesFamille.Docker/docker-compose.yml down
