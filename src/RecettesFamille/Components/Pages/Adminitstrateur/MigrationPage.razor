@@ -51,7 +51,7 @@
         snackbar.Add(message, success ? Severity.Info : Severity.Error);
 
         if (success)
-            await emailManager.SendEmailAsync("Backup", "Body", "Body html", [$"wwwroot/backups/{fileName}"]);
+            await emailManager.SendEmailAsync($"Recette famille - DB Backup {DateTime.UtcNow.ToShortDateString()} {DateTime.UtcNow.ToShortTimeString()}", "Body", "Body html", [$"wwwroot/backups/{fileName}"]);
     }
 
     public async Task DownloadFile(FileInfo fileInfo)
