@@ -45,6 +45,7 @@
     <Folder Include="Data\Migrations\" />
     <Folder Include="Migrations\" />
     <Folder Include="Properties\PublishProfiles\" />
+    <Folder Include="wwwroot\image_recipe\" />
   </ItemGroup>
 
 </Project>

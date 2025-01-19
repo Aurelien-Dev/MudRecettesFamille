@@ -1,18 +1,71 @@
 ﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
 @inherits BaseBlockDefinition<BlockImageEntity>
 
-<div class="d-flex justify-center ">
-    <MudImage Src="@Block.Image" Fluid="true" Class="rounded-lg" Style="opacity: 0.2;">
+@if (EditMode)
+{
+    <MudStack StretchItems="StretchItems.End">
 
+        <MudFileUpload @ref="mudFileUpload" T="IBrowserFile" FilesChanged="OnInputFileChanged">
+            <ActivatorContent>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary">
+                    Selectionne une image
+                </MudButton>
+            </ActivatorContent>
+        </MudFileUpload>
+
+        <MudImage Src="@Block.Image" Fluid="false" ObjectFit="ObjectFit.Cover" Height="300" Elevation="25" Class="rounded-lg">
+        </MudImage>
+    </MudStack>
+
+}
+else
+{
+    <MudImage Src="@Block.Image" Fluid="false" ObjectFit="ObjectFit.Cover" Height="300" Elevation="25" Class="rounded-lg">
     </MudImage>
-</div>
+}
 
 @code {
-    protected override void OnParametersSet()
+    [Inject] ISnackbar snackbar { get; set; } = null!;
+    private readonly long MaxFileSize = 1024 * 1024 * 15;
+    private MudFileUpload<IBrowserFile> mudFileUpload { get; set; } = null!;
+
+    internal async Task StateHasChangedAsync() => await InvokeAsync(StateHasChanged);
+
+    private async Task OnInputFileChanged(IBrowserFile e)
     {
-        if (Block.Image is null)
+        try
         {
-            Block.Image = "DALL·E.webp";
+            if (e is null)
+                return;
+
+            File.Delete($"wwwroot/{Block.Image}");
+
+            int randomNumber = new Random().Next(0, 1000);
+            string formattedNumber = randomNumber.ToString("D3");
+
+            string fullName = $"image_recipe/{Block.Recipe.Id}-{Block.Id}-{formattedNumber}{Path.GetExtension(e.Name)}";
+
+            await using FileStream fs = new($"wwwroot/{fullName}", FileMode.Create);
+            await e.OpenReadStream(MaxFileSize).CopyToAsync(fs);
+            fs.Close();
+
+            Block.Image = fullName;
+
+            snackbar.Clear();
+            snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            snackbar.Add("Image envoyé au serveur.", Severity.Success);
+
+            OnBlockUpdated?.Invoke(Block);
+
+            await mudFileUpload.ClearAsync();
+            await StateHasChangedAsync();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Clear();
+            snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            snackbar.Add("Il y a eu une erreur.", Severity.Error);
+            throw new Exception("Error uploading file");
         }
     }
 }
