@@ -1,7 +1,7 @@
 ﻿@using RecettesFamille.Managers
 @inherits LayoutComponentBase
 
-<MudThemeProvider IsDarkMode="isDarkMode" Theme="CustomThemeManager.Literatheme" />
+<MudThemeProvider @ref="_mudThemeProvider" IsDarkMode="isDarkMode" Theme="CustomThemeManager.Literatheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudPopoverProvider />
@@ -40,10 +40,21 @@
 
 @code {
     private bool _drawerOpen = true;
-    private bool isDarkMode = true;
+    private bool isDarkMode = false;
+    private MudThemeProvider _mudThemeProvider;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isDarkMode = await _mudThemeProvider.GetSystemPreference();
+            StateHasChanged();
+        }
+    }
 
     private void DrawerToggle()
     {
+
         _drawerOpen = !_drawerOpen;
     }
 }
