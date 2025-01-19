@@ -6,6 +6,7 @@ using RecettesFamille;
 using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
 using RecettesFamille.Data;
+using RecettesFamille.Managers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddScoped<EmailManager>();
 
 builder.Services.AddManagers();
 

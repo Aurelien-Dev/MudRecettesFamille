@@ -30,7 +30,7 @@
     [Inject] ApplicationDbContext dbContext { get; set; } = null!;
     [Inject] IJSRuntime jSRuntime { get; set; } = null!;
     [Inject] ISnackbar snackbar { get; set; } = null!;
-
+    [Inject] EmailManager emailManager { get; set; } = null!;
 
     private List<FileInfo> fileInfos { get; set; } = new List<FileInfo>();
 
@@ -41,7 +41,7 @@
 
     public async Task CreateBackup()
     {
-        (bool success, string message) = dbContext.TriggerBackup();
+        (bool success, string message, string fileName) = dbContext.TriggerBackup();
 
         if (success)
             ListFolder();
@@ -49,6 +49,8 @@
         snackbar.Clear();
         snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomEnd;
         snackbar.Add(message, success ? Severity.Info : Severity.Error);
+
+        await emailManager.SendEmailAsync("backup@recettefamille.com", "delyha@gmail.com", "Backup", "Body", "Body html", [$"wwwroot/backups/{fileName}"]);
     }
 
     public async Task DownloadFile(FileInfo fileInfo)

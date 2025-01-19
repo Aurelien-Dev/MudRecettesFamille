@@ -40,7 +40,7 @@ namespace RecettesFamille.Data
             base.OnModelCreating(builder);
         }
 
-        public (bool, string) TriggerBackup()
+        public (bool, string, string) TriggerBackup()
         {
             try
             {
@@ -69,7 +69,7 @@ namespace RecettesFamille.Data
                     if (process.ExitCode == 0)
                     {
                         Console.WriteLine($"Backup terminé avec succès : {fileName}");
-                        return (true, "Backup terminé avec succès : {fileName}");
+                        return (true, "Backup terminé avec succès : {fileName}", fileName);
                     }
                     else
                         throw new Exception($"Erreur lors du backup : {error}");
@@ -78,7 +78,7 @@ namespace RecettesFamille.Data
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception lors du backup : {ex.Message}");
-                return (false, $"Exception lors du backup : {ex.Message}");
+                return (false, $"Exception lors du backup : {ex.Message}", string.Empty);
             }
         }
     }
