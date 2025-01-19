@@ -50,7 +50,8 @@
         snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomEnd;
         snackbar.Add(message, success ? Severity.Info : Severity.Error);
 
-        await emailManager.SendEmailAsync("backup@recettefamille.com", "delyha@gmail.com", "Backup", "Body", "Body html", [$"wwwroot/backups/{fileName}"]);
+        if (success)
+            await emailManager.SendEmailAsync("Backup", "Body", "Body html", [$"wwwroot/backups/{fileName}"]);
     }
 
     public async Task DownloadFile(FileInfo fileInfo)

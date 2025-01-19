@@ -16,7 +16,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - OPENAI_SECRET=${OPENAI_SECRET}
-      - SMTP_USER=${SMTP_USER}
+      - EMAIL_BACKUP_FROM=${EMAIL_BACKUP_FROM}
+      - EMAIL_BACKUP_DEST=${EMAIL_BACKUP_DEST}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
     depends_on:
       - recettesfamille.data

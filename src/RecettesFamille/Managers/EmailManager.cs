@@ -10,17 +10,16 @@ using MailKit.Security;
 public class EmailManager(IConfiguration Config)
 {
     private const string _smtpServer = "smtp.gmail.com";
-    private const int _smtpPort = 587;
-    private readonly string _smtpPassword;
+    private const int _smtpPort = 465;
 
-    public async Task<bool> SendEmailAsync(string from, string to, string subject, string bodyText, string bodyHtml, string[] attachmentPaths = null)
+    public async Task<bool> SendEmailAsync(string subject, string bodyText, string bodyHtml, string[] attachmentPaths = null)
     {
         
         try
         {
             var email = new MimeMessage();
-            email.From.Add(new MailboxAddress(from, from));
-            email.To.Add(new MailboxAddress(to, to));
+            email.From.Add(new MailboxAddress(Config["EMAIL_BACKUP_FROM"], Config["EMAIL_BACKUP_FROM"]));
+            email.To.Add(new MailboxAddress(Config["EMAIL_BACKUP_DEST"], Config["EMAIL_BACKUP_DEST"]));
             email.Subject = subject;
 
             var bodyBuilder = new BodyBuilder
@@ -44,9 +43,9 @@ public class EmailManager(IConfiguration Config)
             email.Body = bodyBuilder.ToMessageBody();
 
             using var client = new SmtpClient();
-            await client.ConnectAsync(_smtpServer, _smtpPort, SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(Config["SMTP_USER"], Config["SMTP_PASSWORD"]);
-            await client.SendAsync(email);
+            await client.ConnectAsync(_smtpServer, _smtpPort, SecureSocketOptions.SslOnConnect);
+            await client.AuthenticateAsync(Config["EMAIL_BACKUP_FROM"], Config["SMTP_PASSWORD"]);
+            var result = await client.SendAsync(email);
             await client.DisconnectAsync(true);
 
             Console.WriteLine("✅ Email envoyé avec succès !");
