@@ -4,6 +4,21 @@ namespace RecettesFamille.Managers
 {
     public static class CustomThemeManager
     {
+        public static readonly MudTheme Customtheme = new()
+        {
+            PaletteLight = new PaletteLight()
+            {
+
+            },
+            PaletteDark = new PaletteDark()
+            {
+                TextPrimary = "#ffffffdd",
+                AppbarText = "#ffffffdd",
+                DrawerText = "#ffffffbc",
+            },
+        };
+
+
         public static readonly MudTheme Sandstonetheme = new()
         {
             PaletteLight = new PaletteLight()
@@ -274,6 +289,7 @@ namespace RecettesFamille.Managers
                 Tooltip = 1600,
             },
         };
+
 
         /* 
         !
@@ -652,7 +668,7 @@ namespace RecettesFamille.Managers
                 ErrorContrastText = "rgba(255,255,255,1)",
                 Dark = "#343a40",
                 DarkContrastText = "#1a1d20",
-                TextPrimary = "#8fb4f4",
+                TextPrimary = "#a9e0ffff", // edited
                 TextSecondary = "#ced3d7",
                 TextDisabled = "rgba(255,255,255,0.2)",
                 ActionDefault = "rgba(173,173,177,1)",
@@ -664,7 +680,7 @@ namespace RecettesFamille.Managers
                 DrawerBackground = "#232426",
                 DrawerText = "#adb5bd",
                 DrawerIcon = "#adb5bd",
-                AppbarBackground = "#0e1a2f",
+                AppbarBackground = "#22314aff", // edited
                 AppbarText = "#4582ec",
                 LinesDefault = "rgba(255,255,255,0.11764705882352941)",
                 LinesInputs = "rgba(255,255,255,0.2980392156862745)",
@@ -672,7 +688,7 @@ namespace RecettesFamille.Managers
                 TableStriped = "rgba(255,255,255,0.2)",
                 Divider = "rgba(255,255,255,0.11764705882352941)",
                 DividerLight = "rgba(255,255,255,0.058823529411764705)",
-                PrimaryDarken = "#8fb4f4",
+                PrimaryDarken = "#a9e0ffff", // edited
                 PrimaryLighten = "#0e1a2f",
                 SecondaryDarken = "#ced3d7",
                 SecondaryLighten = "#232426",
