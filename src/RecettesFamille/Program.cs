@@ -7,6 +7,7 @@ using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
 using RecettesFamille.Data;
 using RecettesFamille.Managers;
+using Cropper.Blazor.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,8 @@ builder.WebHost.ConfigureKestrel(options =>
 // Add MudBlazor services
 builder.Services.AddMudServices();
 builder.Services.AddMudExtensions();
+
+builder.Services.AddCropper();
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
@@ -48,6 +51,11 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddServerSideBlazor()
+    .AddHubOptions(options =>
+    {
+        options.MaximumReceiveMessageSize = 32 * 1024 * 100;
+    });
 
 var app = builder.Build();
 

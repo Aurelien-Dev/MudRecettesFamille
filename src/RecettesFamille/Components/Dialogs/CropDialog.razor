@@ -1,0 +1,50 @@
+﻿@using Cropper.Blazor.Extensions
+@using Cropper.Blazor.Models
+
+<MudDialog>
+    <TitleContent>
+        Rogner l'image
+    </TitleContent>
+    <DialogContent>
+        <CropperComponent @ref="CropperComponent" Class="big-img" Src="@ImageSource" Options="@options" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+    
+    [Parameter] 
+    public string ImageSource { get; set; } = "https://via.placeholder.com/1600x900";
+
+    private CropperComponent? CropperComponent = null!;
+    private Options options = new Options()
+        {
+            AspectRatio = (decimal)16 / 11,
+        };
+    
+    private async Task Submit()
+    {
+        GetCroppedCanvasOptions getCroppedCanvasOptions = new GetCroppedCanvasOptions
+            {
+                MaxHeight = 4096,
+                MaxWidth = 4096,
+                ImageSmoothingQuality = ImageSmoothingQuality.High.ToEnumString()
+            };
+
+        string newImage = await CropperComponent!.GetCroppedCanvasDataURLAsync(getCroppedCanvasOptions);
+
+        MudDialog.Close(DialogResult.Ok(newImage));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+}

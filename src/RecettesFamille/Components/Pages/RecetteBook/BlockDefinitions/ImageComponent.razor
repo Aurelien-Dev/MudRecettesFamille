@@ -1,22 +1,32 @@
-﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+﻿@using Cropper.Blazor.Extensions
+@using Cropper.Blazor.Models
+@using RecettesFamille.Components.Dialogs
+@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+@using Cropper.Blazor
 @inherits BaseBlockDefinition<BlockImageEntity>
 
 @if (EditMode)
 {
-    <MudStack StretchItems="StretchItems.End">
-
-        <MudFileUpload @ref="mudFileUpload" T="IBrowserFile" FilesChanged="OnInputFileChanged">
-            <ActivatorContent>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary">
-                    Selectionne une image
-                </MudButton>
-            </ActivatorContent>
-        </MudFileUpload>
-
-        <MudImage Src="@Block.Image" Fluid="false" ObjectFit="ObjectFit.Cover" Height="300" Elevation="25" Class="rounded-lg">
-        </MudImage>
-    </MudStack>
-
+    <MudGrid Spacing="2" >
+        <MudItem xs="12" md="6">
+            <MudFileUpload @ref="mudFileUpload" T="IBrowserFile" FilesChanged="OnInputFileChanged">
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+                        Selectionne une image
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpendCropDialog" FullWidth="true">
+                Rogner
+            </MudButton>
+        </MudItem>
+        <MudItem xs="12" md="12">
+            <MudImage Src="@Block.Image" Fluid="false" ObjectFit="ObjectFit.Cover" Height="300" Elevation="25" Class="rounded-lg" Style="width:100%" >
+            </MudImage>
+        </MudItem>
+    </MudGrid>
 }
 else
 {
@@ -26,10 +36,10 @@ else
 
 @code {
     [Inject] ISnackbar snackbar { get; set; } = null!;
-    private readonly long MaxFileSize = 1024 * 1024 * 15;
-    private MudFileUpload<IBrowserFile> mudFileUpload { get; set; } = null!;
+    [Inject] IDialogService DialogService { get; set; } = null!;
 
-    internal async Task StateHasChangedAsync() => await InvokeAsync(StateHasChanged);
+    private MudFileUpload<IBrowserFile> mudFileUpload { get; set; } = null!;
+    private readonly long MaxFileSize = 1024 * 1024 * 15;
 
     private async Task OnInputFileChanged(IBrowserFile e)
     {
@@ -38,18 +48,8 @@ else
             if (e is null)
                 return;
 
-            File.Delete($"wwwroot/{Block.Image}");
-
-            int randomNumber = new Random().Next(0, 1000);
-            string formattedNumber = randomNumber.ToString("D3");
-
-            string fullName = $"image_recipe/{Block.Recipe.Id}-{Block.Id}-{formattedNumber}{Path.GetExtension(e.Name)}";
-
-            await using FileStream fs = new($"wwwroot/{fullName}", FileMode.Create);
-            await e.OpenReadStream(MaxFileSize).CopyToAsync(fs);
-            fs.Close();
-
-            Block.Image = fullName;
+            string base64Image = await ConvertToBase64Async(e);
+            Block.Image = base64Image;
 
             snackbar.Clear();
             snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
@@ -58,14 +58,42 @@ else
             OnBlockUpdated?.Invoke(Block);
 
             await mudFileUpload.ClearAsync();
-            await StateHasChangedAsync();
+            StateHasChanged();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             snackbar.Clear();
             snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
             snackbar.Add("Il y a eu une erreur.", Severity.Error);
             throw new Exception("Error uploading file");
         }
+    }
+
+    private async void OpendCropDialog()
+    {
+        var parameters = new DialogParameters<CropDialog>
+        {
+            { x => x.ImageSource, Block.Image }
+        };
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = await DialogService.ShowAsync<CropDialog>("Delete", parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return;
+
+        Block.Image = result.Data.ToString();
+        OnBlockUpdated?.Invoke(Block);
+        StateHasChanged();
+    }
+
+    private async Task<string> ConvertToBase64Async(IBrowserFile file)
+    {
+        using var stream = file.OpenReadStream(MaxFileSize);
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+        byte[] bytes = memoryStream.ToArray();
+        return $"data:{file.ContentType};base64," + Convert.ToBase64String(bytes);
     }
 }
