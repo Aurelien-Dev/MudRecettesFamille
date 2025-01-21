@@ -19,7 +19,7 @@
         }
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="x=>x.Id" Hidden InitialDirection="SortDirection.Ascending" />
+        <PropertyColumn Property="x=>x.Id" Hidden="true" InitialDirection="SortDirection.Ascending" Editable="false" HideSmall="true" />
         <PropertyColumn Property="x => x.Name" Editable="true" />
         <PropertyColumn Property="x => x.Quantity" Editable="true" />
         <TemplateColumn Hidden="!EditMode" CellClass="d-flex justify-end">
