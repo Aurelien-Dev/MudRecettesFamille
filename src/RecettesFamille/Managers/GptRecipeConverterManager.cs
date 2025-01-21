@@ -13,11 +13,15 @@ public class GptRecipeConverterManager(IConfiguration Config, ApplicationDbConte
     {
         var client = new ChatClient(model: "gpt-4o", apiKey: Config["OPENAI_SECRET"]);
 
+        string introductionPrompt = dbContext.Prompts.Where(c => c.Name == "RecipeIntroductionPrompt").Select(c => c.Prompt).First();
+        string responseAskedPrompt = dbContext.Prompts.Where(c => c.Name == "ResponseAskedPrompt").Select(c => c.Prompt).First();
+        string requestInformationPrompt = dbContext.Prompts.Where(c => c.Name == "RequestInformationPrompt").Select(c => c.Prompt).First();
+
         var messages = new ChatMessage[]
         {
-            new SystemChatMessage(await ReadEmbeddedResourceAsync("IntroductionPrompt")),
-            new SystemChatMessage(await ReadEmbeddedResourceAsync("ResponseAskedPrompt")),
-            new UserChatMessage(await ReadEmbeddedResourceAsync("RequestInformationPrompt", (s) => string.Format(s, recipe)))
+            new SystemChatMessage(introductionPrompt),
+            new SystemChatMessage(responseAskedPrompt),
+            new UserChatMessage(string.Format(requestInformationPrompt, recipe))
         };
 
         ChatCompletion completion = await client.CompleteChatAsync(messages, cancellationToken: cancellationToken);
@@ -33,8 +37,6 @@ public class GptRecipeConverterManager(IConfiguration Config, ApplicationDbConte
         };
 
         var serialized = JsonConvert.DeserializeObject<RecipeEntity>(resultText.Replace("```json", string.Empty).Replace("```", string.Empty), withTypes);
-
-
 
         return (serialized, cost);
     }
