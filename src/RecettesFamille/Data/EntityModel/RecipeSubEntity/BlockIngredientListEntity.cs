@@ -6,6 +6,11 @@ public class BlockIngredientListEntity : BlockBase
 {
     public string Name { get; set; } = "Ingrédients";
     public List<IngredientEntity> Ingredients { get; set; } = new List<IngredientEntity>();
+
+    public BlockIngredientListEntity()
+    {
+        HalfPage = true;
+    }
 }
 
 

@@ -10,7 +10,7 @@
 {
     @if (editorMode)
     {
-        <MudTextField @bind-Value="Recette.Name" Typo="Typo.h3" Style="font-weight: bold;"  FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
+        <MudTextField @bind-Value="Recette.Name" Typo="Typo.h3" Style="font-weight: bold;" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
         <MudTextField @bind-Value="Recette.InformationPreparation" Typo="Typo.subtitle1" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
 
     }
@@ -40,7 +40,7 @@
 
         @if (editorMode)
         {
-            <ToolsComponent PrecedentIndex="@(Recette.BlocksInstructions.Count - 1)" AddBlockCallback="AddNewBlock" />
+            <ToolsComponent PrecedentIndex="@(Recette.BlocksInstructions.Count -1)" AddBlockCallback="AddNewBlock" />
         }
     </MudGrid>
 }

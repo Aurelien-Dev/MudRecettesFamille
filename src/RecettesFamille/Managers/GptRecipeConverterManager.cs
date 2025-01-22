@@ -1,8 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using Newtonsoft.Json;
 using OpenAI.Chat;
 using RecettesFamille.Data;
 using RecettesFamille.Data.EntityModel;
+using RecettesFamille.Data.EntityModel.RecipeSubEntity;
+using RecettesFamille.Managers.Mappers;
+using RecettesFamille.Managers.Models;
 using System.Reflection;
 
 namespace RecettesFamille.Managers;
@@ -13,33 +17,34 @@ public class GptRecipeConverterManager(IConfiguration Config, ApplicationDbConte
     {
         var client = new ChatClient(model: "gpt-4o", apiKey: Config["OPENAI_SECRET"]);
 
-        string introductionPrompt = dbContext.Prompts.Where(c => c.Name == "RecipeIntroductionPrompt").Select(c => c.Prompt).First();
-        string responseAskedPrompt = dbContext.Prompts.Where(c => c.Name == "ResponseAskedPrompt").Select(c => c.Prompt).First();
-        string requestInformationPrompt = dbContext.Prompts.Where(c => c.Name == "RequestInformationPrompt").Select(c => c.Prompt).First();
+        string newPromptRecetteConvert = dbContext.Prompts.Where(c => c.Name == "NewPromptRecetteConvert").Select(c => c.Prompt).First();
+        string ask = $@"Voici une recette à convertir en JSON en respectant les instructions du prompt :
+
+=== Début de la recette ===
+{recipe}
+=== Fin de la recette ===
+
+Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans balises Markdown et sans explication.";
 
         var messages = new ChatMessage[]
         {
-            new SystemChatMessage(introductionPrompt),
-            new SystemChatMessage(responseAskedPrompt),
-            new UserChatMessage(string.Format(requestInformationPrompt, recipe))
+            new SystemChatMessage(newPromptRecetteConvert),
+            new UserChatMessage(ask)
         };
 
-        ChatCompletion completion = await client.CompleteChatAsync(messages, cancellationToken: cancellationToken);
+        ChatCompletion completion = await client.CompleteChatAsync(messages, new ChatCompletionOptions() { ResponseFormat = ChatResponseFormat.CreateJsonObjectFormat() }, cancellationToken: cancellationToken);
 
         string resultText = completion.Content[0].Text;
         decimal cost = CalculateCost(completion); // À implémenter selon tes besoins
 
         await ReportConsumption(cost);
 
-        JsonSerializerSettings withTypes = new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.Auto
-        };
+        var serialized = JsonConvert.DeserializeObject<GptRecipe>(resultText);
 
-        var serialized = JsonConvert.DeserializeObject<RecipeEntity>(resultText.Replace("```json", string.Empty).Replace("```", string.Empty), withTypes);
-
-        return (serialized, cost);
+        return (GptMapper.ConvertToRecipeEntity(serialized), cost);
     }
+
+
 
     private async Task ReportConsumption(decimal cost)
     {
@@ -81,29 +86,5 @@ public class GptRecipeConverterManager(IConfiguration Config, ApplicationDbConte
 
         // Convertir le coût en euros
         return totalCostUsd * conversionRate;
-    }
-
-    private async Task<string> ReadEmbeddedResourceAsync(string resourceName, Func<string, string>? textFormaterAction = null)
-    {
-        string assistantPrompt = $"RecettesFamille.Managers.Prompts.{resourceName}.txt";
-
-        var assembly = Assembly.GetExecutingAssembly();
-        using (Stream? stream = assembly.GetManifestResourceStream(assistantPrompt))
-        {
-            if (stream == null)
-            {
-                throw new FileNotFoundException("Resource not found", assistantPrompt);
-            }
-
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                string text = await reader.ReadToEndAsync();
-
-                if (textFormaterAction != null)
-                    return textFormaterAction(text);
-                else
-                    return text;
-            }
-        }
     }
 }
