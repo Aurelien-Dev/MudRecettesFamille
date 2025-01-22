@@ -25,11 +25,6 @@ namespace RecettesFamille.Data
             builder.Entity<BlockBase>().Property(c => c.Id).ValueGeneratedOnAdd();
             builder.Entity<BlockBase>().HasOne(c => c.Recipe).WithMany(c => c.BlocksInstructions).IsRequired();
 
-            builder.Entity<BlockImageEntity>().Property(c => c.HalfPage).HasDefaultValue(true);
-            builder.Entity<BlockIngredientListEntity>().Property(c => c.HalfPage).HasDefaultValue(true);
-            builder.Entity<BlockInstructionEntity>().Property(c => c.HalfPage).HasDefaultValue(false);
-
-
             builder.Entity<IngredientEntity>().HasKey(c => c.Id);
             builder.Entity<IngredientEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
             builder.Entity<IngredientEntity>().HasOne(c => c.IngredientList).WithMany(c => c.Ingredients).HasForeignKey(c => c.IngredientListId);
@@ -44,7 +39,7 @@ namespace RecettesFamille.Data
         {
             try
             {
-                string fileName = $"backup_{DateTime.UtcNow.ToIsoDateString()}-{DateTime.UtcNow.ToShortTimeString()}.backup";
+                string fileName = $"backup_{DateTime.UtcNow.ToIsoDateString()}-{DateTime.UtcNow.ToShortTimeString()}.backup";   
                 string command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -p 5442 -U pguser -d recettesfamilledb -F c -f wwwroot/backups/{fileName}";
 
                 if (!Directory.Exists("wwwroot/backups"))
