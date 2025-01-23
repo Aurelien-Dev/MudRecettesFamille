@@ -43,6 +43,7 @@ jobs:
         script: |
             cd /home/recettesfamille/src
             echo "OPENAI_SECRET=${{ secrets.OPENAI_SECRET }}" > .env
+            echo "DEEPSEEK_SECRET=${{ secrets.DEEPSEEK_SECRET }}" >> .env
             echo "EMAIL_BACKUP_DEST=${{ vars.EMAIL_BACKUP_DEST }}" >> .env
             echo "EMAIL_BACKUP_FROM=${{ vars.EMAIL_BACKUP_FROM }}" >> .env
             echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
