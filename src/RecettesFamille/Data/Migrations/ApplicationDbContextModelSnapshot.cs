@@ -8,7 +8,7 @@ using RecettesFamille.Data;
 
 #nullable disable
 
-namespace RecettesFamille.Migrations
+namespace RecettesFamille.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -295,9 +295,7 @@ namespace RecettesFamille.Migrations
                     NpgsqlPropertyBuilderExtensions.UseSequence(b.Property<int?>("Id"));
 
                     b.Property<bool>("HalfPage")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Order")
                         .HasColumnType("integer");

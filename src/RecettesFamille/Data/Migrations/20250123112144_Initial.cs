@@ -4,10 +4,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace RecettesFamille.Migrations
+namespace RecettesFamille.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -67,6 +67,20 @@ namespace RecettesFamille.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_GptConsumptions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Prompts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Prompt = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Prompts", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -195,7 +209,7 @@ namespace RecettesFamille.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    HalfPage = table.Column<bool>(type: "boolean", nullable: true, defaultValue: false),
+                    HalfPage = table.Column<bool>(type: "boolean", nullable: false),
                     RecipeId = table.Column<int>(type: "integer", nullable: false),
                     Image = table.Column<string>(type: "text", nullable: false)
                 },
@@ -216,7 +230,7 @@ namespace RecettesFamille.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    HalfPage = table.Column<bool>(type: "boolean", nullable: true, defaultValue: false),
+                    HalfPage = table.Column<bool>(type: "boolean", nullable: false),
                     RecipeId = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
@@ -237,7 +251,7 @@ namespace RecettesFamille.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    HalfPage = table.Column<bool>(type: "boolean", nullable: true, defaultValue: false),
+                    HalfPage = table.Column<bool>(type: "boolean", nullable: false),
                     RecipeId = table.Column<int>(type: "integer", nullable: false),
                     Instruction = table.Column<string>(type: "text", nullable: false)
                 },
@@ -361,6 +375,9 @@ namespace RecettesFamille.Migrations
 
             migrationBuilder.DropTable(
                 name: "IngredientEntity");
+
+            migrationBuilder.DropTable(
+                name: "Prompts");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

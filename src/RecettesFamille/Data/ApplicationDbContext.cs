@@ -25,6 +25,10 @@ namespace RecettesFamille.Data
             builder.Entity<BlockBase>().Property(c => c.Id).ValueGeneratedOnAdd();
             builder.Entity<BlockBase>().HasOne(c => c.Recipe).WithMany(c => c.BlocksInstructions).IsRequired();
 
+            builder.Entity<BlockImageEntity>();
+            builder.Entity<BlockIngredientListEntity>();
+            builder.Entity<BlockInstructionEntity>();
+
             builder.Entity<IngredientEntity>().HasKey(c => c.Id);
             builder.Entity<IngredientEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
             builder.Entity<IngredientEntity>().HasOne(c => c.IngredientList).WithMany(c => c.Ingredients).HasForeignKey(c => c.IngredientListId);
