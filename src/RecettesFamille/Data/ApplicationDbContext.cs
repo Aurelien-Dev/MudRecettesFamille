@@ -10,7 +10,7 @@ namespace RecettesFamille.Data
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
         public DbSet<RecipeEntity> Recettes { get; set; }
-        public DbSet<GptConsumptionEntity> GptConsumptions { get; set; }
+        public DbSet<AiConsumptionEntity> AiConsumptions { get; set; }
         public DbSet<PromptEntity> Prompts { get; set; }
 
 

@@ -220,7 +220,7 @@ namespace RecettesFamille.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("RecettesFamille.Data.EntityModel.GptConsumptionEntity", b =>
+            modelBuilder.Entity("RecettesFamille.Data.EntityModel.AiConsumptionEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -228,11 +228,24 @@ namespace RecettesFamille.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("numeric");
+                    b.Property<string>("AiModelName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("InputPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("InputToken")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("OutputPrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("OutputToken")
+                        .HasColumnType("integer");
 
                     b.Property<string>("UseCase")
                         .IsRequired()
@@ -240,7 +253,7 @@ namespace RecettesFamille.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GptConsumptions");
+                    b.ToTable("AiConsumptions");
                 });
 
             modelBuilder.Entity("RecettesFamille.Data.EntityModel.PromptEntity", b =>

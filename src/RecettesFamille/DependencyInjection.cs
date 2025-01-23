@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RecettesFamille.Data;
-using RecettesFamille.Managers;
+using RecettesFamille.Managers.AiGenerators;
 
 namespace RecettesFamille
 {
@@ -8,7 +8,8 @@ namespace RecettesFamille
     {
         public static IServiceCollection AddManagers(this IServiceCollection services)
         {
-            services.AddScoped<GptRecipeConverterManager>();
+            //services.AddScoped<IRecipeConverteBase, GptRecipeConverterManager>();
+            services.AddScoped<IRecipeConverteBase, DeepSeekRecipeConverterManager>();
 
             return services;
         }

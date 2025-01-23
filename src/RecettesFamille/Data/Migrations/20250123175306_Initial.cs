@@ -16,6 +16,25 @@ namespace RecettesFamille.Data.Migrations
                 name: "BlockBaseSequence");
 
             migrationBuilder.CreateTable(
+                name: "AiConsumptions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    InputToken = table.Column<int>(type: "integer", nullable: false),
+                    OutputToken = table.Column<int>(type: "integer", nullable: false),
+                    InputPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    OutputPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    UseCase = table.Column<string>(type: "text", nullable: false),
+                    AiModelName = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AiConsumptions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -52,21 +71,6 @@ namespace RecettesFamille.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "GptConsumptions",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Cost = table.Column<decimal>(type: "numeric", nullable: false),
-                    UseCase = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GptConsumptions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -350,6 +354,9 @@ namespace RecettesFamille.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AiConsumptions");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -369,9 +376,6 @@ namespace RecettesFamille.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "BlockInstructionEntity");
-
-            migrationBuilder.DropTable(
-                name: "GptConsumptions");
 
             migrationBuilder.DropTable(
                 name: "IngredientEntity");
