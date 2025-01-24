@@ -8,6 +8,7 @@ using RecettesFamille.Components.Account;
 using RecettesFamille.Data;
 using RecettesFamille.Managers;
 using Cropper.Blazor.Extensions;
+using MudBlazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.WebHost.ConfigureKestrel(options =>
 // Add MudBlazor services
 builder.Services.AddMudServices();
 builder.Services.AddMudExtensions();
+builder.Services.AddMudMarkdownServices();
 
 builder.Services.AddCropper();
 
