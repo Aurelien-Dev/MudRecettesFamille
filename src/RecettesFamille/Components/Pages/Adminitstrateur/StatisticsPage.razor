@@ -1,0 +1,78 @@
+﻿@page "/admin/statistics"
+@using RecettesFamille.Components.Layout
+@using RecettesFamille.Data
+@layout AdminLayout
+
+<MudGrid >
+    <MudItem xs="12">
+
+        <MudText Typo="Typo.h5">Nombre de requête par jour et par models</MudText>
+        <MudChart ChartType="ChartType.Line"
+                  ChartSeries="@Series"
+                  XAxisLabels="@XAxisLabels"
+                  ChartOptions="@Options"
+                  Height="400" />
+    </MudItem>
+    <MudItem xs="12">
+
+        <MudText Typo="Typo.h5">Token moyen par jour et par models</MudText>
+        <MudChart ChartType="ChartType.Line"
+                  ChartSeries="@SeriesAvg"
+                  XAxisLabels="@XAxisLabels"
+                  ChartOptions="@Options"
+                  Height="400" />
+    </MudItem>
+
+</MudGrid>
+
+@code {
+    [Inject] public ApplicationDbContext dbContext { get; set; } = null!;
+
+    public ChartOptions Options = new ChartOptions();
+
+    public List<ChartSeries> Series = null!;
+    public string[] XAxisLabels = null!;
+
+
+    public List<ChartSeries> SeriesAvg = null!;
+    public string[] XAxisLabelsAvg = null!;
+
+    protected async override Task OnInitializedAsync()
+    {
+        var query = dbContext.AiConsumptions
+                             .GroupBy(a => new { a.Date.Date, a.AiModelName })
+                             .Select(g => new
+                             {
+                                 Date = g.Key.Date,
+                                 AiModelName = g.Key.AiModelName,
+                                 CallCount = (double)g.Count()
+                             })
+                             .OrderBy(x => x.Date)
+                             .ToList();
+
+        XAxisLabels = query.Select(c => c.Date.ToShortDateString()).ToArray();
+
+        Series = new List<ChartSeries>()
+        {
+            new ChartSeries() { Name = "DeepSeek", Data = query.Where(c => c.AiModelName == "DeepSeek").Select(c => c.CallCount).ToArray() },
+            new ChartSeries() { Name = "openai-gpt-4o", Data = query.Where(c => c.AiModelName == "openai-gpt-4o").Select(c => c.CallCount).ToArray() }
+        };
+
+        var queryAvg = dbContext.AiConsumptions
+                                .GroupBy(a => new { a.Date.Date, a.AiModelName })
+                                .Select(g => new
+                                {
+                                    Date = g.Key.Date,
+                                    AiModelName = g.Key.AiModelName,
+                                    AverageTotalCost = (double)g.Average(a => a.InputPrice + a.OutputPrice)
+                                })
+                                .OrderBy(x => x.Date)
+                                .ToList();
+
+        SeriesAvg = new List<ChartSeries>()
+        {
+            new ChartSeries() { Name = "DeepSeek", Data = queryAvg.Where(c => c.AiModelName == "DeepSeek").Select(c => c.AverageTotalCost).ToArray() },
+            new ChartSeries() { Name = "openai-gpt-4o", Data = queryAvg.Where(c => c.AiModelName == "openai-gpt-4o").Select(c => c.AverageTotalCost).ToArray() }
+        };
+    }
+}
