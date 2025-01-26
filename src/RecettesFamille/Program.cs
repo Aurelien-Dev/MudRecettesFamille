@@ -10,6 +10,7 @@ using RecettesFamille.Managers;
 using Cropper.Blazor.Extensions;
 using MudBlazor;
 using Blazored.LocalStorage;
+using BitzArt.Blazor.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,8 @@ builder.Services.AddMudServices();
 builder.Services.AddMudExtensions();
 builder.Services.AddMudMarkdownServices();
 builder.Services.AddBlazoredLocalStorage();
+builder.AddBlazorCookies();
+
 
 builder.Services.AddCropper();
 

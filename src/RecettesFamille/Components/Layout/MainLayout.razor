@@ -1,4 +1,6 @@
-﻿@using RecettesFamille.Managers
+﻿@using BitzArt.Blazor.Cookies
+@using Blazored.LocalStorage
+@using RecettesFamille.Managers
 @inherits LayoutComponentBase
 
 <MudThemeProvider @ref="_mudThemeProvider" IsDarkMode="isDarkMode" Theme="CustomThemeManager.Customtheme" />
@@ -39,29 +41,26 @@
 </div>
 
 @code {
-    [Inject]
-    private Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+    [Inject] private ICookieService CookieService { get; set; } = null!;
+
     private bool _drawerOpen = true;
     private bool isDarkMode = false;
     private MudThemeProvider _mudThemeProvider;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected async override Task OnInitializedAsync()
     {
-        if (firstRender)
-        {
-            var userPreferenceDarkMode = await LocalStorage.GetItemAsync<bool?>("userPreferenceDarkMode");
+        var cookie = await CookieService.GetAsync("userPreferenceDarkMode");
+        bool? userPreferenceDarkMode = bool.TryParse(cookie?.Value, out var result) && result;
 
-            isDarkMode = userPreferenceDarkMode ?? await _mudThemeProvider.GetSystemPreference();
-
-            StateHasChanged();
-        }
+        isDarkMode = userPreferenceDarkMode ?? await _mudThemeProvider.GetSystemPreference();
     }
 
     private async Task OnToggledChanged(bool isDark)
     {
         isDarkMode = isDark;
-        await LocalStorage.SetItemAsync("userPreferenceDarkMode", isDark);
-
+        await CookieService.SetAsync("userPreferenceDarkMode", isDark.ToString(), new DateTimeOffset(DateTime.MaxValue));
+        StateHasChanged();
     }
 
     private void DrawerToggle()
