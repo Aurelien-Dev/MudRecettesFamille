@@ -11,9 +11,9 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
         <MudText Typo="Typo.body1" Style="font-weight: bold;" Class="ml-3">Recettes famille</MudText>
         <MudSpacer />
-        <MudToggleIconButton @bind-Toggled="isDarkMode"
-                             Icon="@Icons.Material.Outlined.LightMode"
-                             ToggledIcon="@Icons.Material.Filled.DarkMode"
+        <MudToggleIconButton ToggledChanged="OnToggledChanged"
+                             Icon="@Icons.Material.Outlined.DarkMode"
+                             ToggledIcon="@Icons.Material.Filled.LightMode"
                              ToggledColor="@Color.Error" />
 
     </MudAppBar>
@@ -39,6 +39,8 @@
 </div>
 
 @code {
+    [Inject]
+    private Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; } = null!;
     private bool _drawerOpen = true;
     private bool isDarkMode = false;
     private MudThemeProvider _mudThemeProvider;
@@ -47,9 +49,19 @@
     {
         if (firstRender)
         {
-            isDarkMode = await _mudThemeProvider.GetSystemPreference();
+            var userPreferenceDarkMode = await LocalStorage.GetItemAsync<bool?>("userPreferenceDarkMode");
+
+            isDarkMode = userPreferenceDarkMode ?? await _mudThemeProvider.GetSystemPreference();
+
             StateHasChanged();
         }
+    }
+
+    private async Task OnToggledChanged(bool isDark)
+    {
+        isDarkMode = isDark;
+        await LocalStorage.SetItemAsync("userPreferenceDarkMode", isDark);
+
     }
 
     private void DrawerToggle()
