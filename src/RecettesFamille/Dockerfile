@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y wget gnupg \
 USER $APP_UID  # Revenir à l'utilisateur non root après l'installation
 
 # Étape 2 : Build l’application
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["../RecettesFamille/RecettesFamille.csproj", "RecettesFamille/"]
