@@ -16,9 +16,9 @@
 
 @code {
     [CascadingParameter]
-    private IMudDialogInstance MudDialog { get; set; }
-    
-    [Parameter] 
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter]
     public string ImageSource { get; set; } = "https://via.placeholder.com/1600x900";
 
     private CropperComponent? CropperComponent = null!;
@@ -26,7 +26,7 @@
         {
             AspectRatio = (decimal)16 / 11,
         };
-    
+
     private async Task Submit()
     {
         GetCroppedCanvasOptions getCroppedCanvasOptions = new GetCroppedCanvasOptions

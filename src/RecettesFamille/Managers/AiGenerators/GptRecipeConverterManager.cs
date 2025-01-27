@@ -3,8 +3,8 @@ using Newtonsoft.Json;
 using OpenAI.Chat;
 using RecettesFamille.Data;
 using RecettesFamille.Data.EntityModel;
+using RecettesFamille.Managers.AiGenerators.Models;
 using RecettesFamille.Managers.Mappers;
-using RecettesFamille.Managers.Models;
 
 namespace RecettesFamille.Managers.AiGenerators;
 
@@ -35,7 +35,7 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
 
         await ReportConsumption(completion);
 
-        var serialized = JsonConvert.DeserializeObject<GptRecipe>(resultText);
+        var serialized = JsonConvert.DeserializeObject<AiRecipe>(resultText) ?? throw new ApplicationException("Deserialization failed");
 
         return GptMapper.ConvertToRecipeEntity(serialized);
     }

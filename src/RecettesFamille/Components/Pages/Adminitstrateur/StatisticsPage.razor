@@ -39,7 +39,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        var query = dbContext.AiConsumptions
+        var query = await dbContext.AiConsumptions
                              .GroupBy(a => new { a.Date.Date, a.AiModelName })
                              .Select(g => new
                              {
@@ -48,7 +48,7 @@
                                  CallCount = (double)g.Count()
                              })
                              .OrderBy(x => x.Date)
-                             .ToList();
+                             .ToListAsync();
 
         XAxisLabels = query.Select(c => c.Date.ToShortDateString()).ToArray();
 
@@ -58,7 +58,7 @@
             new ChartSeries() { Name = "openai-gpt-4o", Data = query.Where(c => c.AiModelName == "openai-gpt-4o").Select(c => c.CallCount).ToArray() }
         };
 
-        var queryAvg = dbContext.AiConsumptions
+        var queryAvg = await dbContext.AiConsumptions
                                 .GroupBy(a => new { a.Date.Date, a.AiModelName })
                                 .Select(g => new
                                 {
@@ -67,7 +67,7 @@
                                     AverageTotalCost = (double)g.Average(a => a.InputPrice + a.OutputPrice)
                                 })
                                 .OrderBy(x => x.Date)
-                                .ToList();
+                                .ToListAsync();
 
         SeriesAvg = new List<ChartSeries>()
         {

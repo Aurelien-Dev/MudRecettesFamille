@@ -61,6 +61,8 @@ namespace RecettesFamille.Data
 
                 using (var process = Process.Start(processInfo))
                 {
+                    if (process is null) throw new Exception("Process not exist.");
+
                     string output = process.StandardOutput.ReadToEnd();
                     string error = process.StandardError.ReadToEnd();
                     process.WaitForExit();

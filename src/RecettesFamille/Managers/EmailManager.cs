@@ -12,9 +12,8 @@ public class EmailManager(IConfiguration Config)
     private const string _smtpServer = "smtp.gmail.com";
     private const int _smtpPort = 465;
 
-    public async Task<bool> SendEmailAsync(string subject, string bodyText, string bodyHtml, string[] attachmentPaths = null)
+    public async Task<bool> SendEmailAsync(string subject, string bodyText, string bodyHtml, string[]? attachmentPaths = null)
     {
-        
         try
         {
             var email = new MimeMessage();

@@ -1,12 +1,12 @@
 ﻿using RecettesFamille.Data.EntityModel.RecipeSubEntity;
 using RecettesFamille.Data.EntityModel;
-using RecettesFamille.Managers.Models;
+using RecettesFamille.Managers.AiGenerators.Models;
 
 namespace RecettesFamille.Managers.Mappers
 {
     public static class GptMapper
     {
-        public static RecipeEntity ConvertToRecipeEntity(GptRecipe gptRecipe)
+        public static RecipeEntity ConvertToRecipeEntity(AiRecipe gptRecipe)
         {
             if (gptRecipe == null)
             {
@@ -39,8 +39,7 @@ namespace RecettesFamille.Managers.Mappers
             var instructionBlock = new BlockInstructionEntity
             {
                 Order = recipeEntity.BlocksInstructions.Count,
-                Instruction = string.Join("\n\n", gptRecipe.Instructions),
-                Recipe = null // Assuming the Recipe property will be set later
+                Instruction = string.Join("\n\n", gptRecipe.Instructions)
             };
             recipeEntity.BlocksInstructions.Add(instructionBlock);
 
