@@ -3,9 +3,9 @@
 @inherits BaseBlockDefinition<BlockIngredientListEntity>
 
 <MudDataGrid @ref="_dataGrid" Items="@Block.Ingredients" T="IngredientEntity" Dense="true" Hover="true" Striped="false" Class="mx-3 mb-2 rounded-lg"
-             HeaderClass="hide-header" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false"
-             EditMode="DataGridEditMode.Form" edit EditTrigger="DataGridEditTrigger.Manual"
-             CommittedItemChanges="@CommittedItemChanges">
+HeaderClass="hide-header" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false"
+EditMode="DataGridEditMode.Form" edit EditTrigger="DataGridEditTrigger.Manual"
+CommittedItemChanges="@CommittedItemChanges">
     <ToolBarContent>
         @if (EditMode)
         {
@@ -19,7 +19,7 @@
         }
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="x=>x.Id" Hidden="true" InitialDirection="SortDirection.Ascending" Editable="false" HideSmall="true" />
+        @* <PropertyColumn Property="x=>x.Id" Hidden="true" InitialDirection="SortDirection.Ascending" Editable="false" HideSmall="true" /> *@
         <PropertyColumn Property="x => x.Name" Editable="true" />
         <PropertyColumn Property="x => x.Quantity" Editable="true" />
         <TemplateColumn Hidden="!EditMode" CellClass="d-flex justify-end">
@@ -35,16 +35,14 @@
 
 <style>
     .hide-header {
-        display: none !important;
+    display: none !important;
     }
 
 </style>
 
 @code {
-    [Inject] ApplicationDbContext dbContext { get; set; } = null!;
-
     DialogOptions dialogOptions = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true };
-    MudDataGrid<IngredientEntity> _dataGrid = null!; 
+    MudDataGrid<IngredientEntity> _dataGrid = null!;
 
     public void OnNameUpdated()
     {
@@ -56,10 +54,10 @@
         if (value)
             return;
 
-        dbContext.Entry(ingredientEntity).State = EntityState.Deleted;
+        DbContext.Entry(ingredientEntity).State = EntityState.Deleted;
         Block.Ingredients.Remove(ingredientEntity);
 
-        await dbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync();
     }
 
 
@@ -81,9 +79,9 @@
 
         // Obligé de mettre à jour l'ingrédient ici en raison de l'attribut [JsonIgnore] sur la propriété de navigation IngredientList, ce qui entraîne une perte de liaison entre le bloc IngredientList et l'ingrédient
         // L'attribut [JsonIgnore] a été ajouté car le DataGrid entraînait une boucle infinie en raison de la propriété de navigation
-        dbContext.Update(item);
+        DbContext.Update(item);
 
-        await dbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync();
         OnBlockHasChanged?.Invoke();
     }
 }

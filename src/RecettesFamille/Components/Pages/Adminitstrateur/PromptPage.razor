@@ -9,6 +9,8 @@
 @using RecettesFamille.Managers
 @using System.Text
 
+@inherits MyComponentBase
+
 <MudGrid>
     <MudItem xs="12" md="4">
         <MudList T="string">
@@ -49,7 +51,6 @@
 </MudGrid>
 
 @code {
-    [Inject] ApplicationDbContext dbContext { get; set; } = null!;
     [Inject] ISnackbar snackbar { get; set; } = null!;
 
     private List<PromptEntity> Prompts { get; set; } = new List<PromptEntity>();
@@ -64,13 +65,13 @@
 
     public async Task Load()
     {
-        Prompts = await dbContext.Prompts.ToListAsync();
+        Prompts = await DbContext.Prompts.ToListAsync();
     }
 
     public async Task SavePrompt()
     {
-        dbContext.Update(CurrentPrompt);
-        await dbContext.SaveChangesAsync();
+        DbContext.Update(CurrentPrompt);
+        await DbContext.SaveChangesAsync();
 
         snackbar.Clear();
         snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;

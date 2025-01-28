@@ -9,6 +9,8 @@
 @using RecettesFamille.Managers
 @using System.Text
 
+@inherits MyComponentBase
+
 <MudStack Spacing="5">
 
     <MudDataGrid Items="fileInfos">
@@ -27,7 +29,6 @@
 </MudStack>
 
 @code {
-    [Inject] ApplicationDbContext dbContext { get; set; } = null!;
     [Inject] IJSRuntime jSRuntime { get; set; } = null!;
     [Inject] ISnackbar snackbar { get; set; } = null!;
     [Inject] EmailManager emailManager { get; set; } = null!;
@@ -41,7 +42,7 @@
 
     public async Task CreateBackup()
     {
-        (bool success, string message, string fileName) = dbContext.TriggerBackup();
+        (bool success, string message, string fileName) = DbContext.TriggerBackup();
 
         if (success)
             ListFolder();

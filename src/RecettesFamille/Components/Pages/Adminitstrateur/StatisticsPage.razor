@@ -3,6 +3,8 @@
 @using RecettesFamille.Data
 @layout AdminLayout
 
+@inherits MyComponentBase
+
 <MudGrid >
     <MudItem xs="12">
 
@@ -26,7 +28,6 @@
 </MudGrid>
 
 @code {
-    [Inject] public ApplicationDbContext dbContext { get; set; } = null!;
 
     public ChartOptions Options = new ChartOptions();
 
@@ -39,7 +40,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        var query = await dbContext.AiConsumptions
+        var query = await DbContext.AiConsumptions
                              .GroupBy(a => new { a.Date.Date, a.AiModelName })
                              .Select(g => new
                              {
@@ -58,7 +59,7 @@
             new ChartSeries() { Name = "openai-gpt-4o", Data = query.Where(c => c.AiModelName == "openai-gpt-4o").Select(c => c.CallCount).ToArray() }
         };
 
-        var queryAvg = await dbContext.AiConsumptions
+        var queryAvg = await DbContext.AiConsumptions
                                 .GroupBy(a => new { a.Date.Date, a.AiModelName })
                                 .Select(g => new
                                 {

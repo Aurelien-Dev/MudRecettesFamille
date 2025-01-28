@@ -19,18 +19,16 @@
 
 <body>
     <Routes @rendermode="RenderModeForPage" />
-    <div id="reconnect-modal" style="display: none;"></div>
-
     <script src="_framework/blazor.web.js" autostart="false"></script>
     <script>
         Blazor.start({
               circuit: {
                   reconnectionOptions: {
-                      maxRetries: 6,
+                      maxRetries: 20,
                       retryIntervalMilliseconds: (previousAttempts, maxRetries) =>
                               previousAttempts >= maxRetries
                                   ? null
-                                  : previousAttempts * 1000
+                                  : previousAttempts * 2000
                       },
                   },
           });

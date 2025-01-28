@@ -16,9 +16,9 @@ namespace RecettesFamille
 
         public static IServiceCollection AddCustomDbContext(this IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContextFactory<ApplicationDbContext>(options =>
             {
-                var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd";
+                var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
                 options.UseNpgsql(postgresCs);
             }, ServiceLifetime.Transient);
 

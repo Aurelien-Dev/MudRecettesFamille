@@ -4,6 +4,8 @@
 @using RecettesFamille.Data.EntityModel
 @using RecettesFamille.Extensions
 
+@inherits MyComponentBase
+
 <MudToolBar Class="mb-3" Dense="true">
     <MudSpacer />
     <MudToggleGroup T="string" Outlined="true" Delimiters="true" Size="Size.Small" Color="Color.Primary" @bind-Value="viewMode">
@@ -78,15 +80,16 @@ else
 
 
 @code {
-    [Inject] ApplicationDbContext applicationDbContext { get; set; } = null!;
     [Inject] NavigationManager navigationManager { get; set; } = null!;
+
     List<RecipeEntity> recetteEntities { get; set; } = null!;
     string viewMode = Icons.Material.Filled.List;
     string searchString1 = string.Empty;
 
     protected async override Task OnInitializedAsync()
     {
-        recetteEntities = await applicationDbContext.Recettes.Include(s => s.BlocksInstructions).ToListAsync();
+        await base.OnInitializedAsync();
+        recetteEntities = await DbContext.Recettes.Include(s => s.BlocksInstructions).ToListAsync();
     }
 
     private bool FilterFunc1(RecipeEntity element) => FilterFunc(element, searchString1);

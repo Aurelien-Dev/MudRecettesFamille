@@ -1,5 +1,6 @@
 ﻿using DeepSeek.Core;
 using DeepSeek.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RecettesFamille.Data;
 using RecettesFamille.Data.EntityModel;
@@ -8,8 +9,10 @@ using RecettesFamille.Managers.Mappers;
 
 namespace RecettesFamille.Managers.AiGenerators;
 
-public class DeepSeekRecipeConverterManager(IConfiguration Config = null!, ApplicationDbContext dbContext = null!) : IRecipeConverteBase
+public class DeepSeekRecipeConverterManager(IConfiguration Config, IDbContextFactory<ApplicationDbContext> contextFactory) : IRecipeConverteBase
 {
+    private ApplicationDbContext dbContext = null!;
+
     public async Task<RecipeEntity> Convert(string recipe, CancellationToken cancellationToken = default)
     {
         string apiKey = Config["DEEPSEEK_SECRET"] ?? throw new ApplicationException("Environment variable IsNullOrEmpty (DEEPSEEK_SECRET)");
@@ -18,11 +21,11 @@ public class DeepSeekRecipeConverterManager(IConfiguration Config = null!, Appli
         string newPromptRecetteConvert = dbContext.Prompts.Where(c => c.Name == "GptRecipeConvert").Select(c => c.Prompt).First();
         string ask = $@"Voici une recette à convertir en JSON en respectant les instructions du prompt :
 
-    === Début de la recette ===
-    {recipe}
-    === Fin de la recette ===
+=== Début de la recette ===
+{recipe}
+=== Fin de la recette ===
 
-    Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans balises Markdown et sans explication.";
+Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans balises Markdown et sans explication.";
 
 
         var request = new ChatRequest
@@ -32,7 +35,8 @@ public class DeepSeekRecipeConverterManager(IConfiguration Config = null!, Appli
                 Message.NewUserMessage(ask)
             ],
             // Specify the model
-            Model = DeepSeekModels.ChatModel
+            Model = DeepSeekModels.ChatModel,
+            ResponseFormat = new ResponseFormat() { Type = "json_object" }
         };
 
         var chatResponse = await client.ChatAsync(request, cancellationToken);

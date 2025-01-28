@@ -1,4 +1,5 @@
-﻿using MudBlazor;
+﻿using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using Newtonsoft.Json;
 using OpenAI.Chat;
 using RecettesFamille.Data;
@@ -8,10 +9,14 @@ using RecettesFamille.Managers.Mappers;
 
 namespace RecettesFamille.Managers.AiGenerators;
 
-public class GptRecipeConverterManager(IConfiguration Config, ApplicationDbContext dbContext) : IRecipeConverteBase
+public class GptRecipeConverterManager(IConfiguration Config, IDbContextFactory<ApplicationDbContext> contextFactory) : IRecipeConverteBase
 {
+    private ApplicationDbContext dbContext = null!;
+
     public async Task<RecipeEntity> Convert(string recipe, CancellationToken cancellationToken = default)
     {
+        dbContext = await contextFactory.CreateDbContextAsync(cancellationToken);
+
         var client = new ChatClient(model: "gpt-4o", apiKey: Config["OPENAI_SECRET"]);
 
         string newPromptRecetteConvert = dbContext.Prompts.Where(c => c.Name == "GptRecipeConvert").Select(c => c.Prompt).First();
