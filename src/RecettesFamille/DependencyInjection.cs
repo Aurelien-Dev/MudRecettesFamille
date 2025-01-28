@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using RecettesFamille.Data;
 using RecettesFamille.Managers.AiGenerators;
 
@@ -8,8 +9,8 @@ namespace RecettesFamille
     {
         public static IServiceCollection AddManagers(this IServiceCollection services)
         {
-            //services.AddScoped<IRecipeConverteBase, GptRecipeConverterManager>();
-            services.AddScoped<IRecipeConverteBase, DeepSeekRecipeConverterManager>();
+            services.AddKeyedScoped<IIaManagerBase, OpenAiManager>("OpenAi");
+            services.AddKeyedScoped<IIaManagerBase, DeepSeekManager>("DeepSeek");
 
             return services;
         }

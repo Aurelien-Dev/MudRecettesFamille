@@ -44,7 +44,7 @@ else
                             @* <MudText Typo="Typo.body2">@item.InformationPreparation</MudText> *@
                         </MudCardContent>
                         <MudCardActions>
-                            <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" OnClick="(() => NavigateToRecipe(item.Id))">Open</MudButton>
+                            <MudButton Href="@($"/recette/{item.Id}")" Variant="Variant.Text" Color="Color.Primary" Size="Size.Small">Open</MudButton>
                         </MudCardActions>
                     </MudCard>
                 </MudItem>
@@ -55,7 +55,7 @@ else
     {
         <MudPaper Elevation="1" Style="">
             <MudTable Items="recetteEntities" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
-                      Filter="new Func<RecipeEntity,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)" >
+                      Filter="new Func<RecipeEntity,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)">
                 <ToolBarContent>
                     <MudSpacer />
                     <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
@@ -66,7 +66,7 @@ else
                     <MudTd>@context.Name</MudTd>
                     <MudTd>@context.InformationPreparation</MudTd>
                     <MudTd>
-                        <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" OnClick="(() => NavigateToRecipe(context.Id))">Open</MudButton>
+                        <MudButton Href="@($"/recette/{context.Id}")" Variant="Variant.Text" Color="Color.Primary" Size="Size.Small">Open</MudButton>
                     </MudTd>
                 </RowTemplate>
 
@@ -104,7 +104,4 @@ else
             return true;
         return false;
     }
-
-
-    public void NavigateToRecipe(int idRecipe) => navigationManager.NavigateTo($"/recette/{idRecipe}");
 }

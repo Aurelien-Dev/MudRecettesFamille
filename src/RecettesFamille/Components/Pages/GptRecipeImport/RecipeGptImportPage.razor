@@ -44,7 +44,7 @@
 
 @code {
     [Inject] NavigationManager navigationManager { get; set; } = null!;
-    [Inject] IRecipeConverteBase gptRecipeConverterManager { get; set; } = null!;
+    [Inject(Key = "DeepSeek")] IIaManagerBase gptRecipeConverterManager { get; set; } = null!;
 
     private MudTextField<string> multilineReference = null!; // Reference to the multiline text field
 
@@ -57,7 +57,7 @@
         isWorkInProgress = true;
         try
         {
-            RecipeEntity recette = await gptRecipeConverterManager.Convert(recipeDescription, cancellationTokenSource.Token);
+            RecipeEntity recette = await gptRecipeConverterManager.ConvertRecipe(recipeDescription, cancellationTokenSource.Token);
 
             DbContext.Recettes.Update(recette);
             await DbContext.SaveChangesAsync(cancellationTokenSource.Token);

@@ -8,18 +8,20 @@
 @if (EditMode)
 {
     <MudGrid Spacing="2" >
-        <MudItem xs="12" md="6">
+        <MudItem xs="12" md="4">
             <MudFileUpload @ref="mudFileUpload" T="IBrowserFile" FilesChanged="OnInputFileChanged">
                 <ActivatorContent>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
-                        Selectionne une image
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" EndIcon="@Icons.Material.Filled.ImageSearch">
                     </MudButton>
                 </ActivatorContent>
             </MudFileUpload>
         </MudItem>
-        <MudItem xs="12" md="6">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpendCropDialog" FullWidth="true">
-                Rogner
+        <MudItem xs="12" md="4">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Filled.Crop" OnClick="OpendCropDialog" FullWidth="true">
+            </MudButton>
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Outlined.AutoFixHigh" OnClick="OpendCropDialog" FullWidth="true">
             </MudButton>
         </MudItem>
         <MudItem xs="12" md="12">
@@ -69,7 +71,7 @@ else
         }
     }
 
-    private async void OpendCropDialog()
+    private async Task OpendCropDialog()
     {
         var parameters = new DialogParameters<CropDialog>
         {
@@ -86,6 +88,13 @@ else
         Block.Image = result.Data.ToString();
         OnBlockUpdated?.Invoke(Block);
         StateHasChanged();
+    }
+
+    private async Task AskImageToAi()
+    {
+
+
+
     }
 
     private async Task<string> ConvertToBase64Async(IBrowserFile file)

@@ -9,11 +9,16 @@ using RecettesFamille.Managers.Mappers;
 
 namespace RecettesFamille.Managers.AiGenerators;
 
-public class DeepSeekRecipeConverterManager(IConfiguration Config, IDbContextFactory<ApplicationDbContext> contextFactory) : IRecipeConverteBase
+public class DeepSeekManager(IConfiguration Config, IDbContextFactory<ApplicationDbContext> contextFactory) : IIaManagerBase
 {
     private ApplicationDbContext dbContext = null!;
 
-    public async Task<RecipeEntity> Convert(string recipe, CancellationToken cancellationToken = default)
+    public Task<string> AskImage(CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<RecipeEntity> ConvertRecipe(string recipe, CancellationToken cancellationToken = default)
     {
         string apiKey = Config["DEEPSEEK_SECRET"] ?? throw new ApplicationException("Environment variable IsNullOrEmpty (DEEPSEEK_SECRET)");
         var client = new DeepSeekClient(apiKey);
@@ -65,7 +70,7 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
             InputPrice = 0.27m,
             OutputPrice = 1.10m,
             UseCase = "RecipeConverter",
-            AiModelName = "DeepSeek"
+            AiModelName = DeepSeekModels.ChatModel
         });
         await dbContext.SaveChangesAsync();
     }

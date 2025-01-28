@@ -1,7 +1,7 @@
 ﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
 @using RecettesFamille.Managers
 
-<MudItem xs="12" md="12" Class="d-flex justify-center flex-grow-1" >
+<MudItem xs="12" md="12" Class="d-flex justify-center flex-grow-1">
     <MudButtonGroup OverrideStyles="false" Variant="Variant.Outlined">
         <MudIconButton Variant="Variant.Filled" Color="Color.Tertiary" Icon="@Icons.Material.Filled.Image" aria-label="delete"
                        OnClick="@(() => AddNewBlock<BlockImageEntity>())" />
@@ -13,7 +13,7 @@
 </MudItem>
 
 @code {
-    [Parameter] public Action<BlockBase> AddBlockCallback { get; set; } = null!;
+    [Parameter] public Func<BlockBase, Task> AddBlockCallback { get; set; } = null!;
     [Parameter] public int? PrecedentIndex { get; set; } = null!;
 
     public void AddNewBlock<T>() where T : BlockBase, new()
