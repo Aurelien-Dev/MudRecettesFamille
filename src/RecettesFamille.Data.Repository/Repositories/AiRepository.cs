@@ -22,7 +22,7 @@ public class AiRepository(IMapper Mapper, ApplicationDbContext Context) : IAiRep
     {
         var result = await Context.Prompts.ToListAsync();
 
-        return Mapper.Map< List<PromptDto>>(result);
+        return Mapper.Map<List<PromptDto>>(result);
     }
 
     public async Task UpdatePrompt(PromptDto prompt, CancellationToken cancellationToken = default)
@@ -36,6 +36,16 @@ public class AiRepository(IMapper Mapper, ApplicationDbContext Context) : IAiRep
         await Context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<bool> AddPrompt(PromptDto prompt, CancellationToken cancellationToken = default)
+    {
+        PromptEntity promptEntity = Mapper.Map<PromptEntity>(prompt);
+
+        await Context.AddAsync(promptEntity);
+        var result = await Context.SaveChangesAsync(cancellationToken);
+
+        return result > 0;
+    }
+
     public async Task ReportConsumption(AiConsumptionDto aiConsumptionDto, CancellationToken cancellationToken = default)
     {
         var element = Mapper.Map<AiConsumptionEntity>(aiConsumptionDto);
@@ -45,34 +55,4 @@ public class AiRepository(IMapper Mapper, ApplicationDbContext Context) : IAiRep
 
 
 
-    public async Task Delete(int recipeId, CancellationToken cancellationToken = default)
-    {
-        var element = await Context.Recettes.FindAsync(recipeId, cancellationToken);
-        if (element != null)
-        {
-            Context.Recettes.Remove(element);
-            await Context.SaveChangesAsync(cancellationToken);
-        }
-    }
-
-    public async Task DeleteBlock(int blockId, CancellationToken cancellationToken = default)
-    {
-        var element = await Context.Set<BlockBaseEntity>().FindAsync(blockId, cancellationToken);
-        if (element is null)
-            return;
-
-        Context.Set<BlockBaseEntity>().Remove(element);
-        await Context.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task Update(RecipeDto recipe, CancellationToken cancellationToken = default)
-    {
-        var element = await Context.Recettes.FindAsync(recipe.Id, cancellationToken);
-        if (recipe is null)
-            return;
-
-        Mapper.Map(recipe, element);
-
-        await Context.SaveChangesAsync(cancellationToken);
-    }
 }

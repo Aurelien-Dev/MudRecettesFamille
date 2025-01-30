@@ -75,7 +75,10 @@
 
     public async Task SavePrompt()
     {
-        await AiRepository.UpdatePrompt(CurrentPrompt);
+        if (CurrentPrompt.Id.HasValue)
+            await AiRepository.UpdatePrompt(CurrentPrompt);
+        else
+            await AiRepository.AddPrompt(CurrentPrompt);
 
         snackbar.Clear();
         snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;

@@ -122,7 +122,7 @@
         if (Recipe is null)
             return;
 
-        block.Recipe = Recipe;
+        block.RecipeId = Recipe.Id;
         var blockDto = await RecetteRepository.AddBlock(block);
         Recipe.BlocksInstructions.Add(blockDto);
 
@@ -137,7 +137,7 @@
             return;
 
         Recipe.BlocksInstructions.MoveUp(block);
-        // await DbContext.SaveChangesAsync();
+        await RecetteRepository.UpdateRecipe(Recipe);
         StateHasChanged();
     }
 
@@ -148,7 +148,7 @@
 
 
         Recipe.BlocksInstructions.MoveDown(block);
-        // await DbContext.SaveChangesAsync();
+        await RecetteRepository.UpdateRecipe(Recipe);
         StateHasChanged();
     }
     #endregion
