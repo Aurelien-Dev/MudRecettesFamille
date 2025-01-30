@@ -1,29 +1,31 @@
 ﻿using DeepSeek.Core;
 using DeepSeek.Core.Models;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using RecettesFamille.Data;
-using RecettesFamille.Data.EntityModel;
+using RecettesFamille.Data.Repository.IRepositories;
+using RecettesFamille.Dto.Models;
+using RecettesFamille.Dto.Models.Blocks;
 using RecettesFamille.Managers.AiGenerators.Models;
 using RecettesFamille.Managers.Mappers;
 
 namespace RecettesFamille.Managers.AiGenerators;
 
-public class DeepSeekManager(IConfiguration Config, IDbContextFactory<ApplicationDbContext> contextFactory) : IIaManagerBase
+public class DeepSeekManager(IConfiguration Config, IAiRepository AiRepository) : IIaManagerBase
 {
-    private ApplicationDbContext dbContext = null!;
 
     public Task<string> AskImage(CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<RecipeEntity> ConvertRecipe(string recipe, CancellationToken cancellationToken = default)
+    public async Task<RecipeDto> ConvertRecipe(string recipe, CancellationToken cancellationToken = default)
     {
         string apiKey = Config["DEEPSEEK_SECRET"] ?? throw new ApplicationException("Environment variable IsNullOrEmpty (DEEPSEEK_SECRET)");
         var client = new DeepSeekClient(apiKey);
 
-        string newPromptRecetteConvert = dbContext.Prompts.Where(c => c.Name == "GptRecipeConvert").Select(c => c.Prompt).First();
+
+        PromptDto promptRecetteConvert = await AiRepository.GetPrompt("GptRecipeConvert");
+
+        string newPromptRecetteConvert = promptRecetteConvert.Prompt;
         string ask = $@"Voici une recette à convertir en JSON en respectant les instructions du prompt :
 
 === Début de la recette ===
@@ -62,7 +64,7 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
 
     private async Task ReportConsumption(ChatResponse chatResponse)
     {
-        dbContext.AiConsumptions.Add(new AiConsumptionEntity()
+        await AiRepository.ReportConsumption(new AiConsumptionDto()
         {
             Date = DateTime.UtcNow,
             InputToken = chatResponse.Usage?.PromptCacheMissTokens,
@@ -72,6 +74,5 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
             UseCase = "RecipeConverter",
             AiModelName = DeepSeekModels.ChatModel
         });
-        await dbContext.SaveChangesAsync();
     }
 }

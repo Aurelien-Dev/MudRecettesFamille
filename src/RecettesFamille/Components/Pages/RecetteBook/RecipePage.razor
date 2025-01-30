@@ -1,13 +1,14 @@
 @page "/recette/{IdRecette:int?}"
-@using RecettesFamille.Extensions
 @using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
 @using RecettesFamille.Data
 @using RecettesFamille.Data.EntityModel
-@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+@using RecettesFamille.Data.EntityModel.Blocks
+@using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Dto.Models
+@using RecettesFamille.Dto.Models.Blocks
+@using RecettesFamille.Extensions
 @using RecettesFamille.Managers;
 @using RecettesFamille.Managers.AiGenerators
-
-@inherits MyComponentBase
 
 @if (Recette is not null)
 {
@@ -15,7 +16,6 @@
     {
         <MudTextField @bind-Value="Recette.Name" Typo="Typo.h3" Style="font-weight: bold;" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
         <MudTextField @bind-Value="Recette.InformationPreparation" Typo="Typo.subtitle1" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
-
     }
     else
     {
@@ -25,7 +25,7 @@
 
     <MudToolBar Class="justify-center mt-0 mb-0">
         <MudToggleIconButton @bind-Toggled="editorMode" Icon="@Icons.Material.Outlined.Edit"
-                             ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
+        ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
         <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
     </MudToolBar>
 
@@ -34,11 +34,11 @@
         @foreach (var block in Recette.BlocksInstructions.OrderBy(c => c.Order).EmptyIfNull())
         {
             <BaseBlock EditMode="editorMode" Block="block"
-                       OnBlockUpdated="OnBlockUpdated"
-                       OnBlockDeleted="OnBlockDeleted"
-                       OnBlockHasChanged="OnBlockHasChanged"
-                       MoveUp="MoveUp"
-                       MoveDown="MoveDown" />
+            OnBlockUpdated="OnBlockUpdated"
+            OnBlockDeleted="OnBlockDeleted"
+            OnBlockHasChanged="OnBlockHasChanged"
+            MoveUp="MoveUp"
+            MoveDown="MoveDown" />
         }
 
         @if (editorMode)
@@ -50,25 +50,23 @@
 
 <style>
     .text-end input {
-        text-align: center !important;
+    text-align: center !important;
     }
 </style>
 
 @code {
+    [Inject] IRecetteRepository RecetteRepository { get; set; } = default!;
     [Inject] IDialogService dialogService { get; set; } = null!;
     [Inject] NavigationManager navigationManager { get; set; } = null!;
 
     [Parameter] public int IdRecette { get; set; }
 
-    RecipeEntity? Recette { get; set; } = null!;
+    RecipeDto? Recette { get; set; } = null!;
     public bool editorMode { get; set; } = false;
 
     protected async override Task OnParametersSetAsync()
     {
-        Recette = await DbContext.Recettes.Include(s => s.BlocksInstructions)
-                                          .ThenInclude(b => ((BlockIngredientListEntity)b).Ingredients)
-                                          .Where(r => r.Id == IdRecette)
-                                          .FirstOrDefaultAsync();
+        Recette = await RecetteRepository.GetWithInstructions(IdRecette);
     }
 
     public async Task DeleteRecipe()
@@ -81,8 +79,7 @@
         if (Recette is null)
             return;
 
-        DbContext.Recettes.Remove(Recette);
-        await DbContext.SaveChangesAsync();
+        await RecetteRepository.DeleteRecipe(IdRecette);
 
         navigationManager.NavigateTo("/");
     }
@@ -92,8 +89,8 @@
         if (Recette is null)
             return;
 
-        DbContext.Update(Recette);
-        await DbContext.SaveChangesAsync();
+        await RecetteRepository.UpdateRecipe(Recette);
+
         StateHasChanged();
     }
 
@@ -104,21 +101,24 @@
         return Task.CompletedTask;
     }
 
-    private async Task OnBlockDeleted(BlockBase block)
+    private async Task OnBlockDeleted(BlockBaseDto block)
     {
-        DbContext.Remove(block);
-        await DbContext.SaveChangesAsync();
+        bool success = await RecetteRepository.DeleteBlock(block.Id!.Value);
+
+        if (!success) return;
+
+        Recette!.BlocksInstructions.Remove(block);
         StateHasChanged();
     }
 
-    private async Task OnBlockUpdated(BlockBase block)
+    private async Task OnBlockUpdated(BlockBaseDto block)
     {
         DbContext.Update(block);
         await DbContext.SaveChangesAsync();
         StateHasChanged();
     }
 
-    private async Task AddNewBlock(BlockBase block)
+    private async Task AddNewBlock(BlockBaseDto block)
     {
         if (Recette is null)
             return;
@@ -133,7 +133,7 @@
     #endregion
 
     #region Block move
-    private async Task MoveUp(BlockBase block)
+    private async Task MoveUp(BlockBaseDto block)
     {
         if (Recette is null)
             return;
@@ -143,7 +143,7 @@
         StateHasChanged();
     }
 
-    private async Task MoveDown(BlockBase block)
+    private async Task MoveDown(BlockBaseDto block)
     {
         if (Recette is null)
             return;

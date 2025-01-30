@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using RecettesFamille.Data;
 using RecettesFamille.Managers.AiGenerators;
 
@@ -21,7 +20,7 @@ namespace RecettesFamille
             {
                 var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
                 options.UseNpgsql(postgresCs);
-            }, ServiceLifetime.Transient);
+            }, ServiceLifetime.Scoped);
 
             return services;
         }

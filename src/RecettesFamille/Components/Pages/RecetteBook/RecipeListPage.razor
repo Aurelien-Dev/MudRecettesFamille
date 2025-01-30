@@ -2,9 +2,9 @@
 @using Microsoft.EntityFrameworkCore
 @using RecettesFamille.Data
 @using RecettesFamille.Data.EntityModel
+@using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Dto.Models
 @using RecettesFamille.Extensions
-
-@inherits MyComponentBase
 
 <MudToolBar Class="mb-3" Dense="true">
     <MudSpacer />
@@ -53,9 +53,9 @@ else
     }
     else if (viewMode == Icons.Material.Filled.List)
     {
-        <MudPaper Elevation="1" Style="">
+        <MudPaper Elevation="1" >
             <MudTable Items="recetteEntities" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
-                      Filter="new Func<RecipeEntity,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)">
+                      Filter="new Func<RecipeDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)">
                 <ToolBarContent>
                     <MudSpacer />
                     <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
@@ -82,19 +82,22 @@ else
 @code {
     [Inject] NavigationManager navigationManager { get; set; } = null!;
 
-    List<RecipeEntity> recetteEntities { get; set; } = null!;
+    [Inject] IRecetteRepository RecetteRepository { get; set; } = default!;
+
+    List<RecipeDto> recetteEntities { get; set; } = null!;
     string viewMode = Icons.Material.Filled.List;
     string searchString1 = string.Empty;
 
     protected async override Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        recetteEntities = await DbContext.Recettes.Include(s => s.BlocksInstructions).ToListAsync();
+
+        recetteEntities = await RecetteRepository.GetAll();
     }
 
-    private bool FilterFunc1(RecipeEntity element) => FilterFunc(element, searchString1);
+    private bool FilterFunc1(RecipeDto element) => FilterFunc(element, searchString1);
 
-    private bool FilterFunc(RecipeEntity element, string searchString)
+    private bool FilterFunc(RecipeDto element, string searchString)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;

@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using MudBlazor.Extensions;
 using RecettesFamille.Data.EntityModel;
-using RecettesFamille.Data.EntityModel.RecipeSubEntity;
+using RecettesFamille.Data.EntityModel.Blocks;
 using System.Diagnostics;
 
 namespace RecettesFamille.Data
@@ -19,22 +18,27 @@ namespace RecettesFamille.Data
             builder.Entity<RecipeEntity>().HasKey(c => c.Id);
             builder.Entity<RecipeEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
 
-            builder.Entity<BlockBase>().UseTpcMappingStrategy();
+            builder.Entity<BlockBaseEntity>().UseTpcMappingStrategy();
 
-            builder.Entity<BlockBase>().HasKey(c => c.Id);
-            builder.Entity<BlockBase>().Property(c => c.Id).ValueGeneratedOnAdd();
-            builder.Entity<BlockBase>().HasOne(c => c.Recipe).WithMany(c => c.BlocksInstructions).IsRequired();
+            builder.Entity<BlockBaseEntity>().HasKey(c => c.Id);
+            builder.Entity<BlockBaseEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
+            builder.Entity<BlockBaseEntity>().HasOne(c => c.Recipe).WithMany(c => c.BlocksInstructions).IsRequired();
 
             builder.Entity<BlockImageEntity>();
             builder.Entity<BlockIngredientListEntity>();
             builder.Entity<BlockInstructionEntity>();
 
-            builder.Entity<IngredientEntity>().HasKey(c => c.Id);
-            builder.Entity<IngredientEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
-            builder.Entity<IngredientEntity>().HasOne(c => c.IngredientList).WithMany(c => c.Ingredients).HasForeignKey(c => c.IngredientListId);
+            builder.Entity<IngredientEntity>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(c => c.Id).ValueGeneratedOnAdd();
+                entity.HasOne(e => e.IngredientList)
+                      .WithMany(il => il.Ingredients)
+                      .HasForeignKey(e => e.IngredientListId);
+            });
 
             builder.Entity<PromptEntity>().HasKey(c => c.Id);
-            builder.Entity<BlockBase>().Property(c => c.Id).ValueGeneratedOnAdd();
+            builder.Entity<BlockBaseEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
 
             base.OnModelCreating(builder);
         }
@@ -43,7 +47,7 @@ namespace RecettesFamille.Data
         {
             try
             {
-                string fileName = $"backup_{DateTime.UtcNow.ToIsoDateString()}-{DateTime.UtcNow.ToShortTimeString()}.backup";   
+                string fileName = $"backup_{DateTime.UtcNow.ToShortDateString()}-{DateTime.UtcNow.ToShortTimeString()}.backup";   
                 string command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -p 5442 -U pguser -d recettesfamilledb -F c -f wwwroot/backups/{fileName}";
 
                 if (!Directory.Exists("wwwroot/backups"))

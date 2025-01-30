@@ -1,5 +1,5 @@
-﻿namespace RecettesFamille.Data.EntityModel.RecipeSubEntity;
-public class BlockImageEntity : BlockBase
+﻿namespace RecettesFamille.Data.EntityModel.Blocks;
+public class BlockImageEntity : BlockBaseEntity
 {
     public string Image { get; set; }
 

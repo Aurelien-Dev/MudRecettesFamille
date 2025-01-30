@@ -1,5 +1,6 @@
-﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
-@inherits BaseBlockDefinition<BlockBase>
+﻿@using RecettesFamille.Data.EntityModel.Blocks
+@using RecettesFamille.Dto.Models.Blocks
+@inherits BaseBlockDefinition<BlockBaseDto>
 
 @if (Block.HalfPage)
 {
@@ -14,13 +15,13 @@ else
     <MudStack Row="true" StretchItems="StretchItems.Start">
         @switch (Block)
         {
-            case BlockInstructionEntity instructionBlock:
+            case BlockInstructionDto instructionBlock:
                 <InstructionComponent EditMode="EditMode" Block="instructionBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
                 break;
-            case BlockIngredientListEntity ingredientListBlock:
+            case BlockIngredientListDto ingredientListBlock:
                 <IngredientComponent EditMode="EditMode" Block="ingredientListBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
                 break;
-            case BlockImageEntity imageBlock:
+            case BlockImageDto imageBlock:
                 <ImageComponent EditMode="EditMode" Block="imageBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
                 break;
 

@@ -1,34 +1,36 @@
-﻿using RecettesFamille.Data.EntityModel.RecipeSubEntity;
+﻿using RecettesFamille.Data.EntityModel.Blocks;
 using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Managers.AiGenerators.Models;
+using RecettesFamille.Dto.Models;
+using RecettesFamille.Dto.Models.Blocks;
 
 namespace RecettesFamille.Managers.Mappers
 {
     public static class GptMapper
     {
-        public static RecipeEntity ConvertToRecipeEntity(AiRecipe gptRecipe)
+        public static RecipeDto ConvertToRecipeEntity(AiRecipe gptRecipe)
         {
             if (gptRecipe == null)
             {
                 throw new ArgumentNullException(nameof(gptRecipe));
             }
 
-            var recipeEntity = new RecipeEntity
+            var recipeEntity = new RecipeDto
             {
                 Name = gptRecipe.Nom,
                 InformationPreparation = $"Temps de préparation: {gptRecipe.Preparation.TempsPreparation} minutes, Temps de cuisson: {gptRecipe.Preparation.TempsCuisson} minutes, Portions: {gptRecipe.Preparation.Portions}",
-                BlocksInstructions = new List<BlockBase>()
+                BlocksInstructions = new List<BlockBaseDto>()
             };
 
             // Convert ingredients to BlockIngredientListEntity
-            var ingredientBlocks = gptRecipe.Ingredients.Select((ingredient, index) => new BlockIngredientListEntity
+            var ingredientBlocks = gptRecipe.Ingredients.Select((ingredient, index) => new BlockIngredientListDto
             {
-                Order = index + 1,
+                Order = index,
                 Name = ingredient.NomListe,
                 HalfPage = true,
-                Ingredients = ingredient.Ingredients.Select((ing, ingIndex) => new IngredientEntity
+                Ingredients = ingredient.Ingredients.Select((ing, ingIndex) => new IngredientDto
                 {
-                    Order = ingIndex + 1,
+                    Order = ingIndex,
                     Name = ing.Nom,
                     Quantity = ing.Quantite
                 }).ToList()
@@ -36,7 +38,7 @@ namespace RecettesFamille.Managers.Mappers
             recipeEntity.BlocksInstructions.AddRange(ingredientBlocks);
 
             // Convert instructions to a single BlockInstructionEntity
-            var instructionBlock = new BlockInstructionEntity
+            var instructionBlock = new BlockInstructionDto
             {
                 Order = recipeEntity.BlocksInstructions.Count,
                 Instruction = string.Join("\n\n", gptRecipe.Instructions)

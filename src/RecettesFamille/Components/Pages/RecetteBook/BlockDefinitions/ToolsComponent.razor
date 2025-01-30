@@ -1,24 +1,25 @@
-﻿@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+﻿@using RecettesFamille.Data.EntityModel.Blocks
+@using RecettesFamille.Dto.Models.Blocks
 @using RecettesFamille.Managers
 
 <MudItem xs="12" md="12" Class="d-flex justify-center flex-grow-1">
     <MudButtonGroup OverrideStyles="false" Variant="Variant.Outlined">
         <MudIconButton Variant="Variant.Filled" Color="Color.Tertiary" Icon="@Icons.Material.Filled.Image" aria-label="delete"
-                       OnClick="@(() => AddNewBlock<BlockImageEntity>())" />
+                       OnClick="@(() => AddNewBlock<BlockImageDto>())" />
         <MudIconButton Variant="Variant.Filled" Color="Color.Tertiary" Icon="@Icons.Material.Filled.Assignment" aria-label="delete"
-                       OnClick="@(() => AddNewBlock<BlockInstructionEntity>())" />
+                       OnClick="@(() => AddNewBlock<BlockInstructionDto>())" />
         <MudIconButton Variant="Variant.Filled" Color="Color.Tertiary" Icon="@Icons.Material.Filled.FormatListBulleted" aria-label="delete"
-                       OnClick="@(() => AddNewBlock<BlockIngredientListEntity>())" />
+                       OnClick="@(() => AddNewBlock<BlockIngredientListDto>())" />
     </MudButtonGroup>
 </MudItem>
 
 @code {
-    [Parameter] public Func<BlockBase, Task> AddBlockCallback { get; set; } = null!;
+    [Parameter] public Func<BlockBaseDto, Task> AddBlockCallback { get; set; } = null!;
     [Parameter] public int? PrecedentIndex { get; set; } = null!;
 
-    public void AddNewBlock<T>() where T : BlockBase, new()
+    public void AddNewBlock<T>() where T : BlockBaseDto, new()
     {
-        BlockBase newBlock = Activator.CreateInstance<T>();
+        BlockBaseDto newBlock = Activator.CreateInstance<T>();
         newBlock.Order = PrecedentIndex.HasValue ? PrecedentIndex.Value + 1 : 0;
 
         if (PrecedentIndex.HasValue)

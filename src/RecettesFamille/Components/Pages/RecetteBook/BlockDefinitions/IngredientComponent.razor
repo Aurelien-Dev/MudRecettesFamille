@@ -1,8 +1,10 @@
 ﻿@using RecettesFamille.Data
-@using RecettesFamille.Data.EntityModel.RecipeSubEntity
-@inherits BaseBlockDefinition<BlockIngredientListEntity>
+@using RecettesFamille.Data.EntityModel.Blocks
+@using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Dto.Models.Blocks
+@inherits BaseBlockDefinition<BlockIngredientListDto>
 
-<MudDataGrid @ref="_dataGrid" Items="@Block.Ingredients" T="IngredientEntity" Dense="true" Hover="true" Striped="false" Class="mx-3 mb-2 rounded-lg"
+<MudDataGrid @ref="_dataGrid" Items="@Block.Ingredients" T="IngredientDto" Dense="true" Hover="true" Striped="false" Class="mx-3 mb-2 rounded-lg"
 HeaderClass="hide-header" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false"
 EditMode="DataGridEditMode.Form" edit EditTrigger="DataGridEditTrigger.Manual"
 CommittedItemChanges="@CommittedItemChanges">
@@ -41,47 +43,43 @@ CommittedItemChanges="@CommittedItemChanges">
 </style>
 
 @code {
+    [Inject] IRecetteRepository RecetteRepository { get; set; } = default!;
+
     DialogOptions dialogOptions = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true };
-    MudDataGrid<IngredientEntity> _dataGrid = null!;
+    MudDataGrid<IngredientDto> _dataGrid = null!;
 
     public void OnNameUpdated()
     {
         OnBlockUpdated?.Invoke(Block);
     }
 
-    private async Task ToggleChanged(bool value, IngredientEntity ingredientEntity)
+    private async Task ToggleChanged(bool value, IngredientDto ingredientEntity)
     {
         if (value)
             return;
 
-        DbContext.Entry(ingredientEntity).State = EntityState.Deleted;
+        bool success = await RecetteRepository.DeleteIngredient(ingredientEntity.Id!.Value);
+
+        if (!success) return;
+
         Block.Ingredients.Remove(ingredientEntity);
-
-        await DbContext.SaveChangesAsync();
+        StateHasChanged();
     }
-
 
     public async Task OpenDialogNewItem()
     {
-        await _dataGrid.SetEditingItemAsync(new IngredientEntity());
+        await _dataGrid.SetEditingItemAsync(new IngredientDto());
     }
 
-    public async Task CommittedItemChanges(IngredientEntity item)
+    public async Task CommittedItemChanges(IngredientDto item)
     {
         if (!Block.Id.HasValue)
             return;
 
-        item.IngredientListId = Block.Id.Value;
-
-        //Cas d'un nouvelle item
+        // Cas d'un nouvel item
         if (!item.Id.HasValue)
             Block.Ingredients.Add(item);
 
-        // Obligé de mettre à jour l'ingrédient ici en raison de l'attribut [JsonIgnore] sur la propriété de navigation IngredientList, ce qui entraîne une perte de liaison entre le bloc IngredientList et l'ingrédient
-        // L'attribut [JsonIgnore] a été ajouté car le DataGrid entraînait une boucle infinie en raison de la propriété de navigation
-        DbContext.Update(item);
-
-        await DbContext.SaveChangesAsync();
-        OnBlockHasChanged?.Invoke();
+        OnBlockUpdated?.Invoke(Block);
     }
 }

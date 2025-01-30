@@ -11,6 +11,7 @@ using Cropper.Blazor.Extensions;
 using MudBlazor;
 using Blazored.LocalStorage;
 using BitzArt.Blazor.Cookies;
+using RecettesFamille.Data.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +28,6 @@ builder.Services.AddMudMarkdownServices();
 builder.Services.AddBlazoredLocalStorage();
 builder.AddBlazorCookies();
 
-
 builder.Services.AddCropper();
 
 // Add services to the container.
@@ -38,6 +38,8 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddScoped<EmailManager>();
+
+builder.Services.AddRepository();
 
 builder.Services.AddManagers();
 
@@ -50,7 +52,6 @@ builder.Services.AddAuthentication(options =>
 
 
 builder.Services.AddCustomDbContext();
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -67,11 +68,7 @@ builder.Services.AddServerSideBlazor()
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseMigrationsEndPoint();
-}
-else
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.

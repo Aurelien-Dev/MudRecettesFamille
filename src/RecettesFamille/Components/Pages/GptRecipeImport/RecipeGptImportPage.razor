@@ -4,13 +4,13 @@
 @using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
 @using RecettesFamille.Data
 @using RecettesFamille.Data.EntityModel
+@using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Dto.Models
 @using RecettesFamille.Managers
 @using System.Text.Json
 @using System.Text.Json.Serialization.Metadata
 @using System.ComponentModel.DataAnnotations
 @using RecettesFamille.Managers.AiGenerators
-
-@inherits MyComponentBase
 
 <MudForm Spacing="2">
     <MudGrid>
@@ -43,6 +43,7 @@
 
 
 @code {
+    [Inject] IRecetteRepository RecetteRepository { get; set; } = default!;
     [Inject] NavigationManager navigationManager { get; set; } = null!;
     [Inject(Key = "DeepSeek")] IIaManagerBase gptRecipeConverterManager { get; set; } = null!;
 
@@ -57,11 +58,9 @@
         isWorkInProgress = true;
         try
         {
-            RecipeEntity recette = await gptRecipeConverterManager.ConvertRecipe(recipeDescription, cancellationTokenSource.Token);
+            RecipeDto recette = await gptRecipeConverterManager.ConvertRecipe(recipeDescription, cancellationTokenSource.Token);
 
-            DbContext.Recettes.Update(recette);
-            await DbContext.SaveChangesAsync(cancellationTokenSource.Token);
-
+            RecetteRepository.AddRecipe(recette);
             navigationManager.NavigateTo($"/recette/{recette.Id}");
         }
         catch (OperationCanceledException)

@@ -1,6 +1,6 @@
-﻿namespace RecettesFamille.Data.EntityModel.RecipeSubEntity;
+﻿namespace RecettesFamille.Data.EntityModel.Blocks;
 
-public class BlockInstructionEntity : BlockBase
+public class BlockInstructionEntity : BlockBaseEntity
 {
     public string Instruction { get; set; } = string.Empty;
 

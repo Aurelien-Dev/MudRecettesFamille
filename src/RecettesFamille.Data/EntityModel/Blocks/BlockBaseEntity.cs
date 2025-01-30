@@ -1,7 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace RecettesFamille.Data.EntityModel.RecipeSubEntity;
-public abstract class BlockBase
+﻿namespace RecettesFamille.Data.EntityModel.Blocks;
+public abstract class BlockBaseEntity
 {
     public int? Id { get; set; }
     public int Order { get; set; }

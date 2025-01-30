@@ -1,8 +1,7 @@
-﻿using MudBlazor;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace RecettesFamille.Data.EntityModel.RecipeSubEntity;
-public class BlockIngredientListEntity : BlockBase
+namespace RecettesFamille.Data.EntityModel.Blocks;
+public class BlockIngredientListEntity : BlockBaseEntity
 {
     public string Name { get; set; } = "Ingrédients";
     public List<IngredientEntity> Ingredients { get; set; } = new List<IngredientEntity>();
@@ -14,7 +13,7 @@ public class BlockIngredientListEntity : BlockBase
 }
 
 
-public record class IngredientEntity()
+public class IngredientEntity()
 {
     public int? Id { get; set; }
     public int Order { get; set; }

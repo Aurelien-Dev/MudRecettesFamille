@@ -1,15 +1,15 @@
 @page "/admin/prompt"
 @layout AdminLayout
+@using System.Text
 @using RecettesFamille.Components.Layout
-@using RecettesFamille.Extensions
 @using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
 @using RecettesFamille.Data
 @using RecettesFamille.Data.EntityModel
-@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+@using RecettesFamille.Data.EntityModel.Blocks
+@using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Dto.Models.Blocks
+@using RecettesFamille.Extensions
 @using RecettesFamille.Managers
-@using System.Text
-
-@inherits MyComponentBase
 
 <MudGrid>
     <MudItem xs="12" md="4">
@@ -21,7 +21,7 @@
                 <MudListItem Dense="true" Text="@item.Name" Icon="@Icons.Material.Filled.UploadFile" OnClick="@(() => ShowPrompt(item))" />
             }
             @{
-                PromptEntity newPrompt = new() { Name = "NewPrompt" };
+                PromptDto newPrompt = new() { Name = "NewPrompt" };
             }
             <MudListItem Dense="true" Text="@newPrompt.Name" Icon="@Icons.Material.Filled.NewLabel" OnClick="@(() => ShowPrompt(newPrompt))" />
 
@@ -51,27 +51,31 @@
 </MudGrid>
 
 @code {
+    [Inject] IAiRepository AiRepository { get; set; } = default!;
     [Inject] ISnackbar snackbar { get; set; } = null!;
 
-    private List<PromptEntity> Prompts { get; set; } = new List<PromptEntity>();
+    private List<PromptDto> Prompts { get; set; } = new List<PromptDto>();
 
-    private PromptEntity CurrentPrompt { get; set; } = new PromptEntity();
+    private PromptDto CurrentPrompt { get; set; } = new PromptDto();
     private bool EditMode { get; set; } = false;
 
-    protected async override Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await Load();
+        if (firstRender)
+        {
+            await Load();
+            StateHasChanged();
+        }
     }
 
     public async Task Load()
     {
-        Prompts = await DbContext.Prompts.ToListAsync();
+        Prompts = await AiRepository.GetPrompt();
     }
 
     public async Task SavePrompt()
     {
-        DbContext.Update(CurrentPrompt);
-        await DbContext.SaveChangesAsync();
+        await AiRepository.UpdatePrompt(CurrentPrompt);
 
         snackbar.Clear();
         snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
@@ -81,7 +85,7 @@
         StateHasChanged();
     }
 
-    public void ShowPrompt(PromptEntity promptEntity)
+    public void ShowPrompt(PromptDto promptEntity)
     {
         CurrentPrompt = promptEntity;
     }

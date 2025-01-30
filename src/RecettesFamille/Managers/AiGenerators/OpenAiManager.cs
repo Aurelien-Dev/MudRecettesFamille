@@ -6,6 +6,7 @@ using OpenAI.Chat;
 using OpenAI.Images;
 using RecettesFamille.Data;
 using RecettesFamille.Data.EntityModel;
+using RecettesFamille.Dto.Models;
 using RecettesFamille.Managers.AiGenerators.Models;
 using RecettesFamille.Managers.Mappers;
 
@@ -37,7 +38,7 @@ public class OpenAiManager(IConfiguration Config, IDbContextFactory<ApplicationD
         return $"data:png;base64," + Convert.ToBase64String(image.ImageBytes);
     }
 
-    public async Task<RecipeEntity> ConvertRecipe(string recipe, CancellationToken cancellationToken = default)
+    public async Task<RecipeDto> ConvertRecipe(string recipe, CancellationToken cancellationToken = default)
     {
         dbContext = await contextFactory.CreateDbContextAsync(cancellationToken);
 

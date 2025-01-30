@@ -1,15 +1,14 @@
 @page "/admin/migrations"
 @layout AdminLayout
+@using System.Text
 @using RecettesFamille.Components.Layout
-@using RecettesFamille.Extensions
 @using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
 @using RecettesFamille.Data
 @using RecettesFamille.Data.EntityModel
-@using RecettesFamille.Data.EntityModel.RecipeSubEntity
+@using RecettesFamille.Data.EntityModel.Blocks
+@using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Extensions
 @using RecettesFamille.Managers
-@using System.Text
-
-@inherits MyComponentBase
 
 <MudStack Spacing="5">
 
@@ -29,6 +28,7 @@
 </MudStack>
 
 @code {
+    [Inject] ITechnicalDbRepository TechnicalDbRepository { get; set; } = default!;
     [Inject] IJSRuntime jSRuntime { get; set; } = null!;
     [Inject] ISnackbar snackbar { get; set; } = null!;
     [Inject] EmailManager emailManager { get; set; } = null!;
@@ -42,7 +42,7 @@
 
     public async Task CreateBackup()
     {
-        (bool success, string message, string fileName) = DbContext.TriggerBackup();
+        (bool success, string message, string fileName) = TechnicalDbRepository.TriggerBackup();
 
         if (success)
             ListFolder();
@@ -63,7 +63,6 @@
         await jSRuntime.InvokeVoidAsync("downloadFileFromStream", fileInfo.Name, streamRef);
     }
 
-
     public void ListFolder()
     {
         var folderPath = "wwwroot/backups/"; // Replace with the actual folder path
@@ -79,5 +78,4 @@
             fileInfos.Add(new FileInfo(file));
         }
     }
-
 }

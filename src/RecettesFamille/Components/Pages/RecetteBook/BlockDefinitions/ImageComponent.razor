@@ -1,13 +1,13 @@
 ﻿@using Cropper.Blazor.Extensions
 @using Cropper.Blazor.Models
 @using RecettesFamille.Components.Dialogs
-@using RecettesFamille.Data.EntityModel.RecipeSubEntity
 @using Cropper.Blazor
-@inherits BaseBlockDefinition<BlockImageEntity>
+@using RecettesFamille.Dto.Models.Blocks
+@inherits BaseBlockDefinition<BlockImageDto>
 
 @if (EditMode)
 {
-    <MudGrid Spacing="2" >
+    <MudGrid Spacing="2">
         <MudItem xs="12" md="4">
             <MudFileUpload @ref="mudFileUpload" T="IBrowserFile" FilesChanged="OnInputFileChanged">
                 <ActivatorContent>
@@ -25,7 +25,7 @@
             </MudButton>
         </MudItem>
         <MudItem xs="12" md="12">
-            <MudImage Src="@Block.Image" Fluid="false" ObjectFit="ObjectFit.Cover" Height="300" Elevation="25" Class="rounded-lg" Style="width:100%" >
+            <MudImage Src="@Block.Image" Fluid="false" ObjectFit="ObjectFit.Cover" Height="300" Elevation="25" Class="rounded-lg" Style="width:100%">
             </MudImage>
         </MudItem>
     </MudGrid>
@@ -82,7 +82,7 @@ else
         var dialog = await DialogService.ShowAsync<CropDialog>("Delete", parameters, options);
         var result = await dialog.Result;
 
-        if (result.Canceled)
+        if (result is null || result.Canceled)
             return;
 
         Block.Image = result.Data.ToString();
