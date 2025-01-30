@@ -3,7 +3,6 @@ using DeepSeek.Core.Models;
 using Newtonsoft.Json;
 using RecettesFamille.Data.Repository.IRepositories;
 using RecettesFamille.Dto.Models;
-using RecettesFamille.Dto.Models.Blocks;
 using RecettesFamille.Managers.AiGenerators.Models;
 using RecettesFamille.Managers.Mappers;
 

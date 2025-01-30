@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RecettesFamille.Dto.Models.Blocks
+namespace RecettesFamille.Dto.Models
 {
     public class AiConsumptionDto
     {

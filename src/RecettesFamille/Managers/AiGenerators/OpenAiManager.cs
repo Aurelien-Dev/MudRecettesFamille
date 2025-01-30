@@ -1,27 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MudBlazor;
+﻿using MudBlazor;
 using Newtonsoft.Json;
 using OpenAI.Chat;
 using OpenAI.Images;
-using RecettesFamille.Data;
-using RecettesFamille.Data.EntityModel;
+using RecettesFamille.Data.Repository.IRepositories;
 using RecettesFamille.Dto.Models;
 using RecettesFamille.Managers.AiGenerators.Models;
 using RecettesFamille.Managers.Mappers;
 
 namespace RecettesFamille.Managers.AiGenerators;
 
-public class OpenAiManager(IConfiguration Config, IDbContextFactory<ApplicationDbContext> contextFactory) : IIaManagerBase
+public class OpenAiManager(IConfiguration Config, IAiRepository AiRepository) : IIaManagerBase
 {
-    private ApplicationDbContext dbContext = null!;
-
     private const string _chatModel = "gpt-4o";
     private const string _imageModel = "dall-e-2";
 
     public async Task<string> AskImage(CancellationToken cancellationToken = default)
     {
-        dbContext = await contextFactory.CreateDbContextAsync(cancellationToken);
-
         var client = new ImageClient(model: _imageModel, apiKey: Config["OPENAI_SECRET"]);
 
         GeneratedImage image = await client.GenerateImageAsync("prompt", new ImageGenerationOptions()
@@ -39,11 +33,11 @@ public class OpenAiManager(IConfiguration Config, IDbContextFactory<ApplicationD
 
     public async Task<RecipeDto> ConvertRecipe(string recipe, CancellationToken cancellationToken = default)
     {
-        dbContext = await contextFactory.CreateDbContextAsync(cancellationToken);
-
         var client = new ChatClient(model: _chatModel, apiKey: Config["OPENAI_SECRET"]);
 
-        string newPromptRecetteConvert = dbContext.Prompts.Where(c => c.Name == "GptRecipeConvert").Select(c => c.Prompt).First();
+        PromptDto promptRecetteConvert = await AiRepository.GetPrompt("GptRecipeConvert");
+
+        string newPromptRecetteConvert = promptRecetteConvert.Prompt;
         string ask = $@"Voici une recette à convertir en JSON en respectant les instructions du prompt :
 
 === Début de la recette ===
@@ -71,7 +65,7 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
 
     private async Task ReportImageConsumption(GeneratedImage image)
     {
-        dbContext.AiConsumptions.Add(new AiConsumptionEntity()
+        await AiRepository.ReportConsumption(new AiConsumptionDto()
         {
             Date = DateTime.UtcNow,
             InputToken = 1,
@@ -81,12 +75,11 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
             UseCase = "ImageCreation",
             AiModelName = $"openai-{_imageModel}"
         });
-        await dbContext.SaveChangesAsync();
     }
 
     private async Task ReportChatConsumption(ChatCompletion completion)
     {
-        dbContext.AiConsumptions.Add(new AiConsumptionEntity()
+        await AiRepository.ReportConsumption(new AiConsumptionDto()
         {
             Date = DateTime.UtcNow,
             InputToken = completion.Usage.InputTokenCount,
@@ -96,6 +89,5 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
             UseCase = "RecipeConverter",
             AiModelName = $"openai-{_chatModel}"
         });
-        await dbContext.SaveChangesAsync();
     }
 }

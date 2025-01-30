@@ -12,6 +12,7 @@ using MudBlazor;
 using Blazored.LocalStorage;
 using BitzArt.Blazor.Cookies;
 using RecettesFamille.Data.Repository;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,8 +51,11 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-
-builder.Services.AddCustomDbContext();
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+{
+    var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
+    options.UseNpgsql(postgresCs);
+}, ServiceLifetime.Scoped);
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()

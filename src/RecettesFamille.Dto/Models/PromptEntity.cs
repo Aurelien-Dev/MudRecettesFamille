@@ -1,4 +1,4 @@
-﻿namespace RecettesFamille.Dto.Models.Blocks
+﻿namespace RecettesFamille.Dto.Models
 {
     public class PromptDto
     {

@@ -1,5 +1,4 @@
-﻿using RecettesFamille.Data.EntityModel;
-using RecettesFamille.Dto.Models.Blocks;
+﻿using RecettesFamille.Dto.Models;
 
 namespace RecettesFamille.Data.Repository.IRepositories;
 
