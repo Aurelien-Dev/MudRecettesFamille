@@ -20,9 +20,15 @@ namespace RecettesFamille.Data
 
             builder.Entity<BlockBaseEntity>().UseTpcMappingStrategy();
 
-            builder.Entity<BlockBaseEntity>().HasKey(c => c.Id);
-            builder.Entity<BlockBaseEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
-            builder.Entity<BlockBaseEntity>().HasOne(c => c.Recipe).WithMany(c => c.BlocksInstructions).IsRequired();
+            builder.Entity<BlockBaseEntity>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Id).ValueGeneratedOnAdd();
+                entity.HasOne(c => c.Recipe)
+                      .WithMany(c => c.BlocksInstructions)
+                      .HasForeignKey(e => e.RecipeId)
+                      .IsRequired();
+            });
 
             builder.Entity<BlockImageEntity>();
             builder.Entity<BlockIngredientListEntity>();
@@ -31,9 +37,9 @@ namespace RecettesFamille.Data
             builder.Entity<IngredientEntity>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(c => c.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
                 entity.HasOne(e => e.IngredientList)
-                      .WithMany(il => il.Ingredients)
+                      .WithMany(e => e.Ingredients)
                       .HasForeignKey(e => e.IngredientListId);
             });
 
@@ -47,12 +53,12 @@ namespace RecettesFamille.Data
         {
             try
             {
-                string fileName = $"backup_{DateTime.UtcNow.ToShortDateString()}-{DateTime.UtcNow.ToShortTimeString()}.backup";   
+                string fileName = $"backup_{DateTime.UtcNow.ToShortDateString()}-{DateTime.UtcNow.ToShortTimeString()}.backup";
                 string command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -p 5442 -U pguser -d recettesfamilledb -F c -f wwwroot/backups/{fileName}";
 
                 if (!Directory.Exists("wwwroot/backups"))
                     Directory.CreateDirectory("wwwroot/backups");
-                
+
                 var processInfo = new ProcessStartInfo
                 {
                     FileName = "/bin/sh",

@@ -10,47 +10,47 @@
 @using RecettesFamille.Managers;
 @using RecettesFamille.Managers.AiGenerators
 
-@if (Recette is not null)
+@if (Recipe is not null)
 {
     @if (editorMode)
     {
-        <MudTextField @bind-Value="Recette.Name" Typo="Typo.h3" Style="font-weight: bold;" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
-        <MudTextField @bind-Value="Recette.InformationPreparation" Typo="Typo.subtitle1" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
+        <MudTextField @bind-Value="Recipe.Name" Typo="Typo.h3" Style="font-weight: bold;" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
+        <MudTextField @bind-Value="Recipe.InformationPreparation" Typo="Typo.subtitle1" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
     }
     else
     {
-        <MudText Typo="Typo.h3" Style="font-weight: bold;" Align="Align.Center" GutterBottom="true">@Recette.Name</MudText>
-        <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recette.InformationPreparation</MudText>
+        <MudText Typo="Typo.h3" Style="font-weight: bold;" Align="Align.Center" GutterBottom="true">@Recipe.Name</MudText>
+        <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recipe.InformationPreparation</MudText>
     }
 
     <MudToolBar Class="justify-center mt-0 mb-0">
         <MudToggleIconButton @bind-Toggled="editorMode" Icon="@Icons.Material.Outlined.Edit"
-        ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
+                             ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
         <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
     </MudToolBar>
 
     @* Description recette *@
     <MudGrid Spacing="5" Class="mt-0 mb-12">
-        @foreach (var block in Recette.BlocksInstructions.OrderBy(c => c.Order).EmptyIfNull())
+        @foreach (var block in Recipe.BlocksInstructions.OrderBy(c => c.Order).EmptyIfNull())
         {
             <BaseBlock EditMode="editorMode" Block="block"
-            OnBlockUpdated="OnBlockUpdated"
-            OnBlockDeleted="OnBlockDeleted"
-            OnBlockHasChanged="OnBlockHasChanged"
-            MoveUp="MoveUp"
-            MoveDown="MoveDown" />
+                       OnBlockUpdated="OnBlockUpdated"
+                       OnBlockDeleted="OnBlockDeleted"
+                       OnBlockHasChanged="OnBlockHasChanged"
+                       MoveUp="MoveUp"
+                       MoveDown="MoveDown" />
         }
 
         @if (editorMode)
         {
-            <ToolsComponent PrecedentIndex="@(Recette.BlocksInstructions.Count -1)" AddBlockCallback="AddNewBlock" />
+            <ToolsComponent PrecedentIndex="@(Recipe.BlocksInstructions.Count -1)" AddBlockCallback="AddNewBlock" />
         }
     </MudGrid>
 }
 
 <style>
     .text-end input {
-    text-align: center !important;
+        text-align: center !important;
     }
 </style>
 
@@ -61,12 +61,12 @@
 
     [Parameter] public int IdRecette { get; set; }
 
-    RecipeDto? Recette { get; set; } = null!;
+    RecipeDto? Recipe { get; set; } = null!;
     public bool editorMode { get; set; } = false;
 
     protected async override Task OnParametersSetAsync()
     {
-        Recette = await RecetteRepository.GetWithInstructions(IdRecette);
+        Recipe = await RecetteRepository.GetWithInstructions(IdRecette);
     }
 
     public async Task DeleteRecipe()
@@ -76,7 +76,7 @@
         if (result is null || (result.HasValue && !result.Value))
             return;
 
-        if (Recette is null)
+        if (Recipe is null)
             return;
 
         await RecetteRepository.DeleteRecipe(IdRecette);
@@ -86,10 +86,10 @@
 
     private async Task UpdateGeneralRecipeInformation()
     {
-        if (Recette is null)
+        if (Recipe is null)
             return;
 
-        await RecetteRepository.UpdateRecipe(Recette);
+        await RecetteRepository.UpdateRecipe(Recipe);
 
         StateHasChanged();
     }
@@ -107,26 +107,24 @@
 
         if (!success) return;
 
-        Recette!.BlocksInstructions.Remove(block);
+        Recipe!.BlocksInstructions.Remove(block);
         StateHasChanged();
     }
 
     private async Task OnBlockUpdated(BlockBaseDto block)
     {
-        DbContext.Update(block);
-        await DbContext.SaveChangesAsync();
+        await RecetteRepository.UpdateBlock(block);
         StateHasChanged();
     }
 
     private async Task AddNewBlock(BlockBaseDto block)
     {
-        if (Recette is null)
+        if (Recipe is null)
             return;
 
-        Recette.BlocksInstructions.Add(block);
-
-        DbContext.Update(Recette);
-        await DbContext.SaveChangesAsync();
+        block.Recipe = Recipe;
+        var blockDto = await RecetteRepository.AddBlock(block);
+        Recipe.BlocksInstructions.Add(blockDto);
 
         StateHasChanged();
     }
@@ -135,31 +133,22 @@
     #region Block move
     private async Task MoveUp(BlockBaseDto block)
     {
-        if (Recette is null)
+        if (Recipe is null)
             return;
 
-        Recette.BlocksInstructions.MoveUp(block);
-        await DbContext.SaveChangesAsync();
+        Recipe.BlocksInstructions.MoveUp(block);
+        // await DbContext.SaveChangesAsync();
         StateHasChanged();
     }
 
     private async Task MoveDown(BlockBaseDto block)
     {
-        if (Recette is null)
+        if (Recipe is null)
             return;
 
 
-        Recette.BlocksInstructions.MoveDown(block);
-        await DbContext.SaveChangesAsync();
-        StateHasChanged();
-    }
-
-    private async Task UpdateOrder()
-    {
-        if (Recette is null)
-            return;
-
-        await DbContext.SaveChangesAsync();
+        Recipe.BlocksInstructions.MoveDown(block);
+        // await DbContext.SaveChangesAsync();
         StateHasChanged();
     }
     #endregion

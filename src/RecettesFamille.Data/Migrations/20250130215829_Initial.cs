@@ -13,7 +13,7 @@ namespace RecettesFamille.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateSequence(
-                name: "BlockBaseSequence");
+                name: "BlockBaseEntitySequence");
 
             migrationBuilder.CreateTable(
                 name: "AiConsumptions",
@@ -22,8 +22,8 @@ namespace RecettesFamille.Data.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    InputToken = table.Column<int>(type: "integer", nullable: false),
-                    OutputToken = table.Column<int>(type: "integer", nullable: false),
+                    InputToken = table.Column<int>(type: "integer", nullable: true),
+                    OutputToken = table.Column<int>(type: "integer", nullable: true),
                     InputPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     OutputPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     UseCase = table.Column<string>(type: "text", nullable: false),
@@ -211,7 +211,7 @@ namespace RecettesFamille.Data.Migrations
                 name: "BlockImageEntity",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseEntitySequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
                     HalfPage = table.Column<bool>(type: "boolean", nullable: false),
                     RecipeId = table.Column<int>(type: "integer", nullable: false),
@@ -232,7 +232,7 @@ namespace RecettesFamille.Data.Migrations
                 name: "BlockIngredientListEntity",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseEntitySequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
                     HalfPage = table.Column<bool>(type: "boolean", nullable: false),
                     RecipeId = table.Column<int>(type: "integer", nullable: false),
@@ -253,7 +253,7 @@ namespace RecettesFamille.Data.Migrations
                 name: "BlockInstructionEntity",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseSequence\"')"),
+                    Id = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"BlockBaseEntitySequence\"')"),
                     Order = table.Column<int>(type: "integer", nullable: false),
                     HalfPage = table.Column<bool>(type: "boolean", nullable: false),
                     RecipeId = table.Column<int>(type: "integer", nullable: false),
@@ -396,7 +396,7 @@ namespace RecettesFamille.Data.Migrations
                 name: "Recettes");
 
             migrationBuilder.DropSequence(
-                name: "BlockBaseSequence");
+                name: "BlockBaseEntitySequence");
         }
     }
 }
