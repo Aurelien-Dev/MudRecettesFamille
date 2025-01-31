@@ -21,7 +21,7 @@ CommittedItemChanges="@CommittedItemChanges">
     <Columns>
         @* <PropertyColumn Property="x=>x.Id" Hidden="true" InitialDirection="SortDirection.Ascending" Editable="false" HideSmall="true" /> *@
         <PropertyColumn Property="x => x.Name" Editable="true" />
-        <PropertyColumn Property="x => x.Quantity" Editable="true" />
+        <PropertyColumn Property="x => x.Quantity" Editable="true" Required="false" />
         <TemplateColumn Hidden="!EditMode" CellClass="d-flex justify-end">
             <CellTemplate>
                 <MudStack Row="true" Spacing="0" AlignItems="AlignItems.End">

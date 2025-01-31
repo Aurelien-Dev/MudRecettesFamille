@@ -1,24 +1,25 @@
-﻿using RecettesFamille.Data.EntityModel.Blocks;
-using RecettesFamille.Data.EntityModel;
-using RecettesFamille.Managers.AiGenerators.Models;
-using RecettesFamille.Dto.Models;
+﻿using RecettesFamille.Dto.Models;
 using RecettesFamille.Dto.Models.Blocks;
+using RecettesFamille.Managers.AiGenerators.Models;
 
 namespace RecettesFamille.Managers.Mappers
 {
     public static class GptMapper
     {
-        public static RecipeDto ConvertToRecipeEntity(AiRecipe gptRecipe)
+        public static RecipeDto ConvertToRecipeDto(AiRecipe gptRecipe)
         {
             if (gptRecipe == null)
             {
                 throw new ArgumentNullException(nameof(gptRecipe));
             }
 
-            var recipeEntity = new RecipeDto
+            var recipe = new RecipeDto
             {
                 Name = gptRecipe.Nom,
-                InformationPreparation = $"Temps de préparation: {gptRecipe.Preparation.TempsPreparation} minutes, Temps de cuisson: {gptRecipe.Preparation.TempsCuisson} minutes, Portions: {gptRecipe.Preparation.Portions}",
+                PrepTime = gptRecipe.Preparation.TempsPreparation,
+                CookingTime = gptRecipe.Preparation.TempsCuisson,
+                Portion = gptRecipe.Preparation.Portions,
+                Tags = string.Join("|", gptRecipe.Tags),
                 BlocksInstructions = new List<BlockBaseDto>()
             };
 
@@ -35,23 +36,23 @@ namespace RecettesFamille.Managers.Mappers
                     Quantity = ing.Quantite
                 }).ToList()
             }).ToList();
-            recipeEntity.BlocksInstructions.AddRange(ingredientBlocks);
+            recipe.BlocksInstructions.AddRange(ingredientBlocks);
 
             // Convert instructions to a single BlockInstructionEntity
             var instructionBlock = new BlockInstructionDto
             {
-                Order = recipeEntity.BlocksInstructions.Count,
+                Order = recipe.BlocksInstructions.Count,
                 Instruction = string.Join("\n\n", gptRecipe.Instructions)
             };
-            recipeEntity.BlocksInstructions.Add(instructionBlock);
+            recipe.BlocksInstructions.Add(instructionBlock);
 
             // Set the Recipe property for each block
-            foreach (var block in recipeEntity.BlocksInstructions)
+            foreach (var block in recipe.BlocksInstructions)
             {
-                block.Recipe = recipeEntity;
+                block.Recipe = recipe;
             }
 
-            return recipeEntity;
+            return recipe;
         }
     }
 }

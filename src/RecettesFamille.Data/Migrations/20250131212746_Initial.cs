@@ -88,17 +88,21 @@ namespace RecettesFamille.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Recettes",
+                name: "Recipes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    InformationPreparation = table.Column<string>(type: "text", nullable: false)
+                    InformationPreparation = table.Column<string>(type: "text", nullable: false),
+                    PrepTime = table.Column<int>(type: "integer", nullable: false),
+                    CookingTime = table.Column<int>(type: "integer", nullable: false),
+                    Portion = table.Column<int>(type: "integer", nullable: false),
+                    Tags = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Recettes", x => x.Id);
+                    table.PrimaryKey("PK_Recipes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -221,9 +225,9 @@ namespace RecettesFamille.Data.Migrations
                 {
                     table.PrimaryKey("PK_BlockImageEntity", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BlockImageEntity_Recettes_RecipeId",
+                        name: "FK_BlockImageEntity_Recipes_RecipeId",
                         column: x => x.RecipeId,
-                        principalTable: "Recettes",
+                        principalTable: "Recipes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -242,9 +246,9 @@ namespace RecettesFamille.Data.Migrations
                 {
                     table.PrimaryKey("PK_BlockIngredientListEntity", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BlockIngredientListEntity_Recettes_RecipeId",
+                        name: "FK_BlockIngredientListEntity_Recipes_RecipeId",
                         column: x => x.RecipeId,
-                        principalTable: "Recettes",
+                        principalTable: "Recipes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -263,9 +267,9 @@ namespace RecettesFamille.Data.Migrations
                 {
                     table.PrimaryKey("PK_BlockInstructionEntity", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BlockInstructionEntity_Recettes_RecipeId",
+                        name: "FK_BlockInstructionEntity_Recipes_RecipeId",
                         column: x => x.RecipeId,
-                        principalTable: "Recettes",
+                        principalTable: "Recipes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -393,7 +397,7 @@ namespace RecettesFamille.Data.Migrations
                 name: "BlockIngredientListEntity");
 
             migrationBuilder.DropTable(
-                name: "Recettes");
+                name: "Recipes");
 
             migrationBuilder.DropSequence(
                 name: "BlockBaseEntitySequence");

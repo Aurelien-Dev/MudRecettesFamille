@@ -1,0 +1,38 @@
+﻿@using RecettesFamille.Dto.Models
+@using System.Globalization
+<MudStack Spacing="0">
+
+    <MudText Typo="Typo.h3" Class="mb-0" Style="font-weight: bold;" Align="Align.Center" GutterBottom="true">@Recipe.Name</MudText>
+
+    <MudText Typo="Typo.subtitle1" Class="mb-0" Align="Align.Center" GutterBottom="true">
+        @{
+            var instructions = new[]
+            {
+                Recipe.PrepTime > 0 ? $"préparation : {Recipe.PrepTime} min" : null,
+                Recipe.CookingTime > 0 ? $"temps de cuisson: {Recipe.CookingTime} min" : null,
+                Recipe.Portion > 0 ? $"pour {Recipe.Portion} portions" : null
+            };
+
+            var result = string.Join(", ", instructions.Where(e => !string.IsNullOrEmpty(e))).ToLower();
+            result = string.IsNullOrEmpty(result) ? result : char.ToUpper(result[0]) + result[1..];
+
+            @(result);
+        }
+    </MudText>
+
+    @if (!string.IsNullOrEmpty(Recipe.Tags))
+    {
+        <MudStack Row="true" Justify="Justify.Center">
+            @foreach (var item in Recipe.Tags.Split("|"))
+            {
+                <MudChip T="string" Variant="Variant.Text" Color="Color.Info">@item</MudChip>
+            }
+        </MudStack>
+    }
+
+</MudStack>
+
+
+@code {
+    [Parameter] public RecipeDto Recipe { get; set; } = null!;
+}

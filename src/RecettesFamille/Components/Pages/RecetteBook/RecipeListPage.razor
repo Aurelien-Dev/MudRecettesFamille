@@ -51,7 +51,7 @@ else
     }
     else if (viewMode == Icons.Material.Filled.List)
     {
-        <MudPaper Elevation="1" >
+        <MudPaper Elevation="1">
             <MudTable Items="recetteEntities" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
                       Filter="new Func<RecipeDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)">
                 <ToolBarContent>
@@ -62,14 +62,22 @@ else
 
                 <RowTemplate>
                     <MudTd>@context.Name</MudTd>
-                    <MudTd>@context.InformationPreparation</MudTd>
+                    <MudTd>
+                        @foreach (var item in context.Tags.Split("|"))
+                        {
+                            <MudChip T="string" Variant="Variant.Text" Size="Size.Small" Color="Color.Info">@item</MudChip>
+                        }
+                    </MudTd>
                     <MudTd>
                         <MudButton Href="@($"/recette/{context.Id}")" Variant="Variant.Text" Color="Color.Primary" Size="Size.Small">Open</MudButton>
                     </MudTd>
                 </RowTemplate>
 
                 <PagerContent>
-                    <MudTablePager />
+                    <MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
+                                   RowsPerPageString="Elements par page :"
+                                   AllItemsText="Tout"
+                                   InfoFormat="{first_item}-{last_item} sur {all_items}" />
                 </PagerContent>
             </MudTable>
         </MudPaper>
@@ -99,10 +107,12 @@ else
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+
+        string comparer = $"{element.Name} - {element.Tags}";
+
+        if (comparer.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (element.InformationPreparation.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+
         return false;
     }
 }

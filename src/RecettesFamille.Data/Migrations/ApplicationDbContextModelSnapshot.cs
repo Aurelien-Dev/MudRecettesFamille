@@ -341,6 +341,9 @@ namespace RecettesFamille.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CookingTime")
+                        .HasColumnType("integer");
+
                     b.Property<string>("InformationPreparation")
                         .IsRequired()
                         .HasColumnType("text");
@@ -349,9 +352,19 @@ namespace RecettesFamille.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Portion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PrepTime")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Recettes");
+                    b.ToTable("Recipes");
                 });
 
             modelBuilder.Entity("RecettesFamille.Data.EntityModel.Blocks.BlockImageEntity", b =>

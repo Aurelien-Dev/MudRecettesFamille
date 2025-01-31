@@ -57,7 +57,7 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
 
         var serialized = JsonConvert.DeserializeObject<AiRecipe>(resultText) ?? throw new ApplicationException("Deserialization failed");
 
-        return GptMapper.ConvertToRecipeEntity(serialized);
+        return GptMapper.ConvertToRecipeDto(serialized);
     }
 
 

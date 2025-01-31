@@ -1,5 +1,6 @@
 @page "/recette/{IdRecette:int?}"
 @using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
+@using RecettesFamille.Components.Pages.RecetteBook.Components
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Dto.Models
 @using RecettesFamille.Dto.Models.Blocks
@@ -16,8 +17,7 @@
     }
     else
     {
-        <MudText Typo="Typo.h3" Style="font-weight: bold;" Align="Align.Center" GutterBottom="true">@Recipe.Name</MudText>
-        <MudText Typo="Typo.subtitle1" Align="Align.Center" GutterBottom="true">@Recipe.InformationPreparation</MudText>
+        <RecipeHeader Recipe="Recipe" />
     }
 
     <MudToolBar Class="justify-center mt-0 mb-0">
@@ -25,6 +25,7 @@
                              ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
         <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
     </MudToolBar>
+
 
     @* Description recette *@
     <MudGrid Spacing="5" Class="mt-0 mb-12">
@@ -105,6 +106,8 @@
         if (!success) return;
 
         Recipe!.BlocksInstructions.Remove(block);
+        await RecetteRepository.UpdateRecipe(Recipe);
+        Recipe.BlocksInstructions.Reorder();
         StateHasChanged();
     }
 
@@ -122,7 +125,7 @@
         block.RecipeId = Recipe.Id;
         var blockDto = await RecetteRepository.AddBlock(block);
         Recipe.BlocksInstructions.Add(blockDto);
-
+        Recipe.BlocksInstructions.Reorder();
         StateHasChanged();
     }
     #endregion
@@ -133,6 +136,7 @@
         if (Recipe is null)
             return;
 
+        Recipe.BlocksInstructions.Reorder();
         Recipe.BlocksInstructions.MoveUp(block);
         await RecetteRepository.UpdateRecipe(Recipe);
         StateHasChanged();
@@ -143,7 +147,7 @@
         if (Recipe is null)
             return;
 
-
+        Recipe.BlocksInstructions.Reorder();
         Recipe.BlocksInstructions.MoveDown(block);
         await RecetteRepository.UpdateRecipe(Recipe);
         StateHasChanged();

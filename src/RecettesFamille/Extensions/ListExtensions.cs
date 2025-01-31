@@ -25,6 +25,15 @@ namespace RecettesFamille.Extensions
             }
         }
 
+        public static void Reorder(this List<BlockBaseDto> blocks)
+        {
+            blocks.Sort((a, b) => a.Order.CompareTo(b.Order)); // Trier par ordre
+            for (int i = 0; i < blocks.Count; i++)
+            {
+                blocks[i].Order = i + 1; // Réécrire les ordres pour qu'ils soient continus
+            }
+        }
+
         private static void Swap(List<BlockBaseDto> blocks, int i, int j)
         {
             (blocks[i].Order, blocks[j].Order) = (blocks[j].Order, blocks[i].Order);

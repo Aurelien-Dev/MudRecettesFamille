@@ -58,8 +58,8 @@
         {
             RecipeDto recette = await gptRecipeConverterManager.ConvertRecipe(recipeDescription, cancellationTokenSource.Token);
 
-            RecetteRepository.AddRecipe(recette);
-            navigationManager.NavigateTo($"/recette/{recette.Id}");
+            RecipeDto recipeAdded = await RecetteRepository.AddRecipe(recette);
+            navigationManager.NavigateTo($"/recette/{recipeAdded.Id}", true);
         }
         catch (OperationCanceledException)
         {
