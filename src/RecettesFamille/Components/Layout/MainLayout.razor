@@ -26,13 +26,13 @@
 
     <MudMainContent Class="mt-12 pa-4">
         <MudContainer MaxWidth="MaxWidth.Large">
-
-            @Body
+            <CustomErrorBoundary>
+                @Body
+            </CustomErrorBoundary>
 
         </MudContainer>
     </MudMainContent>
 </MudLayout>
-
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.

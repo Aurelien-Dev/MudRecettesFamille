@@ -3,6 +3,8 @@
 @using RecettesFamille.Components.Dialogs
 @using Cropper.Blazor
 @using RecettesFamille.Dto.Models.Blocks
+@using RecettesFamille.Extensions
+@using RecettesFamille.Managers
 @using RecettesFamille.Managers.AiGenerators
 @inherits BaseBlockDefinition<BlockImageDto>
 
@@ -38,9 +40,9 @@ else
 }
 
 @code {
-    [Inject] ISnackbar snackbar { get; set; } = null!;
     [Inject] IDialogService DialogService { get; set; } = null!;
     [Inject(Key = "OpenAi")] IIaManagerBase iaManager { get; set; } = null!;
+    [Inject] ErrorManager errosManager { get; set; } = null!;
 
     private MudFileUpload<IBrowserFile> mudFileUpload { get; set; } = null!;
     private readonly long MaxFileSize = 1024 * 1024 * 15;
@@ -55,9 +57,7 @@ else
             string base64Image = await ConvertToBase64Async(e);
             Block.Image = base64Image;
 
-            snackbar.Clear();
-            snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-            snackbar.Add("Image envoyé au serveur.", Severity.Success);
+            errosManager.DisplaySuccess("Image envoyé au serveur.");
 
             OnBlockUpdated?.Invoke(Block);
 
@@ -66,9 +66,7 @@ else
         }
         catch (Exception)
         {
-            snackbar.Clear();
-            snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-            snackbar.Add("Il y a eu une erreur.", Severity.Error);
+            errosManager.DisplayError();
             throw new Exception("Error uploading file");
         }
     }
@@ -94,10 +92,17 @@ else
 
     private async Task AskImageToAi()
     {
-        string base64Image = await iaManager.AskImage(Block.Recipe.Name);
+        try
+        {
+            string base64Image = await iaManager.AskImage(Block.Recipe.Name);
 
-        Block.Image = base64Image;
-        StateHasChanged();
+            Block.Image = base64Image;
+            StateHasChanged();
+        }
+        catch (Exception)
+        {
+            errosManager.DisplayError();
+        }
     }
 
     private async Task<string> ConvertToBase64Async(IBrowserFile file)

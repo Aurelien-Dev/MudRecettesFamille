@@ -17,4 +17,5 @@ public interface IRecetteRepository
     Task<bool> DeleteBlock(int blockId, CancellationToken cancellationToken = default);
 
     Task<bool> DeleteIngredient(int ingredientId, CancellationToken cancellationToken = default);
+    Task<List<RecipeDto>> GetAllByTag(string tag, CancellationToken cancellationToken = default);
 }

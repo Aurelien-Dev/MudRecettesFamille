@@ -1,18 +1,18 @@
+using BitzArt.Blazor.Cookies;
+using Blazored.LocalStorage;
+using Cropper.Blazor.Extensions;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using MudBlazor.Services;
 using MudExtensions.Services;
 using RecettesFamille;
 using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
 using RecettesFamille.Data;
-using RecettesFamille.Managers;
-using Cropper.Blazor.Extensions;
-using MudBlazor;
-using Blazored.LocalStorage;
-using BitzArt.Blazor.Cookies;
 using RecettesFamille.Data.Repository;
-using Microsoft.EntityFrameworkCore;
+using RecettesFamille.Managers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +32,11 @@ builder.AddBlazorCookies();
 builder.Services.AddCropper();
 
 // Add services to the container.
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents(
+    options =>
+    {
+        options.DetailedErrors = builder.Environment.IsDevelopment();
+    });
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();

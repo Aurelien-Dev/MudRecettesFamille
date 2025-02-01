@@ -1,4 +1,5 @@
 ﻿@page "/"
+@page "/recipe/{Tag}"
 @using Microsoft.EntityFrameworkCore
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Dto.Models
@@ -53,11 +54,11 @@ else
     {
         <MudPaper Elevation="1">
             <MudTable Items="recetteEntities" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
-                      Filter="new Func<RecipeDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)">
+            Filter="new Func<RecipeDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)">
                 <ToolBarContent>
                     <MudSpacer />
                     <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
-                                  IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                    IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 </ToolBarContent>
 
                 <RowTemplate>
@@ -75,9 +76,9 @@ else
 
                 <PagerContent>
                     <MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
-                                   RowsPerPageString="Elements par page :"
-                                   AllItemsText="Tout"
-                                   InfoFormat="{first_item}-{last_item} sur {all_items}" />
+                    RowsPerPageString="Elements par page :"
+                    AllItemsText="Tout"
+                    InfoFormat="{first_item}-{last_item} sur {all_items}" />
                 </PagerContent>
             </MudTable>
         </MudPaper>
@@ -87,18 +88,24 @@ else
 
 @code {
     [Inject] NavigationManager navigationManager { get; set; } = null!;
-
     [Inject] IRecetteRepository RecetteRepository { get; set; } = default!;
+
+    [Parameter] public string Tag { get; set; } = null!;
 
     List<RecipeDto> recetteEntities { get; set; } = null!;
     string viewMode = Icons.Material.Filled.List;
     string searchString1 = string.Empty;
 
-    protected async override Task OnInitializedAsync()
+    protected async override Task OnParametersSetAsync()
     {
-        await base.OnInitializedAsync();
-
-        recetteEntities = await RecetteRepository.GetAll();
+        if (string.IsNullOrEmpty(Tag))
+        {
+            recetteEntities = await RecetteRepository.GetAll();            
+        }
+        else
+        {
+            recetteEntities = await RecetteRepository.GetAllByTag(Tag);
+        }
     }
 
     private bool FilterFunc1(RecipeDto element) => FilterFunc(element, searchString1);

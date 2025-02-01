@@ -2,11 +2,15 @@
 @rendermode InteractiveServer
 
 <MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Recettes</MudNavLink>
+    <MudNavGroup Title="Tags" Icon="@Icons.Material.Filled.Tag" Expanded="true">
+        <MudNavLink Href="/recipe/plat">Plats</MudNavLink>
+        <MudNavLink Href="/recipe/dessert">Desserts</MudNavLink>
+    </MudNavGroup>
     <MudNavLink Href="gpt/import" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ImportExport">Importer une recette</MudNavLink>
 
     @* <MudNavLink Href="auth" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Lock">Auth Required</MudNavLink> *@
-@*     <AuthorizeView>
+    @*     <AuthorizeView>
         <Authorized>
             <MudNavLink Href="Account/Manage" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">@context.User.Identity?.Name</MudNavLink>
             <form action="Account/Logout" method="post">

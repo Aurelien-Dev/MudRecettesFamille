@@ -10,12 +10,22 @@ namespace RecettesFamille.Data.Repository.Repositories;
 
 public class RecetteRepository(IMapper Mapper, IDbContextFactory<ApplicationDbContext> contextFactory) : IRecetteRepository
 {
-
     public async Task<List<RecipeDto>> GetAll(CancellationToken cancellationToken = default)
     {
         var context = await contextFactory.CreateDbContextAsync();
 
-        var result = await context.Recipes.Include(c => c.BlocksInstructions).ToListAsync(cancellationToken);
+        var result = await context.Recipes.ToListAsync(cancellationToken);
+
+        return Mapper.Map<List<RecipeDto>>(result);
+    }
+
+    public async Task<List<RecipeDto>> GetAllByTag(string tag, CancellationToken cancellationToken = default)
+    {
+        var context = await contextFactory.CreateDbContextAsync();
+
+        var result = await context.Recipes
+                                  .Where(r => EF.Functions.ILike(r.Tags, $"%{tag}%"))
+                                  .ToListAsync(cancellationToken);
 
         return Mapper.Map<List<RecipeDto>>(result);
     }

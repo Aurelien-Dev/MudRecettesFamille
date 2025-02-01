@@ -22,8 +22,8 @@
                             </MudOverlay>
 
                             <MudTextField @ref="multilineReference" T="string" Label="Recette" Variant="Variant.Outlined" Lines="40"
-                                          Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Delete" AdornmentColor="Color.Error"
-                                          OnAdornmentClick="@(() => multilineReference.Clear())" @bind-Value="@recipeDescription" />
+                            Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Delete" AdornmentColor="Color.Error"
+                            OnAdornmentClick="@(() => multilineReference.Clear())" @bind-Value="@recipeDescription" />
                         </MudPaper>
                     </MudItem>
 
@@ -43,6 +43,7 @@
 @code {
     [Inject] IRecetteRepository RecetteRepository { get; set; } = default!;
     [Inject] NavigationManager navigationManager { get; set; } = null!;
+    [Inject] ErrorManager ErrorManager { get; set; } = null!;
     [Inject(Key = "DeepSeek")] IIaManagerBase gptRecipeConverterManager { get; set; } = null!;
 
     private MudTextField<string> multilineReference = null!; // Reference to the multiline text field
@@ -67,7 +68,7 @@
         }
         catch (Exception)
         {
-            throw;
+            ErrorManager.DisplayError();
         }
         finally
         {

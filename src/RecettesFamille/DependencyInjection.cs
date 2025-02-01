@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using RecettesFamille.Data;
+﻿using RecettesFamille.Managers;
 using RecettesFamille.Managers.AiGenerators;
 
 namespace RecettesFamille
@@ -10,6 +9,8 @@ namespace RecettesFamille
         {
             services.AddKeyedScoped<IIaManagerBase, OpenAiManager>("OpenAi");
             services.AddKeyedScoped<IIaManagerBase, DeepSeekManager>("DeepSeek");
+
+            services.AddScoped<ErrorManager>();
 
             return services;
         }
