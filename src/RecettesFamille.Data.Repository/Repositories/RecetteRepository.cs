@@ -29,6 +29,20 @@ public class RecetteRepository(IMapper Mapper, IDbContextFactory<ApplicationDbCo
 
         return Mapper.Map<List<RecipeDto>>(result);
     }
+    public async Task<List<RecipeDto>> GetAllByTag(string[] tags, CancellationToken cancellationToken = default)
+    {
+        var context = await contextFactory.CreateDbContextAsync();
+
+        var query = context.Recipes.AsQueryable();
+        foreach (var tag in tags)
+        {
+            query = query.Where(r => EF.Functions.ILike(r.Tags, $"%{tag}%"));
+        }
+
+        var result = await query.ToListAsync(cancellationToken);
+
+        return Mapper.Map<List<RecipeDto>>(result);
+    }
 
     public async Task<RecipeDto> GetWithInstructions(int recipeId, CancellationToken cancellationToken = default)
     {

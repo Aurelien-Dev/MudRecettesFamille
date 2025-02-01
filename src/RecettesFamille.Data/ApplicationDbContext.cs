@@ -11,6 +11,7 @@ namespace RecettesFamille.Data
         public DbSet<RecipeEntity> Recipes { get; set; }
         public DbSet<AiConsumptionEntity> AiConsumptions { get; set; }
         public DbSet<PromptEntity> Prompts { get; set; }
+        public DbSet<TagEntity> Tags { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)

@@ -10,8 +10,8 @@
 
 <MudLayout>
     <MudAppBar Elevation="1" Dense="true">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
-        <MudText Typo="Typo.body1" Style="font-weight: bold;" Class="ml-3">Recettes famille</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
+        <MudButton Href="/" Style="font-weight: bold;" Class="mud-typography mud-typography-body2" Color="Color.Inherit">Recettes famille</MudButton>
         <MudSpacer />
         <MudToggleIconButton ToggledChanged="OnToggledChanged"
                              Icon="@Icons.Material.Outlined.DarkMode"
@@ -20,18 +20,13 @@
 
     </MudAppBar>
 
-    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu />
-    </MudDrawer>
-
-    <MudMainContent Class="mt-12 pa-4">
-        <MudContainer MaxWidth="MaxWidth.Large">
-            <CustomErrorBoundary>
+    <CustomErrorBoundary>
+        <MudMainContent Class="mt-12 pa-4">
+            <MudContainer MaxWidth="MaxWidth.Large">
                 @Body
-            </CustomErrorBoundary>
-
-        </MudContainer>
-    </MudMainContent>
+            </MudContainer>
+        </MudMainContent>
+    </CustomErrorBoundary>
 </MudLayout>
 
 <div id="blazor-error-ui">
@@ -44,7 +39,6 @@
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
     [Inject] private ICookieService CookieService { get; set; } = null!;
 
-    private bool _drawerOpen = true;
     private bool isDarkMode = false;
     private MudThemeProvider _mudThemeProvider;
 
@@ -61,11 +55,5 @@
         isDarkMode = isDark;
         await CookieService.SetAsync("userPreferenceDarkMode", isDark.ToString(), new DateTimeOffset(DateTime.MaxValue));
         StateHasChanged();
-    }
-
-    private void DrawerToggle()
-    {
-
-        _drawerOpen = !_drawerOpen;
     }
 }

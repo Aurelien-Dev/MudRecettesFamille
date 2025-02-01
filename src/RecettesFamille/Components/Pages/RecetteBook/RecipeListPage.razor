@@ -5,86 +5,105 @@
 @using RecettesFamille.Dto.Models
 @using RecettesFamille.Extensions
 
-<MudToolBar Class="mb-3" Dense="true">
-    <MudSpacer />
-    <MudToggleGroup T="string" Outlined="true" Delimiters="true" Size="Size.Small" Color="Color.Primary" @bind-Value="viewMode">
-        <MudToggleItem Value="Icons.Material.Filled.GridView">
-            <MudIcon Icon="@Icons.Material.Filled.GridView" />
-        </MudToggleItem>
-        <MudToggleItem Value="Icons.Material.Filled.List">
-            <MudIcon Icon="@Icons.Material.Filled.List" />
-        </MudToggleItem>
-    </MudToggleGroup>
-</MudToolBar>
 
-@if (recetteEntities is null)
-{
-    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="200px" Height="110px" />
-}
-else
-{
-    if (viewMode == Icons.Material.Filled.GridView)
-    {
-        <MudGrid Spacing="5" Justify="Justify.Center">
-            @foreach (var item in recetteEntities.EmptyIfNull())
-            {
-                <MudItem xs="12" sm="4" md="3" xl="2">
-                    <MudCard Style="height:100%">
-                        @* <MudCardMedia Image="images/door.jpg" Height="200" /> *@
-                        <MudCardHeader>
-                            <CardHeaderContent>
-                                <MudText Typo="Typo.subtitle2">@item.Name.ToUpper()</MudText>
-                            </CardHeaderContent>
-                            <CardHeaderActions>
-                                <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" />
-                            </CardHeaderActions>
-                        </MudCardHeader>
-                        <MudCardContent>
-                            @* <MudText Typo="Typo.body2">@item.InformationPreparation</MudText> *@
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudButton Href="@($"/recette/{item.Id}")" Variant="Variant.Text" Color="Color.Primary" Size="Size.Small">Open</MudButton>
-                        </MudCardActions>
-                    </MudCard>
-                </MudItem>
-            }
-        </MudGrid>
-    }
-    else if (viewMode == Icons.Material.Filled.List)
-    {
-        <MudPaper Elevation="1">
-            <MudTable Items="recetteEntities" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
-            Filter="new Func<RecipeDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)">
-                <ToolBarContent>
-                    <MudSpacer />
-                    <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
-                    IconSize="Size.Medium" Class="mt-0"></MudTextField>
-                </ToolBarContent>
+<MudGrid>
+    <MudItem md="3">
 
-                <RowTemplate>
-                    <MudTd>@context.Name</MudTd>
-                    <MudTd>
-                        @foreach (var item in context.Tags.Split("|"))
-                        {
-                            <MudChip T="string" Variant="Variant.Text" Size="Size.Small" Color="Color.Info">@item</MudChip>
-                        }
-                    </MudTd>
-                    <MudTd>
-                        <MudButton Href="@($"/recette/{context.Id}")" Variant="Variant.Text" Color="Color.Primary" Size="Size.Small">Open</MudButton>
-                    </MudTd>
-                </RowTemplate>
-
-                <PagerContent>
-                    <MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
-                    RowsPerPageString="Elements par page :"
-                    AllItemsText="Tout"
-                    InfoFormat="{first_item}-{last_item} sur {all_items}" />
-                </PagerContent>
-            </MudTable>
+        <MudPaper>
+            <MudList T="string" Class="mt-15" SelectionMode="SelectionMode.MultiSelection" SelectedValuesChanged="OnSelectedValuesChanged">
+                <MudListItem Text="Plat" />
+                <MudListItem Text="Rapide" />
+                <MudListItem Text="Dessert" />
+                <MudListItem Text="Amuse-bouche" />
+            </MudList>
         </MudPaper>
-    }
-}
 
+    </MudItem>
+    <MudItem md="9">
+
+        <MudToolBar Class="mb-3" Dense="true">
+            <MudSpacer />
+            <MudToggleGroup T="string" Outlined="true" Delimiters="true" Size="Size.Small" Color="Color.Primary" @bind-Value="viewMode">
+                <MudToggleItem Value="Icons.Material.Filled.GridView">
+                    <MudIcon Icon="@Icons.Material.Filled.GridView" />
+                </MudToggleItem>
+                <MudToggleItem Value="Icons.Material.Filled.List">
+                    <MudIcon Icon="@Icons.Material.Filled.List" />
+                </MudToggleItem>
+            </MudToggleGroup>
+        </MudToolBar>
+
+        @if (recetteEntities is null)
+        {
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="200px" Height="110px" />
+        }
+        else
+        {
+            if (viewMode == Icons.Material.Filled.GridView)
+            {
+                <MudGrid Spacing="5" Justify="Justify.Center">
+                    @foreach (var item in recetteEntities.EmptyIfNull())
+                    {
+                        <MudItem xs="12" sm="4" md="3" xl="2">
+                            <MudCard Style="height:100%">
+                                @* <MudCardMedia Image="images/door.jpg" Height="200" /> *@
+                                <MudCardHeader>
+                                    <CardHeaderContent>
+                                        <MudText Typo="Typo.subtitle2">@item.Name.ToUpper()</MudText>
+                                    </CardHeaderContent>
+                                    <CardHeaderActions>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" />
+                                    </CardHeaderActions>
+                                </MudCardHeader>
+                                <MudCardContent>
+                                    @* <MudText Typo="Typo.body2">@item.InformationPreparation</MudText> *@
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <MudButton Href="@($"/recette/{item.Id}")" Variant="Variant.Text" 
+                                               Color="Color.Inherit" Size="Size.Small">Open</MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        </MudItem>
+                    }
+                </MudGrid>
+            }
+            else if (viewMode == Icons.Material.Filled.List)
+            {
+                <MudPaper Elevation="1">
+                    <MudTable Items="recetteEntities" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
+                              Filter="new Func<RecipeDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)">
+                        <ToolBarContent>
+                            <MudSpacer />
+                            <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                        </ToolBarContent>
+
+                        <RowTemplate>
+                            <MudTd>@context.Name</MudTd>
+                            <MudTd>
+                                @foreach (var item in context.Tags.Split("|"))
+                                {
+                                    <MudChip T="string" Variant="Variant.Text" Size="Size.Small" Color="Color.Info">@item</MudChip>
+                                }
+                            </MudTd>
+                            <MudTd>
+                                <MudButton Href="@($"/recette/{context.Id}")" Variant="Variant.Text"
+                                           Color="Color.Inherit" Size="Size.Small">Open</MudButton>
+                            </MudTd>
+                        </RowTemplate>
+
+                        <PagerContent>
+                            <MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
+                                           RowsPerPageString="Elements par page :"
+                                           AllItemsText="Tout"
+                                           InfoFormat="{first_item}-{last_item} sur {all_items}" />
+                        </PagerContent>
+                    </MudTable>
+                </MudPaper>
+            }
+        }
+    </MudItem>
+</MudGrid>
 
 @code {
     [Inject] NavigationManager navigationManager { get; set; } = null!;
@@ -99,13 +118,14 @@ else
     protected async override Task OnParametersSetAsync()
     {
         if (string.IsNullOrEmpty(Tag))
-        {
-            recetteEntities = await RecetteRepository.GetAll();            
-        }
+            recetteEntities = await RecetteRepository.GetAll();
         else
-        {
             recetteEntities = await RecetteRepository.GetAllByTag(Tag);
-        }
+    }
+
+    public async Task OnSelectedValuesChanged(IReadOnlyCollection<string> strings)
+    {
+        recetteEntities = await RecetteRepository.GetAllByTag(strings.ToArray());
     }
 
     private bool FilterFunc1(RecipeDto element) => FilterFunc(element, searchString1);
