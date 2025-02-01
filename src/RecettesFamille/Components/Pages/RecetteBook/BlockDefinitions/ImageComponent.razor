@@ -3,6 +3,7 @@
 @using RecettesFamille.Components.Dialogs
 @using Cropper.Blazor
 @using RecettesFamille.Dto.Models.Blocks
+@using RecettesFamille.Managers.AiGenerators
 @inherits BaseBlockDefinition<BlockImageDto>
 
 @if (EditMode)
@@ -21,7 +22,7 @@
             </MudButton>
         </MudItem>
         <MudItem xs="12" md="4">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Outlined.AutoFixHigh" OnClick="OpendCropDialog" FullWidth="true">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Outlined.AutoFixHigh" OnClick="AskImageToAi" FullWidth="true">
             </MudButton>
         </MudItem>
         <MudItem xs="12" md="12">
@@ -39,6 +40,7 @@ else
 @code {
     [Inject] ISnackbar snackbar { get; set; } = null!;
     [Inject] IDialogService DialogService { get; set; } = null!;
+    [Inject(Key = "OpenAi")] IIaManagerBase iaManager { get; set; } = null!;
 
     private MudFileUpload<IBrowserFile> mudFileUpload { get; set; } = null!;
     private readonly long MaxFileSize = 1024 * 1024 * 15;
@@ -92,9 +94,10 @@ else
 
     private async Task AskImageToAi()
     {
+        string base64Image = await iaManager.AskImage(Block.Recipe.Name);
 
-
-
+        Block.Image = base64Image;
+        StateHasChanged();
     }
 
     private async Task<string> ConvertToBase64Async(IBrowserFile file)

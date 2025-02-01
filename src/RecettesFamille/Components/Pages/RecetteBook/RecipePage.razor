@@ -124,6 +124,7 @@
 
         block.RecipeId = Recipe.Id;
         var blockDto = await RecetteRepository.AddBlock(block);
+        blockDto.Recipe = Recipe;
         Recipe.BlocksInstructions.Add(blockDto);
         Recipe.BlocksInstructions.Reorder();
         StateHasChanged();

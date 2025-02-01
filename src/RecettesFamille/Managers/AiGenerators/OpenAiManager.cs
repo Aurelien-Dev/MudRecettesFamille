@@ -12,18 +12,23 @@ namespace RecettesFamille.Managers.AiGenerators;
 public class OpenAiManager(IConfiguration Config, IAiRepository AiRepository) : IIaManagerBase
 {
     private const string _chatModel = "gpt-4o";
-    private const string _imageModel = "dall-e-2";
+    private const string _imageModel = "dall-e-3";
 
-    public async Task<string> AskImage(CancellationToken cancellationToken = default)
+    public async Task<string> AskImage(string recipeName, CancellationToken cancellationToken = default)
     {
         var client = new ImageClient(model: _imageModel, apiKey: Config["OPENAI_SECRET"]);
 
-        GeneratedImage image = await client.GenerateImageAsync("prompt", new ImageGenerationOptions()
+        string ask = $@"Un gros plan réaliste de la recette : {recipeName}. 
+Dans une ambiance minimaliste, sans accessoires ni distractions en arrière-plan, pour focaliser l'attention sur ses détails. 
+L'éclairage est doux et naturel, mettant en avant les textures et les nuances pour une présentation élégante et épurée.";
+
+
+        GeneratedImage image = await client.GenerateImageAsync(ask, new ImageGenerationOptions()
         {
-            Quality = GeneratedImageQuality.Standard,
-            Size = GeneratedImageSize.W512xH512,
+            Quality = GeneratedImageQuality.High,
+            Size = GeneratedImageSize.W1792xH1024,
             ResponseFormat = GeneratedImageFormat.Bytes,
-            Style = GeneratedImageStyle.Natural
+            Style = GeneratedImageStyle.Vivid
         }, cancellationToken);
 
         await ReportImageConsumption(image);

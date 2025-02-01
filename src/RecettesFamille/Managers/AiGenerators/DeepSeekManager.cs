@@ -10,8 +10,7 @@ namespace RecettesFamille.Managers.AiGenerators;
 
 public class DeepSeekManager(IConfiguration Config, IAiRepository AiRepository) : IIaManagerBase
 {
-
-    public Task<string> AskImage(CancellationToken cancellationToken = default)
+    public Task<string> AskImage(string recipeName, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
