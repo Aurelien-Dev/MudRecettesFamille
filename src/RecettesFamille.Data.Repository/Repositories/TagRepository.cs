@@ -2,48 +2,62 @@
 using Microsoft.EntityFrameworkCore;
 using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.Repository.IRepositories;
-using RecettesFamille.Dto.Models.Blocks;
+using RecettesFamille.Dto.Models;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
-public class TagRepository(IMapper Mapper, IDbContextFactory<ApplicationDbContext> contextFactory) : ITagRepository
+public class TagRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext> contextFactory) : ITagRepository
 {
-    public async Task UpdateBlock(TagDto tag, CancellationToken cancellationToken = default)
+    public async Task<List<TagDto>> GetAll(CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
-        var element = await context.Set<TagEntity>().FindAsync(tag.Id, cancellationToken);
-        if (tag is null)
-            return;
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var result = await context.Tags.ToListAsync(cancellationToken);
 
-        Mapper.Map(tag, element);
+        return mapper.Map<List<TagDto>>(result);
+    }
+
+    public async Task<List<TagDto>> GetAllVisible(CancellationToken cancellationToken = default)
+    {
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var result = await context.Tags.Where(c => c.IsVisible).ToListAsync(cancellationToken);
+
+        return mapper.Map<List<TagDto>>(result);
+    }
+
+    public async Task UpdateTag(TagDto tag, CancellationToken cancellationToken = default)
+    {
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var element = await context.Set<TagEntity>().FindAsync(tag.Id, cancellationToken);
+        
+        mapper.Map(tag, element);
 
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<BlockBaseDto> AddTag(TagDto tag, CancellationToken cancellationToken = default)
+    public async Task<TagDto> AddTag(TagDto tag, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
-        TagEntity tagEntity = Mapper.Map<TagEntity>(tag);
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var tagEntity = mapper.Map<TagEntity>(tag);
 
         await context.Set<TagEntity>().AddAsync(tagEntity, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
-        return Mapper.Map<BlockBaseDto>(tagEntity);
+        return mapper.Map<TagDto>(tagEntity);
     }
 
-    public async Task<BlockBaseDto> AddTag(TagDto[] tags, CancellationToken cancellationToken = default)
+    public async Task<bool> AddTag(TagDto[] tags, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         // Exclude existing tags
         var existingTagNames = await context.Tags.Select(t => t.TagName).ToListAsync(cancellationToken);
         var newTags = tags.Where(t => !existingTagNames.Contains(t.TagName)).ToArray();
 
-        TagEntity[] tagEntity = Mapper.Map<TagEntity[]>(newTags);
+        var tagEntity = mapper.Map<TagEntity[]>(newTags);
 
         await context.Set<TagEntity>().AddRangeAsync(tagEntity, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
+        var result = await context.SaveChangesAsync(cancellationToken);
 
-        return Mapper.Map<BlockBaseDto>(tagEntity);
+        return result > 0;
     }
 }

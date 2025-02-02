@@ -29,6 +29,7 @@ public class MappingProfile : Profile
         // Mapping AI
         CreateMap<PromptEntity, PromptDto>().ReverseMap();
         CreateMap<AiConsumptionEntity, AiConsumptionDto>().ReverseMap();
+        CreateMap<TagEntity, TagDto>().ReverseMap();
     }
 
 }

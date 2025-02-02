@@ -1,20 +1,21 @@
 ﻿@page "/"
-@page "/recipe/{Tag}"
-@using Microsoft.EntityFrameworkCore
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Dto.Models
 @using RecettesFamille.Extensions
-
 
 <MudGrid>
     <MudItem md="3">
 
         <MudPaper>
-            <MudList T="string" Class="mt-15" SelectionMode="SelectionMode.MultiSelection" SelectedValuesChanged="OnSelectedValuesChanged">
-                <MudListItem Text="Plat" />
-                <MudListItem Text="Rapide" />
-                <MudListItem Text="Dessert" />
-                <MudListItem Text="Amuse-bouche" />
+            <MudList T="string" Class="mt-15" SelectionMode="SelectionMode.MultiSelection" Dense="true"
+                     SelectedValuesChanged="OnSelectedValuesChanged">
+                <MudListSubheader>
+                    Filtre par catégories
+                </MudListSubheader>
+                @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
+                {
+                    <MudListItem Dense="true" Text="@item.TagName"/>
+                }
             </MudList>
         </MudPaper>
 
@@ -22,27 +23,23 @@
     <MudItem md="9">
 
         <MudToolBar Class="mb-3" Dense="true">
-            <MudSpacer />
-            <MudToggleGroup T="string" Outlined="true" Delimiters="true" Size="Size.Small" Color="Color.Primary" @bind-Value="viewMode">
+            <MudSpacer/>
+            <MudToggleGroup T="string" Outlined="true" Delimiters="true" Size="Size.Small" Color="Color.Primary"
+                            @bind-Value="_viewMode">
                 <MudToggleItem Value="Icons.Material.Filled.GridView">
-                    <MudIcon Icon="@Icons.Material.Filled.GridView" />
+                    <MudIcon Icon="@Icons.Material.Filled.GridView"/>
                 </MudToggleItem>
                 <MudToggleItem Value="Icons.Material.Filled.List">
-                    <MudIcon Icon="@Icons.Material.Filled.List" />
+                    <MudIcon Icon="@Icons.Material.Filled.List"/>
                 </MudToggleItem>
             </MudToggleGroup>
         </MudToolBar>
 
-        @if (recetteEntities is null)
+        @switch (_viewMode)
         {
-            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Width="200px" Height="110px" />
-        }
-        else
-        {
-            if (viewMode == Icons.Material.Filled.GridView)
-            {
+            case Icons.Material.Filled.GridView:
                 <MudGrid Spacing="5" Justify="Justify.Center">
-                    @foreach (var item in recetteEntities.EmptyIfNull())
+                    @foreach (var item in Recipes.EmptyIfNull())
                     {
                         <MudItem xs="12" sm="4" md="3" xl="2">
                             <MudCard Style="height:100%">
@@ -52,43 +49,46 @@
                                         <MudText Typo="Typo.subtitle2">@item.Name.ToUpper()</MudText>
                                     </CardHeaderContent>
                                     <CardHeaderActions>
-                                        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default"/>
                                     </CardHeaderActions>
                                 </MudCardHeader>
                                 <MudCardContent>
                                     @* <MudText Typo="Typo.body2">@item.InformationPreparation</MudText> *@
                                 </MudCardContent>
                                 <MudCardActions>
-                                    <MudButton Href="@($"/recette/{item.Id}")" Variant="Variant.Text" 
-                                               Color="Color.Inherit" Size="Size.Small">Open</MudButton>
+                                    <MudButton Href="@($"/recette/{item.Id}")" Variant="Variant.Text"
+                                               Color="Color.Inherit" Size="Size.Small">Open
+                                    </MudButton>
                                 </MudCardActions>
                             </MudCard>
                         </MudItem>
                     }
                 </MudGrid>
-            }
-            else if (viewMode == Icons.Material.Filled.List)
-            {
+                break;
+            case Icons.Material.Filled.List:
                 <MudPaper Elevation="1">
-                    <MudTable Items="recetteEntities" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
+                    <MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.Sm"
+                              LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
                               Filter="new Func<RecipeDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)">
                         <ToolBarContent>
-                            <MudSpacer />
-                            <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                            <MudSpacer/>
+                            <MudTextField @bind-Value="_searchString1" Placeholder="Search" Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
                                           IconSize="Size.Medium" Class="mt-0"></MudTextField>
                         </ToolBarContent>
-
                         <RowTemplate>
                             <MudTd>@context.Name</MudTd>
                             <MudTd>
                                 @foreach (var item in context.Tags.Split("|"))
                                 {
-                                    <MudChip T="string" Variant="Variant.Text" Size="Size.Small" Color="Color.Info">@item</MudChip>
+                                    <MudChip T="string" Variant="Variant.Text" Size="Size.Small"
+                                             Color="Color.Info">@item</MudChip>
                                 }
                             </MudTd>
                             <MudTd>
                                 <MudButton Href="@($"/recette/{context.Id}")" Variant="Variant.Text"
-                                           Color="Color.Inherit" Size="Size.Small">Open</MudButton>
+                                           Color="Color.Inherit" Size="Size.Small">Open
+                                </MudButton>
                             </MudTd>
                         </RowTemplate>
 
@@ -96,50 +96,44 @@
                             <MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
                                            RowsPerPageString="Elements par page :"
                                            AllItemsText="Tout"
-                                           InfoFormat="{first_item}-{last_item} sur {all_items}" />
+                                           InfoFormat="{first_item}-{last_item} sur {all_items}"/>
                         </PagerContent>
                     </MudTable>
                 </MudPaper>
-            }
+                break;
         }
     </MudItem>
 </MudGrid>
 
 @code {
-    [Inject] NavigationManager navigationManager { get; set; } = null!;
-    [Inject] IRecetteRepository RecetteRepository { get; set; } = default!;
+    [Inject] NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
+    [Inject] ITagRepository TagRepository { get; set; } = null!;
 
-    [Parameter] public string Tag { get; set; } = null!;
+    List<RecipeDto> Recipes { get; set; } = null!;
+    List<TagDto> Tags { get; set; } = null!;
+    string _viewMode = Icons.Material.Filled.List;
+    string _searchString1 = string.Empty;
 
-    List<RecipeDto> recetteEntities { get; set; } = null!;
-    string viewMode = Icons.Material.Filled.List;
-    string searchString1 = string.Empty;
-
-    protected async override Task OnParametersSetAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        if (string.IsNullOrEmpty(Tag))
-            recetteEntities = await RecetteRepository.GetAll();
-        else
-            recetteEntities = await RecetteRepository.GetAllByTag(Tag);
+        Recipes = (await RecipeRepository.GetAll()).OrderBy(c => c.Name).ToList();
+        Tags = await TagRepository.GetAllVisible();
     }
 
-    public async Task OnSelectedValuesChanged(IReadOnlyCollection<string> strings)
+    public async Task OnSelectedValuesChanged(IReadOnlyCollection<string>? strings)
     {
-        recetteEntities = await RecetteRepository.GetAllByTag(strings.ToArray());
+        Recipes = (await RecipeRepository.GetAllByTag(strings!.ToArray())).OrderBy(c => c.Name).ToList();
     }
 
-    private bool FilterFunc1(RecipeDto element) => FilterFunc(element, searchString1);
+    private bool FilterFunc1(RecipeDto element) => FilterFunc(element, _searchString1);
 
-    private bool FilterFunc(RecipeDto element, string searchString)
+    private static bool FilterFunc(RecipeDto element, string searchString)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-
-        string comparer = $"{element.Name} - {element.Tags}";
-
-        if (comparer.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        return false;
+        var comparer = $"{element.Name} - {element.Tags}";
+        return comparer.Contains(searchString, StringComparison.OrdinalIgnoreCase);
     }
+
 }

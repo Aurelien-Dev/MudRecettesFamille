@@ -8,7 +8,7 @@ using RecettesFamille.Dto.Models.Blocks;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
-public class RecetteRepository(IMapper Mapper, IDbContextFactory<ApplicationDbContext> contextFactory) : IRecetteRepository
+public class RecipeRepository(IMapper Mapper, IDbContextFactory<ApplicationDbContext> contextFactory) : IRecipeRepository
 {
     public async Task<List<RecipeDto>> GetAll(CancellationToken cancellationToken = default)
     {

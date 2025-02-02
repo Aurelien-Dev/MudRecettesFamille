@@ -1,41 +1,47 @@
 ﻿@using RecettesFamille.Managers
 @inherits LayoutComponentBase
 
-<MudThemeProvider @ref="_mudThemeProvider" IsDarkMode="isDarkMode" Theme="CustomThemeManager.Customtheme" />
-<MudDialogProvider />
-<MudSnackbarProvider />
-<MudPopoverProvider />
+<MudThemeProvider IsDarkMode="true" Theme="CustomThemeManager.Customtheme"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+<MudPopoverProvider/>
 
 <MudLayout>
     <MudAppBar Elevation="1" Dense="true">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
-        <MudText Typo="Typo.body1" Style="font-weight: bold;" Class="ml-3">Recettes famille</MudText>
-        <MudSpacer />
-        <MudToggleIconButton @bind-Toggled="isDarkMode"
-                             Icon="@Icons.Material.Outlined.LightMode"
-                             ToggledIcon="@Icons.Material.Filled.DarkMode"
-                             ToggledColor="@Color.Error" />
-
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"/>
+        <MudButton Href="/" Style="font-weight: bold;" Class="mud-typography mud-typography-body2"
+                   Color="Color.Inherit">Recettes famille
+        </MudButton>
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <MudNavMenu>
             <MudNavLink Href="admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-            <MudNavLink Href="admin/migrations" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.TransferWithinAStation">Migration</MudNavLink>
-            <MudNavLink Href="admin/prompt" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ImportExport">Prompt editor</MudNavLink>
-            <MudNavLink Href="admin/statistics" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ImportExport">Statistics</MudNavLink>
-            
-            <MudNavLink Href="/" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ArrowBack">Back to the web site</MudNavLink>
+            <MudNavLink Href="admin/migrations" Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.TransferWithinAStation">Migration
+            </MudNavLink>
+            <MudNavLink Href="admin/prompt" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ImportExport">
+                Prompt editor
+            </MudNavLink>
+            <MudNavLink Href="admin/statistics" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.GraphicEq">
+                Statistics
+            </MudNavLink>
+
+            <MudNavLink Href="/" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ArrowBack">Back to the web
+                site
+            </MudNavLink>
         </MudNavMenu>
     </MudDrawer>
 
-    <MudMainContent Class="mt-12 pa-4">
-        <MudContainer MaxWidth="MaxWidth.Large">
+    <CustomErrorBoundary>
+        <MudMainContent Class="mt-12 pa-4">
+            <MudContainer MaxWidth="MaxWidth.Large">
 
-            @Body
+                @Body
 
-        </MudContainer>
-    </MudMainContent>
+            </MudContainer>
+        </MudMainContent>
+    </CustomErrorBoundary>
 </MudLayout>
 
 
@@ -47,21 +53,10 @@
 
 @code {
     private bool _drawerOpen = true;
-    private bool isDarkMode = false;
-    private MudThemeProvider _mudThemeProvider;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            isDarkMode = await _mudThemeProvider.GetSystemPreference();
-            StateHasChanged();
-        }
-    }
 
     private void DrawerToggle()
     {
-
         _drawerOpen = !_drawerOpen;
     }
+
 }

@@ -11,10 +11,11 @@ public static class DependencyInjection
     public static IServiceCollection AddRepository(this IServiceCollection services)
     {
         //Repositories
-        services.AddScoped<IRecetteRepository, RecetteRepository>();
+        services.AddScoped<IRecipeRepository, RecipeRepository>();
         services.AddScoped<IAiRepository, AiRepository>();
         services.AddScoped<IStatisticRepository, StatisticRepository>();
         services.AddScoped<ITechnicalDbRepository, TechnicalDbRepository>();
+        services.AddScoped<ITagRepository, TagRepository>();
 
         //AutoMapper
         var mapperConfig = new MapperConfiguration(cfg =>

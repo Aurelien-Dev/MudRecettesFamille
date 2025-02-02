@@ -1,0 +1,55 @@
+﻿@page "/admin/tag"
+@using RecettesFamille.Components.Layout
+@using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Dto.Models
+@using RecettesFamille.Extensions
+@layout AdminLayout
+
+
+<MudList T="TagDto" SelectionMode="SelectionMode.MultiSelection" Dense="true">
+    <MudListSubheader>
+        Tags :
+    </MudListSubheader>
+    @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.Id))
+    {
+        <MudCheckBox T="bool" Value="@item.IsVisible" ValueChanged="@(e => Callback(e, item))"
+                     Size="Size.Small" Color="Color.Secondary">@item.TagName</MudCheckBox>
+    }
+</MudList>
+
+<MudButton OnClick="PreloadTags">PreloadTags</MudButton>
+
+@code {
+    [Inject] public ITagRepository TagRepository { get; set; } = null!;
+    [Inject] public IRecipeRepository RecipeRepository { get; set; } = null!;
+
+    private List<TagDto>? Tags { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Tags = await TagRepository.GetAll();
+    }
+
+    private async Task PreloadTags()
+    {
+        var recipes = await RecipeRepository.GetAll();
+        var strTags = new List<string>();
+
+        foreach (var recipe in recipes)
+        {
+            strTags.AddRange(recipe.Tags.Split("|").ToList());
+        }
+
+        strTags = strTags.Distinct().ToList();
+        var success = await TagRepository.AddTag(strTags.Select(c => new TagDto() { TagName = c }).ToArray());
+
+        if (success)
+            Tags = await TagRepository.GetAll();
+    }
+
+    private async Task Callback(bool b, TagDto item)
+    {
+        item.IsVisible = b;
+        await TagRepository.UpdateTag(item);
+    }
+}

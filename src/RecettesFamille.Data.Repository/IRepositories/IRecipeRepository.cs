@@ -3,7 +3,7 @@ using RecettesFamille.Dto.Models.Blocks;
 
 namespace RecettesFamille.Data.Repository.IRepositories;
 
-public interface IRecetteRepository
+public interface IRecipeRepository
 {
     Task<List<RecipeDto>> GetAll(CancellationToken cancellationToken = default);
     Task<RecipeDto> GetWithInstructions(int recipeId, CancellationToken cancellationToken = default);

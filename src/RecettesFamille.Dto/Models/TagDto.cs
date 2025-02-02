@@ -1,4 +1,4 @@
-﻿namespace RecettesFamille.Data.EntityModel;
+﻿namespace RecettesFamille.Dto.Models;
 
 public class TagDto
 {

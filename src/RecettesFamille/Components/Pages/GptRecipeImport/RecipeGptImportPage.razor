@@ -41,7 +41,7 @@
 
 
 @code {
-    [Inject] IRecetteRepository RecetteRepository { get; set; } = default!;
+    [Inject] IRecipeRepository RecipeRepository { get; set; } = default!;
     [Inject] NavigationManager navigationManager { get; set; } = null!;
     [Inject] ErrorManager ErrorManager { get; set; } = null!;
     [Inject(Key = "DeepSeek")] IIaManagerBase gptRecipeConverterManager { get; set; } = null!;
@@ -59,7 +59,7 @@
         {
             RecipeDto recette = await gptRecipeConverterManager.ConvertRecipe(recipeDescription, cancellationTokenSource.Token);
 
-            RecipeDto recipeAdded = await RecetteRepository.AddRecipe(recette);
+            RecipeDto recipeAdded = await RecipeRepository.AddRecipe(recette);
             navigationManager.NavigateTo($"/recette/{recipeAdded.Id}", true);
         }
         catch (OperationCanceledException)
