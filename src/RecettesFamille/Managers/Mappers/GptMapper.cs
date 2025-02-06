@@ -8,10 +8,7 @@ namespace RecettesFamille.Managers.Mappers
     {
         public static RecipeDto ConvertToRecipeDto(AiRecipe gptRecipe)
         {
-            if (gptRecipe == null)
-            {
-                throw new ArgumentNullException(nameof(gptRecipe));
-            }
+            ArgumentNullException.ThrowIfNull(gptRecipe);
 
             var recipe = new RecipeDto
             {
@@ -19,7 +16,7 @@ namespace RecettesFamille.Managers.Mappers
                 PrepTime = gptRecipe.Preparation.TempsPreparation,
                 CookingTime = gptRecipe.Preparation.TempsCuisson,
                 Portion = gptRecipe.Preparation.Portions,
-                Tags = string.Join("|", gptRecipe.Tags),
+                Tags = gptRecipe.Tags != null ? string.Join("|", gptRecipe.Tags) : string.Empty,
                 BlocksInstructions = new List<BlockBaseDto>()
             };
 

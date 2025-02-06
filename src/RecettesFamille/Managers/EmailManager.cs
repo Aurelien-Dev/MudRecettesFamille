@@ -44,7 +44,7 @@ public class EmailManager(IConfiguration config)
             using var client = new SmtpClient();
             await client.ConnectAsync(SmtpServer, SmtpPort, SecureSocketOptions.SslOnConnect);
             await client.AuthenticateAsync(config["EMAIL_BACKUP_FROM"], config["SMTP_PASSWORD"]);
-            var result = await client.SendAsync(email);
+            await client.SendAsync(email);
             await client.DisconnectAsync(true);
 
             Console.WriteLine("✅ Email envoyé avec succès !");
