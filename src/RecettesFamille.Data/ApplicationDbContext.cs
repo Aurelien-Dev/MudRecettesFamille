@@ -54,7 +54,7 @@ namespace RecettesFamille.Data
         {
             try
             {
-                string fileName = $"backup_{DateTime.UtcNow.ToShortDateString()}-{DateTime.UtcNow.ToShortTimeString()}.backup";
+                string fileName = $"backup_{DateTime.UtcNow.ToString("s")}.backup";
                 string command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -p 5442 -U pguser -d recettesfamilledb -F c -f wwwroot/backups/{fileName}";
 
                 if (!Directory.Exists("wwwroot/backups"))
