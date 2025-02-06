@@ -7,7 +7,7 @@
     </TitleContent>
     <DialogContent>
         <MudPaper Height="200">
-            <CropperComponent @ref="CropperComponent" Class="big-img" Src="@ImageSource" Options="@options" />
+            <CropperComponent @ref="_cropperComponent" Class="big-img" Src="@ImageSource" Options="@_options" />
         </MudPaper>
     </DialogContent>
     <DialogActions>
@@ -30,30 +30,25 @@
     [Parameter]
     public string ImageSource { get; set; } = "https://via.placeholder.com/1600x900";
 
-    private CropperComponent? CropperComponent = null!;
-    private Options options = new Options()
+    private CropperComponent? _cropperComponent;
+    private readonly Options _options = new()
         {
             AspectRatio = (decimal)16 / 11,
         };
 
     private async Task Submit()
     {
-        GetCroppedCanvasOptions getCroppedCanvasOptions = new GetCroppedCanvasOptions
+        var getCroppedCanvasOptions = new GetCroppedCanvasOptions
             {
                 MaxHeight = 4096,
                 MaxWidth = 4096,
                 ImageSmoothingQuality = ImageSmoothingQuality.High.ToEnumString()
             };
 
-        string newImage = await CropperComponent!.GetCroppedCanvasDataURLAsync(getCroppedCanvasOptions);
+        var newImage = await _cropperComponent!.GetCroppedCanvasDataURLAsync(getCroppedCanvasOptions);
 
         MudDialog.Close(DialogResult.Ok(newImage));
     }
 
     private void Cancel() => MudDialog.Cancel();
-
-    protected override Task OnInitializedAsync()
-    {
-        return base.OnInitializedAsync();
-    }
 }

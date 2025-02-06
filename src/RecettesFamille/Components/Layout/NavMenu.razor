@@ -1,5 +1,4 @@
-﻿@implements IDisposable
-@rendermode InteractiveServer
+﻿@rendermode InteractiveServer
 
 <MudNavMenu>
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Recettes</MudNavLink>
@@ -27,28 +26,3 @@
         </NotAuthorized>
     </AuthorizeView> *@
 </MudNavMenu>
-
-
-@code {
-    [Inject] NavigationManager NavigationManager { get; set; } = null!;
-    private string? currentUrl;
-
-    protected override void OnInitialized()
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
-    }
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-        StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-    }
-}
-
-

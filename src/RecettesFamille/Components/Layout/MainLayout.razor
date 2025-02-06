@@ -3,7 +3,7 @@
 @using RecettesFamille.Managers
 @inherits LayoutComponentBase
 
-<MudThemeProvider @ref="_mudThemeProvider" IsDarkMode="isDarkMode" Theme="CustomThemeManager.Customtheme" />
+<MudThemeProvider @ref="_mudThemeProvider" IsDarkMode="_isDarkMode" Theme="CustomThemeManager.Customtheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudPopoverProvider />
@@ -39,20 +39,20 @@
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
     [Inject] private ICookieService CookieService { get; set; } = null!;
 
-    private bool isDarkMode = false;
+    private bool _isDarkMode;
     private MudThemeProvider _mudThemeProvider;
 
-    protected async override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         var cookie = await CookieService.GetAsync("userPreferenceDarkMode");
         bool? userPreferenceDarkMode = bool.TryParse(cookie?.Value, out var result) && result;
 
-        isDarkMode = userPreferenceDarkMode ?? await _mudThemeProvider.GetSystemPreference();
+        _isDarkMode = userPreferenceDarkMode ?? await _mudThemeProvider.GetSystemPreference();
     }
 
     private async Task OnToggledChanged(bool isDark)
     {
-        isDarkMode = isDark;
+        _isDarkMode = isDark;
         await CookieService.SetAsync("userPreferenceDarkMode", isDark.ToString(), new DateTimeOffset(DateTime.MaxValue));
         StateHasChanged();
     }
