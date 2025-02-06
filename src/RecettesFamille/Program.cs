@@ -93,4 +93,4 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-app.Run();
+await app.RunAsync();

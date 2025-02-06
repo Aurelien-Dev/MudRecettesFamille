@@ -6,7 +6,7 @@ public class AiRecipe
     public required Preparation Preparation { get; set; }
     public required IngredientList[] Ingredients { get; set; }
     public required string[] Instructions { get; set; }
-    public string[] Tags { get; set; }
+    public string[]? Tags { get; set; }
 }
 
 public abstract class Preparation

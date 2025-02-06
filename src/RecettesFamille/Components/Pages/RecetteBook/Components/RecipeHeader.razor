@@ -16,7 +16,7 @@
             var result = string.Join(", ", instructions.Where(e => !string.IsNullOrEmpty(e))).ToLower();
             result = string.IsNullOrEmpty(result) ? result : char.ToUpper(result[0]) + result[1..];
 
-            @(result);
+            @(result)
         }
     </MudText>
 

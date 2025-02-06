@@ -42,7 +42,7 @@ else
 @code {
     [Inject] IDialogService DialogService { get; set; } = null!;
     [Inject(Key = "OpenAi")] IIaManagerBase IaManager { get; set; } = null!;
-    [Inject] ErrorManager ErrosManager { get; set; } = null!;
+    [Inject] ErrorManager ErrorManager { get; set; } = null!;
 
     private MudFileUpload<IBrowserFile> MudFileUpload { get; set; } = null!;
     private readonly long _maxFileSize = 1024 * 1024 * 15;
@@ -54,7 +54,7 @@ else
             var base64Image = await ConvertToBase64Async(e);
             Block.Image = base64Image;
 
-            ErrosManager.DisplaySuccess("Image envoyé au serveur.");
+            ErrorManager.DisplaySuccess("Image envoyé au serveur.");
 
             OnBlockUpdated?.Invoke(Block);
 
@@ -63,8 +63,7 @@ else
         }
         catch (Exception)
         {
-            ErrosManager.DisplayError();
-            throw new Exception("Error uploading file");
+            ErrorManager.DisplayError();
         }
     }
 
@@ -98,7 +97,7 @@ else
         }
         catch (Exception)
         {
-            ErrosManager.DisplayError();
+            ErrorManager.DisplayError();
         }
     }
 

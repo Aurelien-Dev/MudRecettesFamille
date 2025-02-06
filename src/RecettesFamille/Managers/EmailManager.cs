@@ -30,7 +30,7 @@ public class EmailManager(IConfiguration config)
             // Ajout des pièces jointes si fournies
             if (attachmentPaths != null)
             {
-                foreach (var filePath in attachmentPaths)
+                foreach (var filePath in attachmentPaths.Where(File.Exists))
                 {
                     if (File.Exists(filePath))
                     {

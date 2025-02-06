@@ -17,7 +17,7 @@ public class DeepSeekManager(IConfiguration config, IAiRepository aiRepository) 
 
     public async Task<RecipeDto> ConvertRecipe(string recipe, CancellationToken cancellationToken = default)
     {
-        string apiKey = config["DEEPSEEK_SECRET"] ?? throw new ApplicationException("Environment variable IsNullOrEmpty (DEEPSEEK_SECRET)");
+        string apiKey = config["DEEPSEEK_SECRET"] ?? throw new InvalidOperationException("Environment variable IsNullOrEmpty (DEEPSEEK_SECRET)");
         var client = new DeepSeekClient(apiKey);
 
 
@@ -48,13 +48,13 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
         if (chatResponse is null)
         {
             Console.WriteLine(client.ErrorMsg);
-            throw new ApplicationException("Chat response is null");
+            throw new InvalidOperationException("Chat response is null");
         }
-        var resultText = chatResponse.Choices.First().Message?.Content ?? throw new ApplicationException("Result text is null");
+        var resultText = chatResponse.Choices.First().Message?.Content ?? throw new InvalidOperationException("Result text is null");
 
         await ReportConsumption(chatResponse);
 
-        var serialized = JsonConvert.DeserializeObject<AiRecipe>(resultText) ?? throw new ApplicationException("Deserialization failed");
+        var serialized = JsonConvert.DeserializeObject<AiRecipe>(resultText) ?? throw new InvalidOperationException("Deserialization failed");
 
         return GptMapper.ConvertToRecipeDto(serialized);
     }

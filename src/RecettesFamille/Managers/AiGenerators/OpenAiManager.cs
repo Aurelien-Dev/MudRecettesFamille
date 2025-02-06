@@ -31,7 +31,7 @@ L'éclairage est doux et naturel, mettant en avant les textures et les nuances p
             Style = GeneratedImageStyle.Vivid
         }, cancellationToken);
 
-        await ReportImageConsumption(image);
+        await ReportImageConsumption();
 
         return $"data:png;base64," + Convert.ToBase64String(image.ImageBytes);
     }
@@ -63,12 +63,12 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
 
         await ReportChatConsumption(completion);
 
-        var serialized = JsonConvert.DeserializeObject<AiRecipe>(resultText) ?? throw new ApplicationException("Deserialization failed");
+        var serialized = JsonConvert.DeserializeObject<AiRecipe>(resultText) ?? throw new InvalidOperationException("Deserialization failed");
 
         return GptMapper.ConvertToRecipeDto(serialized);
     }
 
-    private async Task ReportImageConsumption(GeneratedImage image)
+    private async Task ReportImageConsumption()
     {
         await aiRepository.ReportConsumption(new AiConsumptionDto()
         {

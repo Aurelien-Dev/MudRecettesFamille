@@ -43,7 +43,6 @@ CommittedItemChanges="@CommittedItemChanges">
 @code {
     [Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
 
-    DialogOptions _dialogOptions = new() { CloseButton = true, CloseOnEscapeKey = true };
     MudDataGrid<IngredientDto> _dataGrid = null!;
 
     public void OnNameUpdated()
