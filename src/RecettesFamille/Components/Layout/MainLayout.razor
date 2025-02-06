@@ -40,14 +40,14 @@
     [Inject] private ICookieService CookieService { get; set; } = null!;
 
     private bool _isDarkMode;
-    private MudThemeProvider _mudThemeProvider;
+    private MudThemeProvider? _mudThemeProvider;
 
     protected override async Task OnInitializedAsync()
     {
         var cookie = await CookieService.GetAsync("userPreferenceDarkMode");
         bool? userPreferenceDarkMode = bool.TryParse(cookie?.Value, out var result) && result;
 
-        _isDarkMode = userPreferenceDarkMode ?? await _mudThemeProvider.GetSystemPreference();
+        _isDarkMode = userPreferenceDarkMode.GetValueOrDefault(await _mudThemeProvider!.GetSystemPreference());
     }
 
     private async Task OnToggledChanged(bool isDark)

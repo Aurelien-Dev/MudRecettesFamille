@@ -50,7 +50,7 @@ namespace RecettesFamille.Data
             base.OnModelCreating(builder);
         }
 
-        public (bool, string, string) TriggerBackup()
+        public static (bool, string, string) TriggerBackup()
         {
             try
             {
@@ -71,7 +71,7 @@ namespace RecettesFamille.Data
                 };
 
                 using var process = Process.Start(processInfo);
-                if (process is null) throw new Exception("Process not exist.");
+                if (process is null) throw new InvalidOperationException("Process not exist.");
 
                 var output = process.StandardOutput.ReadToEnd();
                 var error = process.StandardError.ReadToEnd();
@@ -83,7 +83,7 @@ namespace RecettesFamille.Data
                     return (true, "Backup terminé avec succès : {fileName}", fileName);
                 }
                 else
-                    throw new Exception($"Erreur lors du backup : {error}");
+                    throw new InvalidOperationException($"Erreur lors du backup : {error}");
             }
             catch (Exception ex)
             {

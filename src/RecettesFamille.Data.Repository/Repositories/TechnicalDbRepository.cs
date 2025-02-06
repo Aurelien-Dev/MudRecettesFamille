@@ -2,10 +2,10 @@
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
-public class TechnicalDbRepository(ApplicationDbContext context) : ITechnicalDbRepository
+public class TechnicalDbRepository() : ITechnicalDbRepository
 {
     public (bool, string, string) TriggerBackup()
     {
-        return context.TriggerBackup();
+        return ApplicationDbContext.TriggerBackup();
     }
 }
