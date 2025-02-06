@@ -7,18 +7,18 @@ using MimeKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 
-public class EmailManager(IConfiguration Config)
+public class EmailManager(IConfiguration config)
 {
-    private const string _smtpServer = "smtp.gmail.com";
-    private const int _smtpPort = 465;
+    private const string SmtpServer = "smtp.gmail.com";
+    private const int SmtpPort = 465;
 
-    public async Task<bool> SendEmailAsync(string subject, string bodyText, string bodyHtml, string[]? attachmentPaths = null)
+    public async Task SendEmailAsync(string subject, string bodyText, string bodyHtml, string[]? attachmentPaths = null)
     {
         try
         {
             var email = new MimeMessage();
-            email.From.Add(new MailboxAddress(Config["EMAIL_BACKUP_FROM"], Config["EMAIL_BACKUP_FROM"]));
-            email.To.Add(new MailboxAddress(Config["EMAIL_BACKUP_DEST"], Config["EMAIL_BACKUP_DEST"]));
+            email.From.Add(new MailboxAddress(config["EMAIL_BACKUP_FROM"], config["EMAIL_BACKUP_FROM"]));
+            email.To.Add(new MailboxAddress(config["EMAIL_BACKUP_DEST"], config["EMAIL_BACKUP_DEST"]));
             email.Subject = subject;
 
             var bodyBuilder = new BodyBuilder
@@ -34,7 +34,7 @@ public class EmailManager(IConfiguration Config)
                 {
                     if (File.Exists(filePath))
                     {
-                        bodyBuilder.Attachments.Add(filePath);
+                        await bodyBuilder.Attachments.AddAsync(filePath);
                     }
                 }
             }
@@ -42,18 +42,16 @@ public class EmailManager(IConfiguration Config)
             email.Body = bodyBuilder.ToMessageBody();
 
             using var client = new SmtpClient();
-            await client.ConnectAsync(_smtpServer, _smtpPort, SecureSocketOptions.SslOnConnect);
-            await client.AuthenticateAsync(Config["EMAIL_BACKUP_FROM"], Config["SMTP_PASSWORD"]);
+            await client.ConnectAsync(SmtpServer, SmtpPort, SecureSocketOptions.SslOnConnect);
+            await client.AuthenticateAsync(config["EMAIL_BACKUP_FROM"], config["SMTP_PASSWORD"]);
             var result = await client.SendAsync(email);
             await client.DisconnectAsync(true);
 
             Console.WriteLine("✅ Email envoyé avec succès !");
-            return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ Erreur lors de l'envoi de l'email : {ex.Message}");
-            return false;
         }
     }
 }

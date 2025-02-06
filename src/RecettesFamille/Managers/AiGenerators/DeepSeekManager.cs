@@ -8,7 +8,7 @@ using RecettesFamille.Managers.Mappers;
 
 namespace RecettesFamille.Managers.AiGenerators;
 
-public class DeepSeekManager(IConfiguration Config, IAiRepository AiRepository) : IIaManagerBase
+public class DeepSeekManager(IConfiguration config, IAiRepository aiRepository) : IIaManagerBase
 {
     public Task<string> AskImage(string recipeName, CancellationToken cancellationToken = default)
     {
@@ -17,14 +17,14 @@ public class DeepSeekManager(IConfiguration Config, IAiRepository AiRepository) 
 
     public async Task<RecipeDto> ConvertRecipe(string recipe, CancellationToken cancellationToken = default)
     {
-        string apiKey = "sk-6026b5370f5c4532b545dc57d868adbe" ?? throw new ApplicationException("Environment variable IsNullOrEmpty (DEEPSEEK_SECRET)");
+        string apiKey = config["DEEPSEEK_SECRET"] ?? throw new ApplicationException("Environment variable IsNullOrEmpty (DEEPSEEK_SECRET)");
         var client = new DeepSeekClient(apiKey);
 
 
-        PromptDto promptRecetteConvert = await AiRepository.GetPrompt("GptRecipeConvert");
+        var promptRecipeConvert = await aiRepository.GetPrompt("GptRecipeConvert", cancellationToken);
 
-        string newPromptRecetteConvert = promptRecetteConvert.Prompt;
-        string ask = $@"Voici une recette à convertir en JSON en respectant les instructions du prompt :
+        var newPromptRecipeConvert = promptRecipeConvert.Prompt;
+        var ask = $@"Voici une recette à convertir en JSON en respectant les instructions du prompt :
 
 === Début de la recette ===
 {recipe}
@@ -36,7 +36,7 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
         var request = new ChatRequest
         {
             Messages = [
-                Message.NewSystemMessage(newPromptRecetteConvert),
+                Message.NewSystemMessage(newPromptRecipeConvert),
                 Message.NewUserMessage(ask)
             ],
             // Specify the model
@@ -50,7 +50,7 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
             Console.WriteLine(client.ErrorMsg);
             throw new ApplicationException("Chat response is null");
         }
-        string resultText = chatResponse.Choices.First().Message?.Content ?? throw new ApplicationException("Result text is null");
+        var resultText = chatResponse.Choices.First().Message?.Content ?? throw new ApplicationException("Result text is null");
 
         await ReportConsumption(chatResponse);
 
@@ -62,7 +62,7 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
 
     private async Task ReportConsumption(ChatResponse chatResponse)
     {
-        await AiRepository.ReportConsumption(new AiConsumptionDto()
+        await aiRepository.ReportConsumption(new AiConsumptionDto()
         {
             Date = DateTime.UtcNow,
             InputToken = chatResponse.Usage?.PromptCacheMissTokens,

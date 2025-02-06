@@ -9,14 +9,14 @@ using RecettesFamille.Managers.Mappers;
 
 namespace RecettesFamille.Managers.AiGenerators;
 
-public class OpenAiManager(IConfiguration Config, IAiRepository AiRepository) : IIaManagerBase
+public class OpenAiManager(IConfiguration config, IAiRepository aiRepository) : IIaManagerBase
 {
-    private const string _chatModel = "gpt-4o";
-    private const string _imageModel = "dall-e-3";
+    private const string ChatModel = "gpt-4o";
+    private const string ImageModel = "dall-e-3";
 
     public async Task<string> AskImage(string recipeName, CancellationToken cancellationToken = default)
     {
-        var client = new ImageClient(model: _imageModel, apiKey: Config["OPENAI_SECRET"]);
+        var client = new ImageClient(model: ImageModel, apiKey: config["OPENAI_SECRET"]);
 
         string ask = $@"Un gros plan réaliste de la recette : {recipeName}. 
 Dans une ambiance minimaliste, sans accessoires ni distractions en arrière-plan, pour focaliser l'attention sur ses détails. 
@@ -38,12 +38,12 @@ L'éclairage est doux et naturel, mettant en avant les textures et les nuances p
 
     public async Task<RecipeDto> ConvertRecipe(string recipe, CancellationToken cancellationToken = default)
     {
-        var client = new ChatClient(model: _chatModel, apiKey: Config["OPENAI_SECRET"]);
+        var client = new ChatClient(model: ChatModel, apiKey: config["OPENAI_SECRET"]);
 
-        PromptDto promptRecetteConvert = await AiRepository.GetPrompt("GptRecipeConvert");
+        var promptRecipeConvert = await aiRepository.GetPrompt("GptRecipeConvert", cancellationToken);
 
-        string newPromptRecetteConvert = promptRecetteConvert.Prompt;
-        string ask = $@"Voici une recette à convertir en JSON en respectant les instructions du prompt :
+        var newPromptRecipeConvert = promptRecipeConvert.Prompt;
+        var ask = $@"Voici une recette à convertir en JSON en respectant les instructions du prompt :
 
 === Début de la recette ===
 {recipe}
@@ -53,13 +53,13 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
 
         var messages = new ChatMessage[]
         {
-            new SystemChatMessage(newPromptRecetteConvert),
+            new SystemChatMessage(newPromptRecipeConvert),
             new UserChatMessage(ask)
         };
 
         ChatCompletion completion = await client.CompleteChatAsync(messages, new ChatCompletionOptions() { ResponseFormat = ChatResponseFormat.CreateJsonObjectFormat() }, cancellationToken: cancellationToken);
 
-        string resultText = completion.Content[0].Text;
+        var resultText = completion.Content[0].Text;
 
         await ReportChatConsumption(completion);
 
@@ -70,7 +70,7 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
 
     private async Task ReportImageConsumption(GeneratedImage image)
     {
-        await AiRepository.ReportConsumption(new AiConsumptionDto()
+        await aiRepository.ReportConsumption(new AiConsumptionDto()
         {
             Date = DateTime.UtcNow,
             InputToken = 1,
@@ -78,13 +78,13 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
             InputPrice = 0.018m,
             OutputPrice = 0,
             UseCase = "ImageCreation",
-            AiModelName = $"openai-{_imageModel}"
+            AiModelName = $"openai-{ImageModel}"
         });
     }
 
     private async Task ReportChatConsumption(ChatCompletion completion)
     {
-        await AiRepository.ReportConsumption(new AiConsumptionDto()
+        await aiRepository.ReportConsumption(new AiConsumptionDto()
         {
             Date = DateTime.UtcNow,
             InputToken = completion.Usage.InputTokenCount,
@@ -92,7 +92,7 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
             InputPrice = 2.50m,
             OutputPrice = 10.00m,
             UseCase = "RecipeConverter",
-            AiModelName = $"openai-{_chatModel}"
+            AiModelName = $"openai-{ChatModel}"
         });
     }
 }
