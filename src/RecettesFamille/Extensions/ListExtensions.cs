@@ -8,7 +8,7 @@ namespace RecettesFamille.Extensions
         public static void MoveUp(this List<BlockBaseDto> blocks, BlockBaseDto block)
         {
             blocks.Sort((a, b) => a.Order.CompareTo(b.Order)); // Toujours trier avant d’agir
-            int index = blocks.IndexOf(block);
+            var index = blocks.IndexOf(block);
             if (index > 0)
             {
                 Swap(blocks, index, index - 1);
@@ -18,7 +18,7 @@ namespace RecettesFamille.Extensions
         public static void MoveDown(this List<BlockBaseDto> blocks, BlockBaseDto block)
         {
             blocks.Sort((a, b) => a.Order.CompareTo(b.Order)); // Toujours trier avant d’agir
-            int index = blocks.IndexOf(block);
+            var index = blocks.IndexOf(block);
             if (index >= 0 && index < blocks.Count - 1)
             {
                 Swap(blocks, index, index + 1);
@@ -28,7 +28,7 @@ namespace RecettesFamille.Extensions
         public static void Reorder(this List<BlockBaseDto> blocks)
         {
             blocks.Sort((a, b) => a.Order.CompareTo(b.Order)); // Trier par ordre
-            for (int i = 0; i < blocks.Count; i++)
+            for (var i = 0; i < blocks.Count; i++)
             {
                 blocks[i].Order = i + 1; // Réécrire les ordres pour qu'ils soient continus
             }
@@ -41,7 +41,7 @@ namespace RecettesFamille.Extensions
         }
         public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T>? source)
         {
-            return source ?? Enumerable.Empty<T>();
+            return source ?? [];
         }
     }
 }

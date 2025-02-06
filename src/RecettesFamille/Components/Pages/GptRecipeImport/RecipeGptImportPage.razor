@@ -17,19 +17,19 @@
                 <MudGrid>
                     <MudItem xs="12">
                         <MudPaper Style="position:relative">
-                            <MudOverlay Visible="@isWorkInProgress" DarkBackground="true" Absolute="true" Class="rounded">
+                            <MudOverlay Visible="@_isWorkInProgress" DarkBackground="true" Absolute="true" Class="rounded">
                                 <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
                             </MudOverlay>
 
                             <MudTextField @ref="multilineReference" T="string" Label="Recette" Variant="Variant.Outlined" Lines="40"
                             Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Delete" AdornmentColor="Color.Error"
-                            OnAdornmentClick="@(() => multilineReference.Clear())" @bind-Value="@recipeDescription" />
+                            OnAdornmentClick="@(() => multilineReference.Clear())" @bind-Value="@_recipeDescription" />
                         </MudPaper>
                     </MudItem>
 
                     <MudItem xs="12">
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ImportRecipe" Disabled="@isWorkInProgress">Converti la recette</MudButton>
-                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="CancelUpdateRecipe" Disabled="@(!isWorkInProgress)">Annuler</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ImportRecipe" Disabled="@_isWorkInProgress">Converti la recette</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="CancelUpdateRecipe" Disabled="@(!_isWorkInProgress)">Annuler</MudButton>
                     </MudItem>
 
                 </MudGrid>
@@ -48,18 +48,18 @@
 
     private MudTextField<string> multilineReference = null!; // Reference to the multiline text field
 
-    bool isWorkInProgress = false;
-    [Required] string recipeDescription = string.Empty;
-    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+    bool _isWorkInProgress;
+    [Required] string _recipeDescription = string.Empty;
+    readonly CancellationTokenSource _cancellationTokenSource = new();
 
     public async Task ImportRecipe()
     {
-        isWorkInProgress = true;
+        _isWorkInProgress = true;
         try
         {
-            RecipeDto recette = await gptRecipeConverterManager.ConvertRecipe(recipeDescription, cancellationTokenSource.Token);
+            var recette = await gptRecipeConverterManager.ConvertRecipe(_recipeDescription, _cancellationTokenSource.Token);
 
-            RecipeDto recipeAdded = await RecipeRepository.AddRecipe(recette);
+            var recipeAdded = await RecipeRepository.AddRecipe(recette);
             navigationManager.NavigateTo($"/recette/{recipeAdded.Id}", true);
         }
         catch (OperationCanceledException)
@@ -72,13 +72,13 @@
         }
         finally
         {
-            isWorkInProgress = false;
-            cancellationTokenSource.Dispose();
+            _isWorkInProgress = false;
+            _cancellationTokenSource.Dispose();
         }
     }
 
     public void CancelUpdateRecipe()
     {
-        cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Cancel();
     }
 }

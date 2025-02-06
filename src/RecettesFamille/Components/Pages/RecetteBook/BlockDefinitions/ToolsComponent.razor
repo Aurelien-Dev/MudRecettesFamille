@@ -14,9 +14,9 @@
 
 @code {
     [Parameter] public Func<BlockBaseDto, Task> AddBlockCallback { get; set; } = null!;
-    [Parameter] public int? PrecedentIndex { get; set; } = null!;
+    [Parameter] public int? PrecedentIndex { get; set; }
 
-    public void AddNewBlock<T>() where T : BlockBaseDto, new()
+    private void AddNewBlock<T>() where T : BlockBaseDto, new()
     {
         BlockBaseDto newBlock = Activator.CreateInstance<T>();
         newBlock.Order = PrecedentIndex.HasValue ? PrecedentIndex.Value + 1 : 0;

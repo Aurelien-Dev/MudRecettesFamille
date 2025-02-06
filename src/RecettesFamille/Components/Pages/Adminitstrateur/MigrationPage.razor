@@ -9,7 +9,7 @@
 
 <MudStack Spacing="5">
 
-    <MudDataGrid Items="fileInfos">
+    <MudDataGrid Items="FileInfos">
         <Columns>
             <PropertyColumn Property="x => x.Name" Title="FileName" />
             <TemplateColumn Title="Actions">
@@ -25,12 +25,12 @@
 </MudStack>
 
 @code {
-    [Inject] ITechnicalDbRepository TechnicalDbRepository { get; set; } = default!;
-    [Inject] IJSRuntime jSRuntime { get; set; } = null!;
-    [Inject] ISnackbar snackbar { get; set; } = null!;
-    [Inject] EmailManager emailManager { get; set; } = null!;
+    [Inject] ITechnicalDbRepository TechnicalDbRepository { get; set; } = null!;
+    [Inject] IJSRuntime JsRuntime { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
+    [Inject] EmailManager EmailManager { get; set; } = null!;
 
-    private List<FileInfo> fileInfos { get; set; } = new List<FileInfo>();
+    private List<FileInfo> FileInfos { get; set; } = [];
 
     protected override void OnInitialized()
     {
@@ -39,28 +39,28 @@
 
     public async Task CreateBackup()
     {
-        (bool success, string message, string fileName) = TechnicalDbRepository.TriggerBackup();
+        var (success, message, fileName) = TechnicalDbRepository.TriggerBackup();
 
         if (success)
             ListFolder();
 
-        snackbar.Clear();
-        snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomEnd;
-        snackbar.Add(message, success ? Severity.Info : Severity.Error);
+        Snackbar.Clear();
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomEnd;
+        Snackbar.Add(message, success ? Severity.Info : Severity.Error);
 
         if (success)
-            await emailManager.SendEmailAsync($"Recette famille - DB Backup {DateTime.UtcNow.ToShortDateString()} {DateTime.UtcNow.ToShortTimeString()}", "Body", "Body html", [$"wwwroot/backups/{fileName}"]);
+            await EmailManager.SendEmailAsync($"Recette famille - DB Backup {DateTime.UtcNow.ToShortDateString()} {DateTime.UtcNow.ToShortTimeString()}", "Body", "Body html", [$"wwwroot/backups/{fileName}"]);
     }
 
-    public async Task DownloadFile(FileInfo fileInfo)
+    private async Task DownloadFile(FileInfo fileInfo)
     {
         var fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
         using var streamRef = new DotNetStreamReference(stream: fileStream);
 
-        await jSRuntime.InvokeVoidAsync("downloadFileFromStream", fileInfo.Name, streamRef);
+        await JsRuntime.InvokeVoidAsync("downloadFileFromStream", fileInfo.Name, streamRef);
     }
 
-    public void ListFolder()
+    private void ListFolder()
     {
         var folderPath = "wwwroot/backups/"; // Replace with the actual folder path
 
@@ -69,10 +69,10 @@
 
         var files = Directory.GetFiles(folderPath);
 
-        fileInfos = new List<FileInfo>();
+        FileInfos = new List<FileInfo>();
         foreach (var file in files)
         {
-            fileInfos.Add(new FileInfo(file));
+            FileInfos.Add(new FileInfo(file));
         }
     }
 }

@@ -10,7 +10,7 @@
 
 @if (Recipe is not null)
 {
-    @if (editorMode)
+    @if (EditorMode)
     {
         <MudTextField @bind-Value="Recipe.Name" Typo="Typo.h3" Style="font-weight: bold;" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
         <MudTextField @bind-Value="Recipe.InformationPreparation" Typo="Typo.subtitle1" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
@@ -21,7 +21,7 @@
     }
 
     <MudToolBar Class="justify-center mt-0 mb-0">
-        <MudToggleIconButton @bind-Toggled="editorMode" Icon="@Icons.Material.Outlined.Edit"
+        <MudToggleIconButton @bind-Toggled="EditorMode" Icon="@Icons.Material.Outlined.Edit"
                              ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
         <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
     </MudToolBar>
@@ -31,7 +31,7 @@
     <MudGrid Spacing="5" Class="mt-0 mb-12">
         @foreach (var block in Recipe.BlocksInstructions.OrderBy(c => c.Order).EmptyIfNull())
         {
-            <BaseBlock EditMode="editorMode" Block="block"
+            <BaseBlock EditMode="EditorMode" Block="block"
                        OnBlockUpdated="OnBlockUpdated"
                        OnBlockDeleted="OnBlockDeleted"
                        OnBlockHasChanged="OnBlockHasChanged"
@@ -39,7 +39,7 @@
                        MoveDown="MoveDown" />
         }
 
-        @if (editorMode)
+        @if (EditorMode)
         {
             <ToolsComponent PrecedentIndex="@(Recipe.BlocksInstructions.Count -1)" AddBlockCallback="AddNewBlock" />
         }
@@ -53,25 +53,25 @@
 </style>
 
 @code {
-    [Inject] IRecipeRepository RecipeRepository { get; set; } = default!;
-    [Inject] IDialogService dialogService { get; set; } = null!;
-    [Inject] NavigationManager navigationManager { get; set; } = null!;
+    [Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
+    [Inject] IDialogService DialogService { get; set; } = null!;
+    [Inject] NavigationManager NavigationManager { get; set; } = null!;
 
     [Parameter] public int IdRecette { get; set; }
 
-    RecipeDto? Recipe { get; set; } = null!;
-    public bool editorMode { get; set; } = false;
+    RecipeDto? Recipe { get; set; }
+    bool EditorMode { get; set; }
 
-    protected async override Task OnParametersSetAsync()
+    protected override async Task OnParametersSetAsync()
     {
         Recipe = await RecipeRepository.GetWithInstructions(IdRecette);
     }
 
     public async Task DeleteRecipe()
     {
-        bool? result = await dialogService.ShowMessageBox("Warning", "Deleting can not be undone!", yesText: "Delete!", cancelText: "Cancel");
+        var result = await DialogService.ShowMessageBox("Warning", "Deleting can not be undone!", yesText: "Delete!", cancelText: "Cancel");
 
-        if (result is null || (result.HasValue && !result.Value))
+        if (result is null || !result.Value)
             return;
 
         if (Recipe is null)
@@ -79,7 +79,7 @@
 
         await RecipeRepository.DeleteRecipe(IdRecette);
 
-        navigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo("/");
     }
 
     private async Task UpdateGeneralRecipeInformation()
@@ -101,7 +101,7 @@
 
     private async Task OnBlockDeleted(BlockBaseDto block)
     {
-        bool success = await RecipeRepository.DeleteBlock(block.Id!.Value);
+        var success = await RecipeRepository.DeleteBlock(block.Id!.Value);
 
         if (!success) return;
 

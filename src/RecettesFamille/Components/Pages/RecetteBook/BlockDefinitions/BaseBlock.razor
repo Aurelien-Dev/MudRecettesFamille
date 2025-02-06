@@ -1,16 +1,9 @@
 ﻿@using RecettesFamille.Dto.Models.Blocks
 @inherits BaseBlockDefinition<BlockBaseDto>
-
-@if (Block.HalfPage)
-{
-    md = 6;
+@{
+    Md = Block.HalfPage ? 6 : 12;
 }
-else
-{
-    md = 12;
-}
-
-<MudItem xs="xs" md="md">
+<MudItem xs="Xs" md="Md">
     <MudStack Row="true" StretchItems="StretchItems.Start">
         @switch (Block)
         {
@@ -33,12 +26,12 @@ else
         @if (EditMode)
         {
             <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Vertical="true" Size="Size.Small">
-                <MudIconButton Class="@toolsPaddings" Icon="@Icons.Material.Filled.Delete" Color="@Color.Error" OnClick="OnBlockDelete" Size="Size.Small" />
+                <MudIconButton Class="@ToolsPaddings" Icon="@Icons.Material.Filled.Delete" Color="@Color.Error" OnClick="OnBlockDelete" Size="Size.Small" />
 
-                <MudToggleIconButton Class="@toolsPaddings" ToggledChanged="OnToggledChanged" Toggled="Block.HalfPage" Icon="@Icons.Material.Filled.Fullscreen" ToggledIcon="@Icons.Material.Filled.FullscreenExit" />
+                <MudToggleIconButton Class="@ToolsPaddings" ToggledChanged="OnToggledChanged" Toggled="Block.HalfPage" Icon="@Icons.Material.Filled.Fullscreen" ToggledIcon="@Icons.Material.Filled.FullscreenExit" />
 
-                <MudIconButton Class="@toolsPaddings" Icon="@Icons.Material.Filled.ArrowDropUp" OnClick="OnMoveUp"></MudIconButton>
-                <MudIconButton Class="@toolsPaddings" Icon="@Icons.Material.Filled.ArrowDropDown" OnClick="OnMoveDown"></MudIconButton>
+                <MudIconButton Class="@ToolsPaddings" Icon="@Icons.Material.Filled.ArrowDropUp" OnClick="OnMoveUp"></MudIconButton>
+                <MudIconButton Class="@ToolsPaddings" Icon="@Icons.Material.Filled.ArrowDropDown" OnClick="OnMoveDown"></MudIconButton>
             </MudButtonGroup>
         }
     </MudStack>
@@ -46,13 +39,13 @@ else
 @code {
     [Inject] private IDialogService DialogService { get; set; } = null!;
 
-    public int xs { get; set; } = 12;
-    public int md { get; set; } = 12;
+    public int Xs { get; set; } = 12;
+    public int Md { get; set; } = 12;
 
     private void OnMoveUp() => base.MoveUp?.Invoke(Block);
     private void OnMoveDown() => base.MoveDown?.Invoke(Block);
 
-    const string toolsPaddings = "px-1 py-0";
+    const string ToolsPaddings = "px-1 py-0";
 
 
     public void OnToggledChanged(bool toggled)
@@ -63,7 +56,7 @@ else
 
     private async Task OnBlockDelete()
     {
-        bool? result = await DialogService.ShowMessageBox("Warning", "Deleting can not be undone!", yesText: "Delete!", cancelText: "Cancel");
+        var result = await DialogService.ShowMessageBox("Warning", "Deleting can not be undone!", yesText: "Delete!", cancelText: "Cancel");
 
         if (result is null)
             return;

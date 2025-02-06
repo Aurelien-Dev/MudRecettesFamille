@@ -41,9 +41,9 @@ CommittedItemChanges="@CommittedItemChanges">
 </style>
 
 @code {
-    [Inject] IRecipeRepository RecipeRepository { get; set; } = default!;
+    [Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
 
-    DialogOptions dialogOptions = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true };
+    DialogOptions _dialogOptions = new() { CloseButton = true, CloseOnEscapeKey = true };
     MudDataGrid<IngredientDto> _dataGrid = null!;
 
     public void OnNameUpdated()
@@ -56,7 +56,7 @@ CommittedItemChanges="@CommittedItemChanges">
         if (value)
             return;
 
-        bool success = await RecipeRepository.DeleteIngredient(ingredientEntity.Id!.Value);
+        var success = await RecipeRepository.DeleteIngredient(ingredientEntity.Id!.Value);
 
         if (!success) return;
 
@@ -69,7 +69,7 @@ CommittedItemChanges="@CommittedItemChanges">
         await _dataGrid.SetEditingItemAsync(new IngredientDto());
     }
 
-    public void CommittedItemChanges(IngredientDto item)
+    private void CommittedItemChanges(IngredientDto item)
     {
         if (!Block.Id.HasValue)
             return;

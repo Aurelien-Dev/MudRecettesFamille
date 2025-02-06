@@ -49,13 +49,13 @@
 </MudGrid>
 
 @code {
-    [Inject] IAiRepository AiRepository { get; set; } = default!;
-    [Inject] ISnackbar snackbar { get; set; } = null!;
+    [Inject] IAiRepository AiRepository { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
 
-    private List<PromptDto?> Prompts { get; set; } = new List<PromptDto?>();
+    private List<PromptDto> Prompts { get; set; } = [];
 
-    private PromptDto? CurrentPrompt { get; set; } = new PromptDto();
-    private bool EditMode { get; set; } = false;
+    private PromptDto? CurrentPrompt { get; set; } = new();
+    private bool EditMode { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -66,27 +66,27 @@
         }
     }
 
-    public async Task Load()
+    private async Task Load()
     {
         Prompts = await AiRepository.GetPrompt();
     }
 
     public async Task SavePrompt()
     {
-        if (CurrentPrompt.Id.HasValue)
+        if (CurrentPrompt is { Id: not null })
             await AiRepository.UpdatePrompt(CurrentPrompt);
         else
             await AiRepository.AddPrompt(CurrentPrompt);
 
-        snackbar.Clear();
-        snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-        snackbar.Add("SaveChanges OK.", Severity.Success);
+        Snackbar.Clear();
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+        Snackbar.Add("SaveChanges OK.", Severity.Success);
 
         await Load();
         StateHasChanged();
     }
 
-    public void ShowPrompt(PromptDto? promptEntity)
+    private void ShowPrompt(PromptDto? promptEntity)
     {
         CurrentPrompt = promptEntity;
     }

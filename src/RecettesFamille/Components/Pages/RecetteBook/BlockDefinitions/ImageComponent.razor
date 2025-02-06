@@ -12,7 +12,7 @@
 {
     <MudGrid Spacing="2">
         <MudItem xs="12" md="4">
-            <MudFileUpload @ref="mudFileUpload" T="IBrowserFile" FilesChanged="OnInputFileChanged">
+            <MudFileUpload @ref="MudFileUpload" T="IBrowserFile" FilesChanged="OnInputFileChanged">
                 <ActivatorContent>
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" EndIcon="@Icons.Material.Filled.ImageSearch">
                     </MudButton>
@@ -20,7 +20,7 @@
             </MudFileUpload>
         </MudItem>
         <MudItem xs="12" md="4">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Filled.Crop" OnClick="OpendCropDialog" FullWidth="true">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Filled.Crop" OnClick="OpenCropDialog" FullWidth="true">
             </MudButton>
         </MudItem>
         <MudItem xs="12" md="4">
@@ -41,37 +41,34 @@ else
 
 @code {
     [Inject] IDialogService DialogService { get; set; } = null!;
-    [Inject(Key = "OpenAi")] IIaManagerBase iaManager { get; set; } = null!;
-    [Inject] ErrorManager errosManager { get; set; } = null!;
+    [Inject(Key = "OpenAi")] IIaManagerBase IaManager { get; set; } = null!;
+    [Inject] ErrorManager ErrosManager { get; set; } = null!;
 
-    private MudFileUpload<IBrowserFile> mudFileUpload { get; set; } = null!;
-    private readonly long MaxFileSize = 1024 * 1024 * 15;
+    private MudFileUpload<IBrowserFile> MudFileUpload { get; set; } = null!;
+    private readonly long _maxFileSize = 1024 * 1024 * 15;
 
     private async Task OnInputFileChanged(IBrowserFile e)
     {
         try
         {
-            if (e is null)
-                return;
-
-            string base64Image = await ConvertToBase64Async(e);
+            var base64Image = await ConvertToBase64Async(e);
             Block.Image = base64Image;
 
-            errosManager.DisplaySuccess("Image envoyé au serveur.");
+            ErrosManager.DisplaySuccess("Image envoyé au serveur.");
 
             OnBlockUpdated?.Invoke(Block);
 
-            await mudFileUpload.ClearAsync();
+            await MudFileUpload.ClearAsync();
             StateHasChanged();
         }
         catch (Exception)
         {
-            errosManager.DisplayError();
+            ErrosManager.DisplayError();
             throw new Exception("Error uploading file");
         }
     }
 
-    private async Task OpendCropDialog()
+    private async Task OpenCropDialog()
     {
         var parameters = new DialogParameters<CropDialog>
         {
@@ -94,23 +91,23 @@ else
     {
         try
         {
-            string base64Image = await iaManager.AskImage(Block.Recipe.Name);
+            var base64Image = await IaManager.AskImage(Block.Recipe.Name);
 
             Block.Image = base64Image;
             StateHasChanged();
         }
         catch (Exception)
         {
-            errosManager.DisplayError();
+            ErrosManager.DisplayError();
         }
     }
 
     private async Task<string> ConvertToBase64Async(IBrowserFile file)
     {
-        using var stream = file.OpenReadStream(MaxFileSize);
+        await using var stream = file.OpenReadStream(_maxFileSize);
         using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);
-        byte[] bytes = memoryStream.ToArray();
+        var bytes = memoryStream.ToArray();
         return $"data:{file.ContentType};base64," + Convert.ToBase64String(bytes);
     }
 }

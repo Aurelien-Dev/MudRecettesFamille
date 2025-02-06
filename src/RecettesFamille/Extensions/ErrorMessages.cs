@@ -4,7 +4,7 @@ namespace RecettesFamille.Extensions;
 
 public static class ErrorMessages
 {
-    private static string[] ErrorsMessage = [
+    private static readonly string[] ErrorsMessage = [
         "Oops, la recette a brûlé ! 🫠 Réessayez ou rafraîchissez la page !",
         "Zut, on a mis trop de sel ! 😅 Une erreur s'est glissée dans la recette, essayez à nouveau !",
         "Oops, le soufflé est retombé... 😢 Réessayez ou rafraîchissez la page !",
@@ -22,8 +22,8 @@ public static class ErrorMessages
 
     public static string GetRandomErrorMessage()
     {
-        Random random = new Random();
-        int index = random.Next(ErrorsMessage.Length);
+        var random = new Random();
+        var index = random.Next(ErrorsMessage.Length);
         return ErrorsMessage[index];
     }
 }

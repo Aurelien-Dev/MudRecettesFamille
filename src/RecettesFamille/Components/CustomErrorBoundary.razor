@@ -11,12 +11,12 @@ else if (ErrorContent is not null)
 }
 
 @code {
-    [Inject] NavigationManager navigationManager { get; set; } = null!;
+    [Inject] NavigationManager NavigationManager { get; set; } = null!;
 
     protected override async Task OnErrorAsync(Exception ex)
     {
         Logger.LogError(ex, "😈 A rotten gremlin got us. Sorry!");
         Recover();
-        navigationManager.Refresh(true);
+        NavigationManager.Refresh(true);
     }
 }
