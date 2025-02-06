@@ -6,14 +6,22 @@
         Rogner l'image
     </TitleContent>
     <DialogContent>
-        <CropperComponent @ref="CropperComponent" Class="big-img" Src="@ImageSource" Options="@options" />
+        <MudPaper Height="200">
+            <CropperComponent @ref="CropperComponent" Class="big-img" Src="@ImageSource" Options="@options" />
+        </MudPaper>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
         <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
     </DialogActions>
 </MudDialog>
-
+<style>
+    .big-img {
+        max-height: 400px;
+        /* This rule is very important, please don't ignore this */
+        max-width: 100%;
+    }
+</style>
 @code {
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = null!;
