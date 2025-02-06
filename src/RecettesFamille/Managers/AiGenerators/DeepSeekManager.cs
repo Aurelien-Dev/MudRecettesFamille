@@ -17,7 +17,7 @@ public class DeepSeekManager(IConfiguration Config, IAiRepository AiRepository) 
 
     public async Task<RecipeDto> ConvertRecipe(string recipe, CancellationToken cancellationToken = default)
     {
-        string apiKey = Config["DEEPSEEK_SECRET"] ?? throw new ApplicationException("Environment variable IsNullOrEmpty (DEEPSEEK_SECRET)");
+        string apiKey = "sk-6026b5370f5c4532b545dc57d868adbe" ?? throw new ApplicationException("Environment variable IsNullOrEmpty (DEEPSEEK_SECRET)");
         var client = new DeepSeekClient(apiKey);
 
 

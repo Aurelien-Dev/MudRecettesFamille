@@ -8,7 +8,7 @@ namespace RecettesFamille.Data.Repository;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddRepository(this IServiceCollection services)
+    public static void AddRepository(this IServiceCollection services)
     {
         //Repositories
         services.AddScoped<IRecipeRepository, RecipeRepository>();
@@ -22,9 +22,7 @@ public static class DependencyInjection
         {
             cfg.AddProfile<MappingProfile>();
         });
-        IMapper mapper = mapperConfig.CreateMapper();
+        var mapper = mapperConfig.CreateMapper();
         services.AddSingleton(mapper);
-
-        return services;
     }
 }

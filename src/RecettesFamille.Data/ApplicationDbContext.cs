@@ -54,8 +54,8 @@ namespace RecettesFamille.Data
         {
             try
             {
-                string fileName = $"backup_{DateTime.UtcNow.ToString("s")}.backup";
-                string command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -p 5442 -U pguser -d recettesfamilledb -F c -f wwwroot/backups/{fileName}";
+                var fileName = $"backup_{DateTime.UtcNow:s}.backup";
+                var command = $"PGPASSWORD=PGUserPwd pg_dump -h recettes.atelier-cremazie.com -p 5442 -U pguser -d recettesfamilledb -F c -f wwwroot/backups/{fileName}";
 
                 if (!Directory.Exists("wwwroot/backups"))
                     Directory.CreateDirectory("wwwroot/backups");
@@ -70,22 +70,20 @@ namespace RecettesFamille.Data
                     CreateNoWindow = true
                 };
 
-                using (var process = Process.Start(processInfo))
+                using var process = Process.Start(processInfo);
+                if (process is null) throw new Exception("Process not exist.");
+
+                var output = process.StandardOutput.ReadToEnd();
+                var error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (process.ExitCode == 0)
                 {
-                    if (process is null) throw new Exception("Process not exist.");
-
-                    string output = process.StandardOutput.ReadToEnd();
-                    string error = process.StandardError.ReadToEnd();
-                    process.WaitForExit();
-
-                    if (process.ExitCode == 0)
-                    {
-                        Console.WriteLine($"Backup terminé avec succès : {fileName}");
-                        return (true, "Backup terminé avec succès : {fileName}", fileName);
-                    }
-                    else
-                        throw new Exception($"Erreur lors du backup : {error}");
+                    Console.WriteLine($"Backup terminé avec succès : {fileName}");
+                    return (true, "Backup terminé avec succès : {fileName}", fileName);
                 }
+                else
+                    throw new Exception($"Erreur lors du backup : {error}");
             }
             catch (Exception ex)
             {

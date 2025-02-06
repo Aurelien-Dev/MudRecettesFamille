@@ -1,56 +1,58 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RecettesFamille.Data.EntityModel;
-using RecettesFamille.Data.EntityModel.Blocks;
 using RecettesFamille.Data.Repository.IRepositories;
 using RecettesFamille.Dto.Models;
-using RecettesFamille.Dto.Models.Blocks;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
-public class AiRepository(IMapper Mapper, ApplicationDbContext Context) : IAiRepository
+public class AiRepository(IMapper mapper, ApplicationDbContext context) : IAiRepository
 {
 
     public async Task<PromptDto> GetPrompt(string promptName, CancellationToken cancellationToken = default)
     {
-        var result = await Context.Prompts.Where(r => r.Name == promptName).FirstOrDefaultAsync();
+        var result = await context.Prompts.Where(r => r.Name == promptName).FirstOrDefaultAsync(cancellationToken);
 
-        return Mapper.Map<PromptDto>(result);
+        return mapper.Map<PromptDto>(result);
     }
 
     public async Task<List<PromptDto>> GetPrompt(CancellationToken cancellationToken = default)
     {
-        var result = await Context.Prompts.ToListAsync();
+        var result = await context.Prompts.ToListAsync(cancellationToken);
 
-        return Mapper.Map<List<PromptDto>>(result);
+        return mapper.Map<List<PromptDto>>(result);
     }
 
-    public async Task UpdatePrompt(PromptDto prompt, CancellationToken cancellationToken = default)
+    public async Task UpdatePrompt(PromptDto? prompt, CancellationToken cancellationToken = default)
     {
-        var element = await Context.Set<PromptEntity>().FindAsync(prompt.Id, cancellationToken);
         if (prompt is null)
             return;
 
-        Mapper.Map(prompt, element);
+        var element = await context.Set<PromptEntity>().FindAsync([prompt.Id], cancellationToken);
 
-        await Context.SaveChangesAsync(cancellationToken);
+        mapper.Map(prompt, element);
+
+        await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<bool> AddPrompt(PromptDto prompt, CancellationToken cancellationToken = default)
+    public async Task<bool> AddPrompt(PromptDto? prompt, CancellationToken cancellationToken = default)
     {
-        PromptEntity promptEntity = Mapper.Map<PromptEntity>(prompt);
+        if (prompt is null)
+            return false;
+        
+        var promptEntity = mapper.Map<PromptEntity>(prompt);
 
-        await Context.AddAsync(promptEntity);
-        var result = await Context.SaveChangesAsync(cancellationToken);
+        await context.AddAsync(promptEntity, cancellationToken);
+        var result = await context.SaveChangesAsync(cancellationToken);
 
         return result > 0;
     }
 
     public async Task ReportConsumption(AiConsumptionDto aiConsumptionDto, CancellationToken cancellationToken = default)
     {
-        var element = Mapper.Map<AiConsumptionEntity>(aiConsumptionDto);
-        await Context.AddAsync(element, cancellationToken);
-        await Context.SaveChangesAsync(cancellationToken);
+        var element = mapper.Map<AiConsumptionEntity>(aiConsumptionDto);
+        await context.AddAsync(element, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
 

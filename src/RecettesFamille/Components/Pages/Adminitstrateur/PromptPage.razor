@@ -19,7 +19,7 @@
                 <MudListItem Dense="true" Text="@item.Name" Icon="@Icons.Material.Filled.UploadFile" OnClick="@(() => ShowPrompt(item))" />
             }
             @{
-                PromptDto newPrompt = new() { Name = "NewPrompt" };
+                PromptDto? newPrompt = new() { Name = "NewPrompt" };
             }
             <MudListItem Dense="true" Text="@newPrompt.Name" Icon="@Icons.Material.Filled.NewLabel" OnClick="@(() => ShowPrompt(newPrompt))" />
 
@@ -52,9 +52,9 @@
     [Inject] IAiRepository AiRepository { get; set; } = default!;
     [Inject] ISnackbar snackbar { get; set; } = null!;
 
-    private List<PromptDto> Prompts { get; set; } = new List<PromptDto>();
+    private List<PromptDto?> Prompts { get; set; } = new List<PromptDto?>();
 
-    private PromptDto CurrentPrompt { get; set; } = new PromptDto();
+    private PromptDto? CurrentPrompt { get; set; } = new PromptDto();
     private bool EditMode { get; set; } = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -86,7 +86,7 @@
         StateHasChanged();
     }
 
-    public void ShowPrompt(PromptDto promptEntity)
+    public void ShowPrompt(PromptDto? promptEntity)
     {
         CurrentPrompt = promptEntity;
     }

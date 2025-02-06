@@ -4,44 +4,44 @@ using RecettesFamille.Data.Repository.IRepositories;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
-public class StatisticRepository(IMapper Mapper, ApplicationDbContext Context) : IStatisticRepository
+public class StatisticRepository(ApplicationDbContext context) : IStatisticRepository
 {
-    public async Task<List<StatVM>> GetCountCallByDays(CancellationToken cancellationToken = default)
+    public async Task<List<StatisticsViewModel>> GetCountCallByDays(CancellationToken cancellationToken = default)
     {
-        var result = await Context.AiConsumptions
+        var result = await context.AiConsumptions
                              .GroupBy(a => new { a.Date.Date, a.AiModelName })
-                             .Select(g => new StatVM()
+                             .Select(g => new StatisticsViewModel()
                              {
                                  Date = g.Key.Date,
                                  AiModelName = g.Key.AiModelName,
                                  Calculate = (double)g.Count()
                              })
                              .OrderBy(x => x.Date)
-                             .ToListAsync();
+                             .ToListAsync(cancellationToken);
 
         return result;
     }
 
-    public async Task<List<StatVM>> GetAvgTokenByDays(CancellationToken cancellationToken = default)
+    public async Task<List<StatisticsViewModel>> GetAvgTokenByDays(CancellationToken cancellationToken = default)
     {
-        var queryAvg = await Context.AiConsumptions
+        var queryAvg = await context.AiConsumptions
                         .GroupBy(a => new { a.Date.Date, a.AiModelName })
-                        .Select(g => new StatVM()
+                        .Select(g => new StatisticsViewModel()
                         {
                             Date = g.Key.Date,
                             AiModelName = g.Key.AiModelName,
                             Calculate = (double)g.Average(a => a.InputPrice + a.OutputPrice)
                         })
                         .OrderBy(x => x.Date)
-                        .ToListAsync();
+                        .ToListAsync(cancellationToken);
         return queryAvg;
     }
 }
 
 
-public class StatVM
+public class StatisticsViewModel
 {
     public DateTime Date { get; set; }
-    public string AiModelName { get; set; }
+    public string AiModelName { get; set; } = string.Empty;
     public double Calculate { get; set; }
 }

@@ -69,7 +69,7 @@ CommittedItemChanges="@CommittedItemChanges">
         await _dataGrid.SetEditingItemAsync(new IngredientDto());
     }
 
-    public async Task CommittedItemChanges(IngredientDto item)
+    public void CommittedItemChanges(IngredientDto item)
     {
         if (!Block.Id.HasValue)
             return;

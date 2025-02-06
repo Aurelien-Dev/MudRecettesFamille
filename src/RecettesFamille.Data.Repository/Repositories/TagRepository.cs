@@ -27,7 +27,7 @@ public class TagRepository(IMapper mapper, IDbContextFactory<ApplicationDbContex
     public async Task UpdateTag(TagDto tag, CancellationToken cancellationToken = default)
     {
         var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var element = await context.Set<TagEntity>().FindAsync(tag.Id, cancellationToken);
+        var element = await context.Set<TagEntity>().FindAsync([tag.Id], cancellationToken);
         
         mapper.Map(tag, element);
 

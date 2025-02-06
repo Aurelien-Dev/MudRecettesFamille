@@ -111,7 +111,7 @@
         StateHasChanged();
     }
 
-    private async Task OnBlockUpdated(BlockBaseDto block)
+    private async Task OnBlockUpdated(BlockBaseDto? block)
     {
         await RecipeRepository.UpdateBlock(block);
         StateHasChanged();

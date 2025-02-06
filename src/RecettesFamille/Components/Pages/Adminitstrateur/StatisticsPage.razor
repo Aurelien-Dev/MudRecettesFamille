@@ -42,7 +42,7 @@
     {
         await base.OnInitializedAsync();
 
-        List<StatVM> query = await StatisticRepository.GetCountCallByDays();
+        List<StatisticsViewModel> query = await StatisticRepository.GetCountCallByDays();
 
         XAxisLabels = query.Select(c => c.Date.ToShortDateString()).ToArray();
 
@@ -52,7 +52,7 @@
             new ChartSeries() { Name = "openai-gpt-4o", Data = query.Where(c => c.AiModelName == "openai-gpt-4o").Select(c => c.Calculate).ToArray() }
         };
 
-        List<StatVM> queryAvg = await StatisticRepository.GetAvgTokenByDays();
+        List<StatisticsViewModel> queryAvg = await StatisticRepository.GetAvgTokenByDays();
 
         SeriesAvg = new List<ChartSeries>()
         {

@@ -8,30 +8,32 @@ using RecettesFamille.Dto.Models.Blocks;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
-public class RecipeRepository(IMapper Mapper, IDbContextFactory<ApplicationDbContext> contextFactory) : IRecipeRepository
+public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext> contextFactory)
+    : IRecipeRepository
 {
     public async Task<List<RecipeDto>> GetAll(CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var result = await context.Recipes.ToListAsync(cancellationToken);
 
-        return Mapper.Map<List<RecipeDto>>(result);
+        return mapper.Map<List<RecipeDto>>(result);
     }
 
     public async Task<List<RecipeDto>> GetAllByTag(string tag, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var result = await context.Recipes
-                                  .Where(r => EF.Functions.ILike(r.Tags, $"%{tag}%"))
-                                  .ToListAsync(cancellationToken);
+            .Where(r => EF.Functions.ILike(r.Tags, $"%{tag}%"))
+            .ToListAsync(cancellationToken);
 
-        return Mapper.Map<List<RecipeDto>>(result);
+        return mapper.Map<List<RecipeDto>>(result);
     }
+
     public async Task<List<RecipeDto>> GetAllByTag(string[] tags, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var query = context.Recipes.AsQueryable();
         foreach (var tag in tags)
@@ -41,38 +43,39 @@ public class RecipeRepository(IMapper Mapper, IDbContextFactory<ApplicationDbCon
 
         var result = await query.ToListAsync(cancellationToken);
 
-        return Mapper.Map<List<RecipeDto>>(result);
+        return mapper.Map<List<RecipeDto>>(result);
     }
 
     public async Task<RecipeDto> GetWithInstructions(int recipeId, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var result = await context.Recipes.Include(s => s.BlocksInstructions)
-                                            .ThenInclude(b => ((BlockIngredientListEntity)b).Ingredients)
-                                            .Where(r => r.Id == recipeId)
-                                            .FirstOrDefaultAsync();
+            .ThenInclude(b => ((BlockIngredientListEntity)b).Ingredients)
+            .Where(r => r.Id == recipeId)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        return Mapper.Map<RecipeDto>(result);
+        return mapper.Map<RecipeDto>(result);
     }
 
     #region Recipe
+
     public async Task<RecipeDto> AddRecipe(RecipeDto block, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
-        RecipeEntity blockEntity = Mapper.Map<RecipeEntity>(block);
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var blockEntity = mapper.Map<RecipeEntity>(block);
 
         await context.Set<RecipeEntity>().AddAsync(blockEntity, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
-        return Mapper.Map<RecipeDto>(blockEntity);
+        return mapper.Map<RecipeDto>(blockEntity);
     }
 
     public async Task DeleteRecipe(int recipeId, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
-        var element = await context.Recipes.FindAsync(recipeId, cancellationToken);
+        var element = await context.Recipes.FindAsync([recipeId], cancellationToken);
         if (element != null)
         {
             context.Recipes.Remove(element);
@@ -80,29 +83,28 @@ public class RecipeRepository(IMapper Mapper, IDbContextFactory<ApplicationDbCon
         }
     }
 
-    public async Task UpdateRecipe(RecipeDto recipe, CancellationToken cancellationToken = default)
+    public async Task UpdateRecipe(RecipeDto? recipe, CancellationToken cancellationToken = default)
     {
         if (recipe is null)
             return;
 
-        var context = await contextFactory.CreateDbContextAsync();
-        var element = await context.Recipes.FindAsync(recipe.Id, cancellationToken);
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var element = await context.Recipes.FindAsync([recipe.Id], cancellationToken);
 
-        Mapper.Map(recipe, element, opt =>
-        {
-            opt.AfterMap((src, dest) => dest!.BlocksInstructions = null!);
-        });
+        mapper.Map(recipe, element, opt => { opt.AfterMap((src, dest) => dest!.BlocksInstructions = null!); });
 
         await context.SaveChangesAsync(cancellationToken);
     }
+
     #endregion
 
 
     #region Blocks
+
     public async Task<bool> DeleteBlock(int blockId, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
-        var element = await context.Set<BlockBaseEntity>().FindAsync(blockId, cancellationToken);
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var element = await context.Set<BlockBaseEntity>().FindAsync([blockId], cancellationToken);
         if (element is null)
             return false;
 
@@ -112,15 +114,15 @@ public class RecipeRepository(IMapper Mapper, IDbContextFactory<ApplicationDbCon
         return result > 0;
     }
 
-    public async Task UpdateBlock(BlockBaseDto block, CancellationToken cancellationToken = default)
+    public async Task UpdateBlock(BlockBaseDto? block, CancellationToken cancellationToken = default)
     {
         if (block is null)
             return;
 
-        var context = await contextFactory.CreateDbContextAsync();
-        var element = await context.Set<BlockBaseEntity>().FindAsync(block.Id, cancellationToken);
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var element = await context.Set<BlockBaseEntity>().FindAsync([block.Id], cancellationToken);
 
-        Mapper.Map(block, element, opts =>
+        mapper.Map(block, element, opts =>
         {
             opts.AfterMap((src, dest) => dest!.Recipe = null!); // Conservation de la référence
         });
@@ -130,21 +132,23 @@ public class RecipeRepository(IMapper Mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task<BlockBaseDto> AddBlock(BlockBaseDto block, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
-        BlockBaseEntity blockEntity = Mapper.Map<BlockBaseEntity>(block);
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        BlockBaseEntity blockEntity = mapper.Map<BlockBaseEntity>(block);
 
         await context.Set<BlockBaseEntity>().AddAsync(blockEntity, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
-        return Mapper.Map<BlockBaseDto>(blockEntity);
+        return mapper.Map<BlockBaseDto>(blockEntity);
     }
+
     #endregion
 
     #region Ingredients
+
     public async Task<bool> DeleteIngredient(int ingredientId, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
-        var element = await context.Set<IngredientEntity>().FindAsync(ingredientId, cancellationToken);
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var element = await context.Set<IngredientEntity>().FindAsync([ingredientId], cancellationToken);
         if (element is null)
             return false;
 
