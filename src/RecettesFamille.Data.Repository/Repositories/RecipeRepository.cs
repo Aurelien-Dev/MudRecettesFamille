@@ -82,12 +82,16 @@ public class RecipeRepository(IMapper Mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task UpdateRecipe(RecipeDto recipe, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
-        var element = await context.Recipes.FindAsync(recipe.Id, cancellationToken);
         if (recipe is null)
             return;
 
-        Mapper.Map(recipe, element);
+        var context = await contextFactory.CreateDbContextAsync();
+        var element = await context.Recipes.FindAsync(recipe.Id, cancellationToken);
+
+        Mapper.Map(recipe, element, opt =>
+        {
+            opt.AfterMap((src, dest) => dest!.BlocksInstructions = null!);
+        });
 
         await context.SaveChangesAsync(cancellationToken);
     }
@@ -110,12 +114,16 @@ public class RecipeRepository(IMapper Mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task UpdateBlock(BlockBaseDto block, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync();
-        var element = await context.Set<BlockBaseEntity>().FindAsync(block.Id, cancellationToken);
         if (block is null)
             return;
 
-        Mapper.Map(block, element);
+        var context = await contextFactory.CreateDbContextAsync();
+        var element = await context.Set<BlockBaseEntity>().FindAsync(block.Id, cancellationToken);
+
+        Mapper.Map(block, element, opts =>
+        {
+            opts.AfterMap((src, dest) => dest!.Recipe = null!); // Conservation de la référence
+        });
 
         await context.SaveChangesAsync(cancellationToken);
     }

@@ -8,5 +8,4 @@ public class TechnicalDbRepository(ApplicationDbContext Context) : ITechnicalDbR
     {
         return Context.TriggerBackup();
     }
-
 }
