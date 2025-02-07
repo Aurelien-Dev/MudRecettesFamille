@@ -15,7 +15,7 @@
             </MudPaper>
             <MudPaper>
                 <MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true"
-                SelectedValuesChanged="OnSelectedValuesChanged">
+                         SelectedValuesChanged="OnSelectedValuesChanged">
                     <MudListSubheader>
                         Filtre par catégories
                     </MudListSubheader>
@@ -33,7 +33,7 @@
         <MudToolBar Class="mb-3" Dense="true">
             <MudSpacer />
             <MudToggleGroup T="string" Outlined="true" Delimiters="true" Size="Size.Small" Color="Color.Primary"
-            @bind-Value="_viewMode">
+                            @bind-Value="_viewMode">
                 <MudToggleItem Value="Icons.Material.Filled.GridView">
                     <MudIcon Icon="@Icons.Material.Filled.GridView" />
                 </MudToggleItem>
@@ -54,7 +54,7 @@
                                 @* <MudCardMedia Image="images/door.jpg" Height="200" /> *@
                                 <MudCardHeader>
                                     <CardHeaderContent>
-                                        <MudText Typo="Typo.subtitle2">@item.Name.ToUpper()</MudText>
+                                        <MudText Typo="Typo.subtitle2">@item.Name</MudText>
                                     </CardHeaderContent>
                                     <CardHeaderActions>
                                         <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" />
@@ -64,10 +64,7 @@
                                     @* <MudText Typo="Typo.body2">@item.InformationPreparation</MudText> *@
                                 </MudCardContent>
                                 <MudCardActions>
-                                    <MudButton Href="@($"/recette/{item.Id}")" Variant="Variant.Text"
-                                    Color="Color.Inherit" Size="Size.Small">
-                                        Open
-                                    </MudButton>
+                                    <MudIconButton Href="@($"/recette/{item.Id}")" Icon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Secondary" Size="Size.Small" />
                                 </MudCardActions>
                             </MudCard>
                         </MudItem>
@@ -77,29 +74,26 @@
             case Icons.Material.Filled.List:
                 <MudPaper Elevation="1">
                     <MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
-                              Filter="new Func<RecipeForListDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)">
+                              Filter="new Func<RecipeForListDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 200px)">
                         <RowTemplate>
                             <MudTd>@context.Name</MudTd>
                             <MudTd>
                                 @foreach (var item in context.Tags.Split("|"))
                                 {
                                     <MudChip T="string" Variant="Variant.Text" Size="Size.Small"
-                                    Color="Color.Info">@item</MudChip>
+                                             Color="Color.Info">@item</MudChip>
                                 }
                             </MudTd>
                             <MudTd>
-                                <MudButton Href="@($"/recette/{context.Id}")" Variant="Variant.Text"
-                                Color="Color.Inherit" Size="Size.Small">
-                                    Open
-                                </MudButton>
+                                <MudIconButton Href="@($"/recette/{context.Id}")" Icon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Secondary" Size="Size.Small" />
                             </MudTd>
                         </RowTemplate>
 
                         <PagerContent>
                             <MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
-                            RowsPerPageString="Elements par page :"
-                            AllItemsText="Tout"
-                            InfoFormat="{first_item}-{last_item} sur {all_items}" />
+                                           RowsPerPageString="Elements par page :"
+                                           AllItemsText="Tout"
+                                           InfoFormat="{first_item}-{last_item} sur {all_items}" />
                         </PagerContent>
                     </MudTable>
                 </MudPaper>

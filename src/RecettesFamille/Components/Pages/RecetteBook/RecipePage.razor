@@ -13,7 +13,7 @@
     @if (EditorMode)
     {
         <MudTextField @bind-Value="Recipe.Name" Typo="Typo.h3" Style="font-weight: bold;" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
-        <MudTextField @bind-Value="Recipe.InformationPreparation" Typo="Typo.subtitle1" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
+        @* <MudTextField @bind-Value="Recipe.InformationPreparation" Typo="Typo.subtitle1" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" /> *@
     }
     else
     {
@@ -25,7 +25,6 @@
                              ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
         <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
     </MudToolBar>
-
 
     @* Description recette *@
     <MudGrid Spacing="5" Class="mt-0 mb-12">
