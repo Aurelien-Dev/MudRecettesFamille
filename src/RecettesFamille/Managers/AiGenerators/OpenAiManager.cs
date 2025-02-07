@@ -1,5 +1,4 @@
-﻿using MudBlazor;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using OpenAI.Chat;
 using OpenAI.Images;
 using RecettesFamille.Data.Repository.IRepositories;
@@ -11,8 +10,9 @@ namespace RecettesFamille.Managers.AiGenerators;
 
 public class OpenAiManager(IConfiguration config, IAiRepository aiRepository) : IIaManagerBase
 {
-    private const string ChatModel = "gpt-4o";
-    private const string ImageModel = "dall-e-3";
+    public string ChatModel => "gpt-4o";
+    public string ImageModel => "dall-e-3";
+
 
     public async Task<string> AskImage(string recipeName, CancellationToken cancellationToken = default)
     {

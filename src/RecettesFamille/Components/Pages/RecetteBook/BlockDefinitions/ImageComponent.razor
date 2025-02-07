@@ -107,9 +107,27 @@ else
         {
             _isWorkInProgress = true;
             var base64Image = await IaManager.AskImage(Block.Recipe.Name, _cancellationTokenSource.Token);
-            Block.Image = base64Image;
+            _isWorkInProgress = false;
 
+            var parameters = new DialogParameters<CropDialog>
+            {
+                { x => x.ImageSource, base64Image }
+            };
+            var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+            var dialog = await DialogService.ShowAsync<CropDialog>("Delete", parameters, options);
+            var result = await dialog.Result;
+
+            if (result is null || result.Canceled)
+                return;
+
+            Block.Image = result.Data.ToString();
+            OnBlockUpdated?.Invoke(Block);
             StateHasChanged();
+        }
+        catch (OperationCanceledException)
+        {
+            // Handle cancellation
         }
         catch (Exception)
         {

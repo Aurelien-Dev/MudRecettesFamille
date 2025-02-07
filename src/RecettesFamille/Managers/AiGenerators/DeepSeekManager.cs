@@ -10,6 +10,10 @@ namespace RecettesFamille.Managers.AiGenerators;
 
 public class DeepSeekManager(IConfiguration config, IAiRepository aiRepository) : IIaManagerBase
 {
+    public string ChatModel => DeepSeekModels.ChatModel;
+    public string ImageModel => throw new NotImplementedException();
+
+
     public Task<string> AskImage(string recipeName, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
@@ -40,7 +44,7 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
                 Message.NewUserMessage(ask)
             ],
             // Specify the model
-            Model = DeepSeekModels.ChatModel,
+            Model = ChatModel,
             ResponseFormat = new ResponseFormat() { Type = "json_object" }
         };
 

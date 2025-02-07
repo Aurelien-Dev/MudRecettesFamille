@@ -2,32 +2,38 @@
 @using RecettesFamille.Components.Layout
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Data.Repository.Repositories
+@using RecettesFamille.Managers.AiGenerators
 @layout AdminLayout
 
-<MudGrid>
-    <MudItem xs="12">
+<div>
+    <MudGrid>
+        <MudItem xs="12">
 
-        <MudText Typo="Typo.h5">Nombre de requête par jour et par models</MudText>
-        <MudChart ChartType="ChartType.Line"
-        ChartSeries="@_series"
-        XAxisLabels="@_xAxisLabels"
-        ChartOptions="@_options"
-        Height="400" />
-    </MudItem>
-    <MudItem xs="12">
+            <MudText Typo="Typo.h5">Nombre de requête par jour et par models</MudText>
+            <MudChart ChartType="ChartType.Line"
+                      ChartSeries="@_series"
+                      XAxisLabels="@_xAxisLabels"
+                      ChartOptions="@_options"
+                      Height="400" />
 
-        <MudText Typo="Typo.h5">Token moyen par jour et par models</MudText>
-        <MudChart ChartType="ChartType.Line"
-        ChartSeries="@_seriesAvg"
-        XAxisLabels="@_xAxisLabels"
-        ChartOptions="@_options"
-        Height="400" />
-    </MudItem>
+        </MudItem>
+        <MudItem xs="12">
 
-</MudGrid>
+            <MudText Typo="Typo.h5">Token moyen par jour et par models</MudText>
+            <MudChart ChartType="ChartType.Line"
+                      ChartSeries="@_seriesAvg"
+                      XAxisLabels="@_xAxisLabels"
+                      ChartOptions="@_options"
+                      Height="400" />
+        </MudItem>
+
+    </MudGrid>
+</div>
 
 @code {
     [Inject] IStatisticRepository StatisticRepository { get; set; } = null!;
+    [Inject(Key = "DeepSeek")] IIaManagerBase DeepSeekManagerBase { get; set; } = null!;
+    [Inject(Key = "OpenAi")] IIaManagerBase OpenAiManagerBase { get; set; } = null!;
 
     private readonly ChartOptions _options = new();
 
@@ -43,19 +49,21 @@
         await base.OnInitializedAsync();
 
         var query = await StatisticRepository.GetCountCallByDays();
-        _xAxisLabels = query.Select(c => c.Date.ToShortDateString()).ToArray();
+        _xAxisLabels = query.Select(c => c.Date.ToShortDateString()).Distinct().ToArray();
         _series =
-        [
-            new ChartSeries() { Name = "DeepSeek", Data = query.Where(c => c.AiModelName == "DeepSeek").Select(c => c.Calculate).ToArray() },
-            new ChartSeries() { Name = "openai-gpt-4o", Data = query.Where(c => c.AiModelName == "openai-gpt-4o").Select(c => c.Calculate).ToArray() }
+                [
+            new ChartSeries() { Name = DeepSeekManagerBase.ChatModel, Data = query.Where(c => c.AiModelName == DeepSeekManagerBase.ChatModel).Select(c => c.Calculate).ToArray() },
+            new ChartSeries() { Name = OpenAiManagerBase.ChatModel, Data = query.Where(c => c.AiModelName == OpenAiManagerBase.ChatModel).Select(c => c.Calculate).ToArray() },
+            new ChartSeries() { Name = OpenAiManagerBase.ImageModel, Data = query.Where(c => c.AiModelName == OpenAiManagerBase.ImageModel).Select(c => c.Calculate).ToArray() }
         ];
 
         var queryAvg = await StatisticRepository.GetAvgTokenByDays();
-        _xAxisLabelsAvg = queryAvg.Select(c => c.Date.ToShortDateString()).ToArray();
+        _xAxisLabelsAvg = queryAvg.Select(c => c.Date.ToShortDateString()).Distinct().ToArray();
         _seriesAvg =
-        [
-            new ChartSeries() { Name = "DeepSeek", Data = queryAvg.Where(c => c.AiModelName == "DeepSeek").Select(c => c.Calculate).ToArray() },
-            new ChartSeries() { Name = "openai-gpt-4o", Data = queryAvg.Where(c => c.AiModelName == "openai-gpt-4o").Select(c => c.Calculate).ToArray() }
+                [
+            new ChartSeries() { Name = DeepSeekManagerBase.ChatModel, Data = queryAvg.Where(c => c.AiModelName == DeepSeekManagerBase.ChatModel).Select(c => c.Calculate).ToArray() },
+            new ChartSeries() { Name = OpenAiManagerBase.ChatModel, Data = queryAvg.Where(c => c.AiModelName == OpenAiManagerBase.ChatModel).Select(c => c.Calculate).ToArray() },
+            new ChartSeries() { Name = OpenAiManagerBase.ImageModel, Data = queryAvg.Where(c => c.AiModelName == OpenAiManagerBase.ImageModel).Select(c => c.Calculate).ToArray() }
         ];
     }
 }

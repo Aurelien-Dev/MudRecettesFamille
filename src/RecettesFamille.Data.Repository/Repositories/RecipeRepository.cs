@@ -13,7 +13,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 {
     public async Task<List<RecipeDto>> GetAll(CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var result = await context.Recipes.ToListAsync(cancellationToken);
 
@@ -22,7 +22,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task<List<RecipeDto>> GetAll(string tag, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var result = await context.Recipes
             .Where(r => EF.Functions.ILike(r.Tags, $"%{tag}%"))
@@ -33,7 +33,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task<List<RecipeDto>> GetAll(string[] tags, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var query = context.Recipes.AsQueryable();
         foreach (var tag in tags)
@@ -48,7 +48,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task<List<RecipeForListDto>> GetAllLightRecipe(CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var result = await context.Recipes
             .Select(c => new RecipeForListDto
@@ -62,9 +62,9 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         return result;
     }
 
-    public async Task<List<RecipeForListDto>> GetAllLightRecipe(string[] tags,CancellationToken cancellationToken = default)
+    public async Task<List<RecipeForListDto>> GetAllLightRecipe(string[] tags, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var query = context.Recipes.AsQueryable();
         foreach (var tag in tags)
@@ -85,7 +85,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task<RecipeDto> GetWithInstructions(int recipeId, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var result = await context.Recipes.Include(s => s.BlocksInstructions)
             .ThenInclude(b => ((BlockIngredientListEntity)b).Ingredients)
@@ -99,7 +99,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task<RecipeDto> AddRecipe(RecipeDto block, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var blockEntity = mapper.Map<RecipeEntity>(block);
 
         await context.Set<RecipeEntity>().AddAsync(blockEntity, cancellationToken);
@@ -110,8 +110,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task DeleteRecipe(int recipeId, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var element = await context.Recipes.FindAsync([recipeId], cancellationToken);
         if (element != null)
         {
@@ -125,7 +124,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         if (recipe is null)
             return;
 
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var element = await context.Recipes.FindAsync([recipe.Id], cancellationToken);
 
         mapper.Map(recipe, element, opt => { opt.AfterMap((src, dest) => dest!.BlocksInstructions = null!); });
@@ -140,7 +139,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task<bool> DeleteBlock(int blockId, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var element = await context.Set<BlockBaseEntity>().FindAsync([blockId], cancellationToken);
         if (element is null)
             return false;
@@ -156,7 +155,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         if (block is null)
             return;
 
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var element = await context.Set<BlockBaseEntity>().FindAsync([block.Id], cancellationToken);
 
         mapper.Map(block, element, opts =>
@@ -169,7 +168,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task<BlockBaseDto> AddBlock(BlockBaseDto block, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         BlockBaseEntity blockEntity = mapper.Map<BlockBaseEntity>(block);
 
         await context.Set<BlockBaseEntity>().AddAsync(blockEntity, cancellationToken);
@@ -184,7 +183,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task<bool> DeleteIngredient(int ingredientId, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var element = await context.Set<IngredientEntity>().FindAsync([ingredientId], cancellationToken);
         if (element is null)
             return false;

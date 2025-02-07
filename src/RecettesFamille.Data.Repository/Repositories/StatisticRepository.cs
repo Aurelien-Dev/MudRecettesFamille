@@ -4,10 +4,11 @@ using RecettesFamille.Data.Repository.IRepositories;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
-public class StatisticRepository(ApplicationDbContext context) : IStatisticRepository
+public class StatisticRepository(IDbContextFactory<ApplicationDbContext> contextFactory) : IStatisticRepository
 {
     public async Task<List<StatisticsViewModel>> GetCountCallByDays(CancellationToken cancellationToken = default)
     {
+        using var context = await contextFactory.CreateDbContextAsync();
         var result = await context.AiConsumptions
                              .GroupBy(a => new { a.Date.Date, a.AiModelName })
                              .Select(g => new StatisticsViewModel()
@@ -18,12 +19,12 @@ public class StatisticRepository(ApplicationDbContext context) : IStatisticRepos
                              })
                              .OrderBy(x => x.Date)
                              .ToListAsync(cancellationToken);
-
         return result;
     }
 
     public async Task<List<StatisticsViewModel>> GetAvgTokenByDays(CancellationToken cancellationToken = default)
     {
+        using var context = await contextFactory.CreateDbContextAsync();
         var queryAvg = await context.AiConsumptions
                         .GroupBy(a => new { a.Date.Date, a.AiModelName })
                         .Select(g => new StatisticsViewModel()

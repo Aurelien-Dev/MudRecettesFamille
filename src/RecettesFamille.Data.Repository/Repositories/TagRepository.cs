@@ -10,7 +10,7 @@ public class TagRepository(IMapper mapper, IDbContextFactory<ApplicationDbContex
 {
     public async Task<List<TagDto>> GetAll(CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var result = await context.Tags.ToListAsync(cancellationToken);
 
         return mapper.Map<List<TagDto>>(result);
@@ -18,7 +18,7 @@ public class TagRepository(IMapper mapper, IDbContextFactory<ApplicationDbContex
 
     public async Task<List<TagDto>> GetAllVisible(CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var result = await context.Tags.Where(c => c.IsVisible).ToListAsync(cancellationToken);
 
         return mapper.Map<List<TagDto>>(result);
@@ -26,9 +26,9 @@ public class TagRepository(IMapper mapper, IDbContextFactory<ApplicationDbContex
 
     public async Task UpdateTag(TagDto tag, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var element = await context.Set<TagEntity>().FindAsync([tag.Id], cancellationToken);
-        
+
         mapper.Map(tag, element);
 
         await context.SaveChangesAsync(cancellationToken);
@@ -36,7 +36,7 @@ public class TagRepository(IMapper mapper, IDbContextFactory<ApplicationDbContex
 
     public async Task<TagDto> AddTag(TagDto tag, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var tagEntity = mapper.Map<TagEntity>(tag);
 
         await context.Set<TagEntity>().AddAsync(tagEntity, cancellationToken);
@@ -47,7 +47,7 @@ public class TagRepository(IMapper mapper, IDbContextFactory<ApplicationDbContex
 
     public async Task<bool> AddTag(TagDto[] tags, CancellationToken cancellationToken = default)
     {
-        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         // Exclude existing tags
         var existingTagNames = await context.Tags.Select(t => t.TagName).ToListAsync(cancellationToken);
