@@ -21,7 +21,7 @@ public class DeepSeekManager(IConfiguration config, IAiRepository aiRepository) 
         var client = new DeepSeekClient(apiKey);
 
 
-        var promptRecipeConvert = await aiRepository.GetPrompt("GptRecipeConvert", cancellationToken);
+        var promptRecipeConvert = await aiRepository.GetPrompt("RecipeConvertPrompt", cancellationToken);
 
         var newPromptRecipeConvert = promptRecipeConvert.Prompt;
         var ask = $@"Voici une recette à convertir en JSON en respectant les instructions du prompt :

@@ -17,13 +17,9 @@ public class OpenAiManager(IConfiguration config, IAiRepository aiRepository) : 
     public async Task<string> AskImage(string recipeName, CancellationToken cancellationToken = default)
     {
         var client = new ImageClient(model: ImageModel, apiKey: config["OPENAI_SECRET"]);
+        var promptImageGenerator = await aiRepository.GetPrompt("ImageGeneratorPrompt", cancellationToken);
 
-        string ask = $@"Un gros plan réaliste de la recette : {recipeName}. 
-Dans une ambiance minimaliste, sans accessoires ni distractions en arrière-plan, pour focaliser l'attention sur ses détails. 
-L'éclairage est doux et naturel, mettant en avant les textures et les nuances pour une présentation élégante et épurée.";
-
-
-        GeneratedImage image = await client.GenerateImageAsync(ask, new ImageGenerationOptions()
+        GeneratedImage image = await client.GenerateImageAsync(string.Format(promptImageGenerator.Prompt, recipeName), new ImageGenerationOptions()
         {
             Quality = GeneratedImageQuality.High,
             Size = GeneratedImageSize.W1792xH1024,
@@ -39,8 +35,7 @@ L'éclairage est doux et naturel, mettant en avant les textures et les nuances p
     public async Task<RecipeDto> ConvertRecipe(string recipe, CancellationToken cancellationToken = default)
     {
         var client = new ChatClient(model: ChatModel, apiKey: config["OPENAI_SECRET"]);
-
-        var promptRecipeConvert = await aiRepository.GetPrompt("GptRecipeConvert", cancellationToken);
+        var promptRecipeConvert = await aiRepository.GetPrompt("RecipeConvertPrompt", cancellationToken);
 
         var newPromptRecipeConvert = promptRecipeConvert.Prompt;
         var ask = $@"Voici une recette à convertir en JSON en respectant les instructions du prompt :

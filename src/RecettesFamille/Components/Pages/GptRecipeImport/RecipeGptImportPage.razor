@@ -46,7 +46,7 @@
     [Inject] ErrorManager ErrorManager { get; set; } = null!;
     [Inject(Key = "DeepSeek")] IIaManagerBase gptRecipeConverterManager { get; set; } = null!;
 
-    private MudTextField<string> multilineReference = null!; // Reference to the multiline text field
+    private MudTextField<string> multilineReference = null!;
 
     bool _isWorkInProgress;
     [Required] string _recipeDescription = string.Empty;

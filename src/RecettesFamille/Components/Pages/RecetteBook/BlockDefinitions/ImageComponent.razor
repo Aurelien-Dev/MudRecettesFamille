@@ -24,10 +24,22 @@
             </MudButton>
         </MudItem>
         <MudItem xs="12" md="4">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Outlined.AutoFixHigh" OnClick="AskImageToAi" FullWidth="true">
-            </MudButton>
+            @if (_isWorkInProgress)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Error" EndIcon="@Icons.Material.Outlined.Stop" OnClick="StopAskImageToAi" FullWidth="true">
+                </MudButton>
+            }
+            else
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Outlined.AutoFixHigh" OnClick="AskImageToAi" FullWidth="true">
+                </MudButton>
+            }
         </MudItem>
-        <MudItem xs="12" md="12">
+        <MudItem xs="12" md="12" Style="position: relative;">
+            <MudOverlay Visible="@_isWorkInProgress" DarkBackground="true" Absolute="true" Class="ml-2 mt-2 mb-1 rounded-lg">
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            </MudOverlay>
+
             <MudImage Src="@Block.Image" Fluid="false" ObjectFit="ObjectFit.Cover" Height="300" Elevation="25" Class="rounded-lg" Style="width:100%">
             </MudImage>
         </MudItem>
@@ -46,6 +58,9 @@ else
 
     private MudFileUpload<IBrowserFile> MudFileUpload { get; set; } = null!;
     private readonly long _maxFileSize = 1024 * 1024 * 15;
+    private bool _isWorkInProgress;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+
 
     private async Task OnInputFileChanged(IBrowserFile e)
     {
@@ -90,15 +105,24 @@ else
     {
         try
         {
-            var base64Image = await IaManager.AskImage(Block.Recipe.Name);
-
+            _isWorkInProgress = true;
+            var base64Image = await IaManager.AskImage(Block.Recipe.Name, _cancellationTokenSource.Token);
             Block.Image = base64Image;
+
             StateHasChanged();
         }
         catch (Exception)
         {
             ErrorManager.DisplayError();
         }
+        finally
+        {
+            _isWorkInProgress = false;
+        }
+    }
+    private void StopAskImageToAi()
+    {
+        _cancellationTokenSource?.Cancel();
     }
 
     private async Task<string> ConvertToBase64Async(IBrowserFile file)
