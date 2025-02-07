@@ -13,10 +13,14 @@
         @* <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" /> *@
         <MudButton Href="/" Style="font-weight: bold;" Class="mud-typography mud-typography-body2" Color="Color.Inherit">Recettes famille</MudButton>
         <MudSpacer />
+        <MudButton Href="gpt/import" Color="Color.Inherit" Variant="Variant.Text" EndIcon="@Icons.Material.Filled.UploadFile"
+                   Style="text-transform:none">
+            Importer une recette
+        </MudButton>
         <MudToggleIconButton ToggledChanged="OnToggledChanged"
                              Icon="@Icons.Material.Outlined.DarkMode"
                              ToggledIcon="@Icons.Material.Filled.LightMode"
-                             ToggledColor="@Color.Error" />
+                             ToggledColor="@Color.Error" Color="Color.Inherit" />
 
     </MudAppBar>
 

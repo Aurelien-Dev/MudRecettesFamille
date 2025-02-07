@@ -3,13 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.EntityModel.Blocks;
 using RecettesFamille.Data.Repository.IRepositories;
+using RecettesFamille.Dto.ModelByPage.RecetteBook;
 using RecettesFamille.Dto.Models;
 using RecettesFamille.Dto.Models.Blocks;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
-public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext> contextFactory)
-    : IRecipeRepository
+public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext> contextFactory) : IRecipeRepository
 {
     public async Task<List<RecipeDto>> GetAll(CancellationToken cancellationToken = default)
     {
@@ -20,7 +20,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         return mapper.Map<List<RecipeDto>>(result);
     }
 
-    public async Task<List<RecipeDto>> GetAllByTag(string tag, CancellationToken cancellationToken = default)
+    public async Task<List<RecipeDto>> GetAll(string tag, CancellationToken cancellationToken = default)
     {
         var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -31,7 +31,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         return mapper.Map<List<RecipeDto>>(result);
     }
 
-    public async Task<List<RecipeDto>> GetAllByTag(string[] tags, CancellationToken cancellationToken = default)
+    public async Task<List<RecipeDto>> GetAll(string[] tags, CancellationToken cancellationToken = default)
     {
         var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -45,6 +45,43 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
         return mapper.Map<List<RecipeDto>>(result);
     }
+
+    public async Task<List<RecipeForListDto>> GetAllLightRecipe(CancellationToken cancellationToken = default)
+    {
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var result = await context.Recipes
+            .Select(c => new RecipeForListDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Tags = c.Tags
+            })
+            .ToListAsync(cancellationToken);
+
+        return result;
+    }
+
+    public async Task<List<RecipeForListDto>> GetAllLightRecipe(string[] tags,CancellationToken cancellationToken = default)
+    {
+        var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var query = context.Recipes.AsQueryable();
+        foreach (var tag in tags)
+        {
+            query = query.Where(r => EF.Functions.ILike(r.Tags, $"%{tag}%"));
+        }
+
+        var result = await query.Select(c => new RecipeForListDto
+        {
+            Id = c.Id,
+            Name = c.Name,
+            Tags = c.Tags
+        }).ToListAsync(cancellationToken);
+
+        return result;
+    }
+
 
     public async Task<RecipeDto> GetWithInstructions(int recipeId, CancellationToken cancellationToken = default)
     {

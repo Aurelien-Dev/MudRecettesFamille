@@ -50,7 +50,7 @@ Réponds uniquement avec un objet JSON valide, sans texte supplémentaire, sans 
             Console.WriteLine(client.ErrorMsg);
             throw new InvalidOperationException("Chat response is null");
         }
-        var resultText = chatResponse.Choices.First().Message?.Content ?? throw new InvalidOperationException("Result text is null");
+        var resultText = chatResponse.Choices.FirstOrDefault()?.Message?.Content ?? throw new InvalidOperationException("Result text is null");
 
         await ReportConsumption(chatResponse);
 

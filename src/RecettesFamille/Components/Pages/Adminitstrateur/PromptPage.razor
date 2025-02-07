@@ -26,25 +26,28 @@
         </MudList>
     </MudItem>
     <MudItem xs="12" md="8">
-        <MudStack>
-            <MudToggleIconButton @bind-Toggled="EditMode"
-                                 Icon="@Icons.Material.Filled.Edit"
-                                 Color="@Color.Success"
-                                 ToggledIcon="@Icons.Material.Filled.Edit"
-                                 ToggledColor="@Color.Error" />
-            @if (!EditMode)
-            {
-                <MudText Typo="Typo.h3" GutterBottom="true">@CurrentPrompt.Name</MudText>
-                <MudMarkdown Value="@CurrentPrompt.Prompt" />
-            }
-            else
-            {
-                <MudButton Variant="Variant.Filled" OnClick="SavePrompt">Save</MudButton>
-                <MudTextField T="string" Label="Prompt name" Variant="Variant.Outlined" @bind-Value="CurrentPrompt.Name" />
-                <MudTextField T="string" Label="@CurrentPrompt.Name" Variant="Variant.Outlined" Lines="30"
-                              @bind-Value="CurrentPrompt.Prompt" />
-            }
-        </MudStack>
+        @if (CurrentPrompt is not null)
+        {
+            <MudStack>
+                <MudToggleIconButton @bind-Toggled="EditMode"
+                                     Icon="@Icons.Material.Filled.Edit"
+                                     Color="@Color.Success"
+                                     ToggledIcon="@Icons.Material.Filled.Edit"
+                                     ToggledColor="@Color.Error" />
+                @if (!EditMode)
+                {
+                    <MudText Typo="Typo.h3" GutterBottom="true">@CurrentPrompt.Name</MudText>
+                    <MudMarkdown Value="@CurrentPrompt.Prompt" />
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Filled" OnClick="SavePrompt">Save</MudButton>
+                    <MudTextField T="string" Label="Prompt name" Variant="Variant.Outlined" @bind-Value="CurrentPrompt.Name" />
+                    <MudTextField T="string" Label="@CurrentPrompt.Name" Variant="Variant.Outlined" Lines="30"
+                                  @bind-Value="CurrentPrompt.Prompt" />
+                }
+            </MudStack>
+        }
     </MudItem>
 </MudGrid>
 

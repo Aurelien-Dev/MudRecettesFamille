@@ -1,36 +1,44 @@
 ﻿@page "/"
 @using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Dto.ModelByPage.RecetteBook
 @using RecettesFamille.Dto.Models
 @using RecettesFamille.Extensions
 
 <MudGrid>
     <MudItem md="3">
+        <MudStack Class="mt-15">
 
-        <MudPaper>
-            <MudList T="string" Class="mt-15" SelectionMode="SelectionMode.MultiSelection" Dense="true"
-                     SelectedValuesChanged="OnSelectedValuesChanged">
-                <MudListSubheader>
-                    Filtre par catégories
-                </MudListSubheader>
-                @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
-                {
-                    <MudListItem Dense="true" Text="@item.TagName"/>
-                }
-            </MudList>
-        </MudPaper>
+            <MudPaper>
+                <MudText class="mud-list-subheader mud-list-subheader-gutters" Style="font-weight: 500;">Recherche libre</MudText>
+                <MudTextField @bind-Value="_searchString1" Placeholder="Search" Adornment="Adornment.Start" Clearable="true"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mx-5 mb-2"></MudTextField>
+            </MudPaper>
+            <MudPaper>
+                <MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true"
+                SelectedValuesChanged="OnSelectedValuesChanged">
+                    <MudListSubheader>
+                        Filtre par catégories
+                    </MudListSubheader>
+                    @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
+                    {
+                        <MudListItem Dense="true" Text="@item.TagName" />
+                    }
+                </MudList>
+            </MudPaper>
 
+        </MudStack>
     </MudItem>
     <MudItem md="9">
 
         <MudToolBar Class="mb-3" Dense="true">
-            <MudSpacer/>
+            <MudSpacer />
             <MudToggleGroup T="string" Outlined="true" Delimiters="true" Size="Size.Small" Color="Color.Primary"
-                            @bind-Value="_viewMode">
+            @bind-Value="_viewMode">
                 <MudToggleItem Value="Icons.Material.Filled.GridView">
-                    <MudIcon Icon="@Icons.Material.Filled.GridView"/>
+                    <MudIcon Icon="@Icons.Material.Filled.GridView" />
                 </MudToggleItem>
                 <MudToggleItem Value="Icons.Material.Filled.List">
-                    <MudIcon Icon="@Icons.Material.Filled.List"/>
+                    <MudIcon Icon="@Icons.Material.Filled.List" />
                 </MudToggleItem>
             </MudToggleGroup>
         </MudToolBar>
@@ -49,7 +57,7 @@
                                         <MudText Typo="Typo.subtitle2">@item.Name.ToUpper()</MudText>
                                     </CardHeaderContent>
                                     <CardHeaderActions>
-                                        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default"/>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" />
                                     </CardHeaderActions>
                                 </MudCardHeader>
                                 <MudCardContent>
@@ -57,7 +65,8 @@
                                 </MudCardContent>
                                 <MudCardActions>
                                     <MudButton Href="@($"/recette/{item.Id}")" Variant="Variant.Text"
-                                               Color="Color.Inherit" Size="Size.Small">Open
+                                    Color="Color.Inherit" Size="Size.Small">
+                                        Open
                                     </MudButton>
                                 </MudCardActions>
                             </MudCard>
@@ -67,36 +76,30 @@
                 break;
             case Icons.Material.Filled.List:
                 <MudPaper Elevation="1">
-                    <MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.Sm"
-                              LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
-                              Filter="new Func<RecipeDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)">
-                        <ToolBarContent>
-                            <MudSpacer/>
-                            <MudTextField @bind-Value="_searchString1" Placeholder="Search" Adornment="Adornment.Start"
-                                          AdornmentIcon="@Icons.Material.Filled.Search"
-                                          IconSize="Size.Medium" Class="mt-0"></MudTextField>
-                        </ToolBarContent>
+                    <MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
+                              Filter="new Func<RecipeForListDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 280px)">
                         <RowTemplate>
                             <MudTd>@context.Name</MudTd>
                             <MudTd>
                                 @foreach (var item in context.Tags.Split("|"))
                                 {
                                     <MudChip T="string" Variant="Variant.Text" Size="Size.Small"
-                                             Color="Color.Info">@item</MudChip>
+                                    Color="Color.Info">@item</MudChip>
                                 }
                             </MudTd>
                             <MudTd>
                                 <MudButton Href="@($"/recette/{context.Id}")" Variant="Variant.Text"
-                                           Color="Color.Inherit" Size="Size.Small">Open
+                                Color="Color.Inherit" Size="Size.Small">
+                                    Open
                                 </MudButton>
                             </MudTd>
                         </RowTemplate>
 
                         <PagerContent>
                             <MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
-                                           RowsPerPageString="Elements par page :"
-                                           AllItemsText="Tout"
-                                           InfoFormat="{first_item}-{last_item} sur {all_items}"/>
+                            RowsPerPageString="Elements par page :"
+                            AllItemsText="Tout"
+                            InfoFormat="{first_item}-{last_item} sur {all_items}" />
                         </PagerContent>
                     </MudTable>
                 </MudPaper>
@@ -110,25 +113,27 @@
     [Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
     [Inject] ITagRepository TagRepository { get; set; } = null!;
 
-    List<RecipeDto> Recipes { get; set; } = null!;
+    List<RecipeForListDto> Recipes { get; set; } = null!;
     List<TagDto> Tags { get; set; } = null!;
     string _viewMode = Icons.Material.Filled.List;
     string _searchString1 = string.Empty;
 
     protected override async Task OnParametersSetAsync()
     {
-        Recipes = (await RecipeRepository.GetAll()).OrderBy(c => c.Name).ToList();
+        var result = await RecipeRepository.GetAllLightRecipe();
+
+        Recipes = result.OrderBy(c => c.Name).ToList();
         Tags = await TagRepository.GetAllVisible();
     }
 
     public async Task OnSelectedValuesChanged(IReadOnlyCollection<string>? strings)
     {
-        Recipes = (await RecipeRepository.GetAllByTag(strings!.ToArray())).OrderBy(c => c.Name).ToList();
+        Recipes = (await RecipeRepository.GetAllLightRecipe(strings!.ToArray())).OrderBy(c => c.Name).ToList();
     }
 
-    private bool FilterFunc1(RecipeDto element) => FilterFunc(element, _searchString1);
+    private bool FilterFunc1(RecipeForListDto element) => FilterFunc(element, _searchString1);
 
-    private static bool FilterFunc(RecipeDto element, string searchString)
+    private static bool FilterFunc(RecipeForListDto element, string searchString)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
