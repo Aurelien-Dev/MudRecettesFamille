@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
-using MudExtensions.Services;
 using RecettesFamille;
 using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
@@ -24,7 +23,6 @@ builder.WebHost.ConfigureKestrel(options =>
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
-builder.Services.AddMudExtensions();
 builder.Services.AddMudMarkdownServices();
 builder.Services.AddBlazoredLocalStorage();
 builder.AddBlazorCookies();

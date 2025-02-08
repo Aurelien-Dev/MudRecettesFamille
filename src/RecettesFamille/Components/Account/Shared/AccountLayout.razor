@@ -1,6 +1,11 @@
 ﻿@inherits LayoutComponentBase
-@layout RecettesFamille.Components.Layout.MainLayout
+
 @inject NavigationManager NavigationManager
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
 @if (HttpContext is null)
 {
@@ -8,7 +13,14 @@
 }
 else
 {
-    @Body
+    <MudContainer MaxWidth="MaxWidth.Large" Class="d-flex align-top mt-10" Style="height: 100vh;">
+        <div class="d-flex flex-column mud-width-full">
+            <MudPaper Elevation="25" Class="pa-8" Width="100%" MinHeight="700px">
+                <MudIcon Icon="@Icons.Custom.Brands.MudBlazor" Size="Size.Large" Style="width:100px; height:100px;" />
+                @Body
+            </MudPaper>
+        </div>
+    </MudContainer>
 }
 
 @code {
