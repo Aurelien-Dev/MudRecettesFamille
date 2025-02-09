@@ -20,8 +20,6 @@ services:
       - EMAIL_BACKUP_FROM=${EMAIL_BACKUP_FROM}
       - EMAIL_BACKUP_DEST=${EMAIL_BACKUP_DEST}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
-    depends_on:
-      - recettesfamille.data
     volumes:
       - /home/data/client:/app/data:ro  # Mapping du volume
         
