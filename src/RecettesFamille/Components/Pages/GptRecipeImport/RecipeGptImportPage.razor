@@ -52,7 +52,7 @@
 
     [Required] string _recipeDescription = string.Empty;
     bool _isWorkInProgress;
-    CancellationTokenSource _cancellationTokenSource;
+    CancellationTokenSource _cancellationTokenSource = null!;
 
     public async Task ImportRecipe()
     {
