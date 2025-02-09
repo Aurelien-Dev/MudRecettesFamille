@@ -83,12 +83,11 @@
                             <MudTd>
                                 @foreach (var item in context.Tags.Split("|"))
                                 {
-                                    <MudChip T="string" Variant="Variant.Text" Size="Size.Small"
-                                             Color="Color.Info">@item</MudChip>
+                                    <MudChip T="string" Variant="Variant.Text" Size="Size.Small" Color="Color.Inherit">@item</MudChip>
                                 }
                             </MudTd>
                             <MudTd>
-                                <MudIconButton Href="@($"/recette/{context.Id}")" Icon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Secondary" Size="Size.Small" />
+                                <MudIconButton Href="@($"/recette/{context.Id}")" Icon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Primary" Size="Size.Small" />
                             </MudTd>
                         </RowTemplate>
 
