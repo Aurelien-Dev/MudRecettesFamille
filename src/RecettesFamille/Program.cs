@@ -56,7 +56,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
-    var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
+    var postgresCs = "Host=recettesfamille.data;Port=5442;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
     options.UseNpgsql(postgresCs);
 }, ServiceLifetime.Scoped);
 
