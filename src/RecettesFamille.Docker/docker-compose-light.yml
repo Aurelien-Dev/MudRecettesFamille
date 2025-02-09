@@ -1,0 +1,30 @@
+services:
+  recettesfamille:
+    image: ${DOCKER_REGISTRY-}recettesfamille    
+    user: "root"
+    container_name: recettesfamille.client
+    
+    networks:
+      testnet:
+        ipv4_address: 172.26.0.28
+    restart: always
+
+    build:
+      context: ..
+      dockerfile: ./RecettesFamille/Dockerfile
+
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - OPENAI_SECRET=${OPENAI_SECRET}
+      - DEEPSEEK_SECRET=${DEEPSEEK_SECRET}
+      - EMAIL_BACKUP_FROM=${EMAIL_BACKUP_FROM}
+      - EMAIL_BACKUP_DEST=${EMAIL_BACKUP_DEST}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    depends_on:
+      - recettesfamille.data
+    volumes:
+      - /home/data/client:/app/data:ro  # Mapping du volume
+        
+networks:
+  testnet:
+    external: true
