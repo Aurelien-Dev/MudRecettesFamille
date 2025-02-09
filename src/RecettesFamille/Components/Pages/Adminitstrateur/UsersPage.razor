@@ -1,0 +1,125 @@
+﻿@page "/admin/users"
+@attribute [Authorize(Roles = "Admin")]
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using RecettesFamille.Components.Layout
+@using RecettesFamille.Data
+@using RecettesFamille.Data.Repository.IRepositories
+@layout AdminLayout
+
+@inject IUserRepository userRepository
+@inject SignInManager<ApplicationUser> signInManager
+@inject UserManager<ApplicationUser> userManager
+
+<MudPaper Elevation="1">
+    <MudTable Items="users" Hover="true" Dense="true" Height="calc(100vh - 200px)">
+        <HeaderContent>
+            <MudTh>User</MudTh>
+            <MudTh>Is Admin</MudTh>
+            <MudTh>Is Contributor</MudTh>
+            <MudTh>Is Reader</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Name</MudTd>
+            <MudTd>
+                <MudCheckBox T="bool" Value="@context.IsAdmin" ValueChanged="@((e) => CheckAdminChanged(e, context))" />
+            </MudTd>
+            <MudTd>
+                <MudCheckBox T="bool" Value="@context.IsContributor" ValueChanged="@((e) => CheckContributorChanged(e, context))" />
+            </MudTd>
+            <MudTd>
+                <MudCheckBox T="bool" Value="@context.IsReader" ValueChanged="@((e) => CheckReaderChanged(e, context))" />
+            </MudTd>
+        </RowTemplate>
+
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
+                           RowsPerPageString="Elements par page :"
+                           AllItemsText="Tout"
+                           InfoFormat="{first_item}-{last_item} sur {all_items}" />
+        </PagerContent>
+    </MudTable>
+</MudPaper>
+
+@* 
+<AuthorizeView>
+    <Authorized>
+        <p>Bienvenue, utilisateur connecté !</p>
+    </Authorized>
+    <NotAuthorized>
+        <p>Veuillez vous connecter.</p>
+    </NotAuthorized>
+</AuthorizeView> *@
+
+<AuthorizeView Roles="Admin">
+    <p>Bienvenue, Administrateur !</p>
+</AuthorizeView>
+<AuthorizeView Roles="Contributor">
+    <p>Bienvenue, Contributor !</p>
+</AuthorizeView>
+<AuthorizeView Roles="Reader">
+    <p>Bienvenue, Reader !</p>
+</AuthorizeView>
+
+
+@code {
+    private List<UserViewModel> users { get; set; } = [];
+
+    protected async override Task OnInitializedAsync()
+    {
+        var usersIdentity = await userRepository.GetAllUsersWithRolesAsync();
+
+        foreach (var item in usersIdentity.OrderBy(c => c.User.UserName))
+        {
+            bool IsAdmin = item.Roles.Contains("Admin");
+            bool IsContributor = item.Roles.Contains("Contributor");
+            bool isReader = item.Roles.Contains("Reader");
+
+            users.Add(new UserViewModel(item.User.UserName, IsAdmin, IsContributor, isReader));
+        }
+    }
+
+    private async Task CheckAdminChanged(bool isCheck, UserViewModel userVm)
+    {
+        userVm.IsAdmin = isCheck;
+        if (isCheck)
+            await userRepository.AssignRoleAsync(userVm.Name, "Admin");
+        else
+            await userRepository.RemoveRoleAsync(userVm.Name, "Admin");
+
+        StateHasChanged();
+    }
+    private async Task CheckContributorChanged(bool isCheck, UserViewModel userVm)
+    {
+        userVm.IsContributor = isCheck;
+        if (isCheck)
+            await userRepository.AssignRoleAsync(userVm.Name, "Contributor");
+        else
+            await userRepository.RemoveRoleAsync(userVm.Name, "Contributor");
+    }
+    private async Task CheckReaderChanged(bool isCheck, UserViewModel userVm)
+    {
+        userVm.IsReader = isCheck;
+        if (isCheck)
+            await userRepository.AssignRoleAsync(userVm.Name, "Reader");
+        else
+            await userRepository.RemoveRoleAsync(userVm.Name, "Reader");
+    }
+
+    public class UserViewModel
+    {
+        public string Name { get; set; }
+        public bool IsAdmin { get; set; }
+        public bool IsContributor { get; set; }
+        public bool IsReader { get; set; }
+
+        public UserViewModel(string name, bool isAdmin, bool isContributor, bool isReader)
+        {
+            Name = name;
+            IsAdmin = isAdmin;
+            IsContributor = isContributor;
+            IsReader = isReader;
+        }
+    }
+}

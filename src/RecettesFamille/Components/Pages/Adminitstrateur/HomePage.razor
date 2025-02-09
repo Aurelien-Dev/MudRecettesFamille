@@ -1,0 +1,21 @@
+﻿@page "/Admin"
+@using Microsoft.AspNetCore.Authorization
+@using RecettesFamille.Components.Layout
+@attribute [Authorize(Roles = "Admin, Contributor")]
+
+@layout AdminLayout
+
+<AuthorizeView Roles="Admin">
+    <p>Bienvenue, Administrateur !</p>
+</AuthorizeView>
+<AuthorizeView Roles="Contributor">
+    <p>Bienvenue, Contributor !</p>
+</AuthorizeView>
+<AuthorizeView Roles="Reader">
+    <p>Bienvenue, Reader !</p>
+</AuthorizeView>
+
+
+
+@code {
+}

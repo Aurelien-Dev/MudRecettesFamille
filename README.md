@@ -59,3 +59,13 @@ RecettesFamille est une application web pour gérer et partager des recettes de 
 
 2. Accédez à l'application via l'adresse configurée dans Docker.
 
+
+## Tips
+
+# Modify the server-side reconnection handler
+
+https://learn.microsoft.com/fr-fr/aspnet/core/blazor/fundamentals/signalr?view=aspnetcore-8.0#modify-the-server-side-reconnection-handler
+
+# ThemeManager :
+
+Editeur de thème : https://themes.arctechonline.tech/

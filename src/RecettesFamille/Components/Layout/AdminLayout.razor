@@ -1,38 +1,41 @@
 ﻿@using RecettesFamille.Managers
 @inherits LayoutComponentBase
 
-<MudThemeProvider IsDarkMode="true" Theme="CustomThemeManager.Customtheme"/>
-<MudDialogProvider/>
-<MudSnackbarProvider/>
-<MudPopoverProvider/>
+<MudThemeProvider IsDarkMode="true" Theme="CustomThemeManager.Customtheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
 
 <MudLayout>
     <MudAppBar Elevation="1" Dense="true">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle"/>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
         <MudButton Href="/" Style="font-weight: bold;" Class="mud-typography mud-typography-body2"
-                   Color="Color.Inherit">Recettes famille
+                   Color="Color.Inherit">
+            Recettes famille
         </MudButton>
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <MudNavMenu>
-            <MudNavLink Href="admin/migrations" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.TransferWithinAStation">Migration</MudNavLink>
-            <MudNavLink Href="admin/prompt" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ImportExport">Prompt editor</MudNavLink>
-            <MudNavLink Href="admin/statistics" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.GraphicEq">Statistics</MudNavLink>
-            <MudNavLink Href="admin/tag" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Tag">Tags</MudNavLink>
-            <MudNavLink Href="/" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ArrowBack">Back to the web site</MudNavLink>
+            <AuthorizeView Roles="Admin">
+                <MudNavLink Href="/admin/users" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Person">Users</MudNavLink>
+                <MudNavLink Href="/admin/migrations" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.TransferWithinAStation">Migration</MudNavLink>
+                <MudNavLink Href="/admin/prompt" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ImportExport">Prompt editor</MudNavLink>
+                <MudNavLink Href="/admin/statistics" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.GraphicEq">Statistics</MudNavLink>
+            </AuthorizeView>
+            <AuthorizeView Roles="Admin, Contributor">
+                <MudNavLink Href="/admin/tag" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Tag">Tags</MudNavLink>
+            </AuthorizeView>
+            <MudNavLink Href="/" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ArrowBack">Retour au site</MudNavLink>
         </MudNavMenu>
     </MudDrawer>
 
-    @* <CustomErrorBoundary> *@
-        <MudMainContent Class="mt-12 pa-4">
-            <MudContainer MaxWidth="MaxWidth.Large">
+    <MudMainContent Class="mt-12 pa-4">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            @Body
+        </MudContainer>
+    </MudMainContent>
 
-                @Body
-
-            </MudContainer>
-        </MudMainContent>
-    @* </CustomErrorBoundary> *@
 </MudLayout>
 
 

@@ -1,4 +1,7 @@
 ﻿@page "/"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Dto.ModelByPage.RecetteBook
 @using RecettesFamille.Dto.Models

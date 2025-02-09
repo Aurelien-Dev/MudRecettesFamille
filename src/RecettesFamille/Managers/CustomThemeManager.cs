@@ -8,7 +8,8 @@ namespace RecettesFamille.Managers
         {
             PaletteLight = new PaletteLight()
             {
-
+                Primary = Colors.LightBlue.Darken2,
+                AppbarBackground = "#0F3F59",
             },
             PaletteDark = new PaletteDark()
             {

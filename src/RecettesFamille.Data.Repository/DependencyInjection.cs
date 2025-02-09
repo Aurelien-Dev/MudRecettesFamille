@@ -16,7 +16,8 @@ public static class DependencyInjection
         services.AddScoped<IStatisticRepository, StatisticRepository>();
         services.AddScoped<ITechnicalDbRepository, TechnicalDbRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
-
+        services.AddScoped<IUserRepository, UserRepository>();
+        
         //AutoMapper
         var mapperConfig = new MapperConfiguration(cfg =>
         {

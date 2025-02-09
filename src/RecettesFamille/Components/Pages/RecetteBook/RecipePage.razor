@@ -1,4 +1,7 @@
 @page "/recette/{IdRecette:int?}"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
 @using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
 @using RecettesFamille.Components.Pages.RecetteBook.Components
 @using RecettesFamille.Data.Repository.IRepositories
@@ -20,11 +23,13 @@
         <RecipeHeader Recipe="Recipe" />
     }
 
-    <MudToolBar Class="justify-center mt-0 mb-0">
-        <MudToggleIconButton @bind-Toggled="EditorMode" Icon="@Icons.Material.Outlined.Edit"
-                             ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
-        <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
-    </MudToolBar>
+    <AuthorizeView Roles="Admin, Contributor">
+        <MudToolBar Class="justify-center mt-0 mb-0">
+            <MudToggleIconButton @bind-Toggled="EditorMode" Icon="@Icons.Material.Outlined.Edit"
+                                 ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
+            <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
+        </MudToolBar>
+    </AuthorizeView>
 
     @* Description recette *@
     <MudGrid Spacing="5" Class="mt-0 mb-12">

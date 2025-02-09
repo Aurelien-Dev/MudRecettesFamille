@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using RecettesFamille.Components.Account.Shared
+@using RecettesFamille.Components.Layout
+@using RecettesFamille.Data
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -17,21 +23,37 @@
     <HeadOutlet @rendermode="RenderModeForPage" />
 </head>
 
-<body>
+<body style="@BgBodyClass">
     <Routes @rendermode="RenderModeForPage" />
+@*     <CascadingAuthenticationState>
+        <Router AppAssembly="@typeof(Program).Assembly">
+            <Found Context="routeData">
+                <AuthorizeRouteView @rendermode="RenderModeForPage" RouteData="@routeData" DefaultLayout="typeof(MainLayout)">
+                    <NotAuthorized>
+                        <RedirectToLogin />
+                    </NotAuthorized>
+                </AuthorizeRouteView>
+            </Found>
+            <NotFound>
+                <p>Page non trouvée.</p>
+            </NotFound>
+        </Router>
+    </CascadingAuthenticationState> *@
+
+
     <script src="_framework/blazor.web.js" autostart="false"></script>
     <script>
         Blazor.start({
-              circuit: {
-                  reconnectionOptions: {
-                      maxRetries: 20,
-                      retryIntervalMilliseconds: (previousAttempts, maxRetries) =>
-                              previousAttempts >= maxRetries
-                                  ? null
-                                  : previousAttempts * 2000
-                      },
-                  },
-          });
+        circuit: {
+        reconnectionOptions: {
+        maxRetries: 20,
+        retryIntervalMilliseconds: (previousAttempts, maxRetries) =>
+        previousAttempts >= maxRetries
+        ? null
+        : previousAttempts * 2000
+        },
+        },
+        });
     </script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="_content/Extensions.MudBlazor.StaticInput/NavigationObserver.js"></script>
@@ -41,15 +63,15 @@
 
     <script>
         window.downloadFileFromStream = async (fileName, contentStreamReference) => {
-          const arrayBuffer = await contentStreamReference.arrayBuffer();
-          const blob = new Blob([arrayBuffer]);
-          const url = URL.createObjectURL(blob);
-          const anchorElement = document.createElement('a');
-          anchorElement.href = url;
-          anchorElement.download = fileName ?? '';
-          anchorElement.click();
-          anchorElement.remove();
-          URL.revokeObjectURL(url);
+        const arrayBuffer = await contentStreamReference.arrayBuffer();
+        const blob = new Blob([arrayBuffer]);
+        const url = URL.createObjectURL(blob);
+        const anchorElement = document.createElement('a');
+        anchorElement.href = url;
+        anchorElement.download = fileName ?? '';
+        anchorElement.click();
+        anchorElement.remove();
+        URL.revokeObjectURL(url);
         }
     </script>
 </body>
@@ -57,15 +79,34 @@
 </html>
 
 @code {
-    [CascadingParameter]
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    private string BgBodyClass = string.Empty;
+    private bool IsAuthenticatedd => HttpContext?.User?.Identity?.IsAuthenticated ?? false;
+    private bool IsAuthenticated;
 
-    private HttpContext HttpContext { get; set; } = default!;
+    private IComponentRenderMode? RenderModeForPage
+    {
+        get
+        {
+            if (HttpContext.Request.Path.StartsWithSegments("/Account"))
+            {
+                BgBodyClass = "background-color:var(--mud-palette-primary)";
+                return null;
+            }
+            else
+            {
+                BgBodyClass = string.Empty;
+                return InteractiveServer;
+            }
+        }
+    }
 
+    protected async override Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        IsAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
 
-
-    private IComponentRenderMode? RenderModeForPage => HttpContext.Request.Path.StartsWithSegments("/Account")
-
-        ? null
-
-        : InteractiveServer;
+        if (!IsAuthenticated && !HttpContext.Request.Path.StartsWithSegments("/Account"))
+            NavigationManager.NavigateTo($"Account/Login", forceLoad: true);
+    }
 }

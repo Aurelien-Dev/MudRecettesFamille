@@ -1,4 +1,7 @@
 ﻿@page "/admin/tag"
+@attribute [Authorize(Roles = "Admin, Contributor")]
+
+@using Microsoft.AspNetCore.Authorization
 @using RecettesFamille.Components.Layout
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Dto.Models

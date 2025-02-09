@@ -13,25 +13,33 @@
         @* <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" /> *@
         <MudButton Href="/" Style="font-weight: bold;" Class="mud-typography mud-typography-body2" Color="Color.Inherit">Recettes famille</MudButton>
         <MudSpacer />
-        
-        <MudInput T="string" Placeholder="Demander une recette" Typo="Typo.subtitle1" Adornment="Adornment.End" Class="mud-button-text mud-button-text-inherit"
-                  AdornmentIcon="@Icons.Custom.Brands.Microsoft" AdornmentColor="Color.Warning" Margin="Margin.Dense" />
 
-        <MudIconButton Href="gpt/import" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.UploadFile" />
-        <MudToggleIconButton ToggledChanged="OnToggledChanged"
-                             Icon="@Icons.Material.Outlined.DarkMode"
-                             ToggledIcon="@Icons.Material.Filled.LightMode"
-                             ToggledColor="@Color.Error" Color="Color.Inherit" />
+        <MudInput T="string" Placeholder="Demander une recette" Class="mud-button-text mud-button-text-inherit ms-4" Margin="Margin.Dense" />
+        <MudSpacer />
+
+        <AuthorizeView Roles="Admin, Contributor">
+
+            <MudIconButton Href="gpt/import" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.UploadFile" />
+            <MudToggleIconButton ToggledChanged="OnToggledChanged"
+                                 Icon="@Icons.Material.Outlined.DarkMode"
+                                 ToggledIcon="@Icons.Material.Filled.LightMode"
+                                 ToggledColor="@Color.Error" Color="Color.Inherit" />
+        </AuthorizeView>
+
+        <AuthorizeView Roles="Admin, Contributor">
+            <MudIconButton Href="/Admin" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.Settings" />
+        </AuthorizeView>
+
+        <MudIconButton Href="Account/Logout" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.Logout" />
 
     </MudAppBar>
 
-    @* <CustomErrorBoundary> *@
-        <MudMainContent Class="mt-12 pa-4">
-            <MudContainer MaxWidth="MaxWidth.Large">
-                @Body
-            </MudContainer>
-        </MudMainContent>
-    @* </CustomErrorBoundary> *@
+    <MudMainContent Class="mt-12 pa-4">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+
 </MudLayout>
 
 <div id="blazor-error-ui">

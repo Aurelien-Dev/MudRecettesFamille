@@ -1,6 +1,9 @@
 @page "/admin/prompt"
+@attribute [Authorize(Roles = "Admin")]
+
 @layout AdminLayout
 @using System.Text
+@using Microsoft.AspNetCore.Authorization
 @using RecettesFamille.Components.Layout
 @using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
 @using RecettesFamille.Data.Repository.IRepositories
