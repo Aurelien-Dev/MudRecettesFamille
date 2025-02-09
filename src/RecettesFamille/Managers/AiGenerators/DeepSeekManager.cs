@@ -24,7 +24,6 @@ public class DeepSeekManager(IConfiguration config, IAiRepository aiRepository) 
         string apiKey = config["DEEPSEEK_SECRET"] ?? throw new InvalidOperationException("Environment variable IsNullOrEmpty (DEEPSEEK_SECRET)");
         var client = new DeepSeekClient(apiKey);
 
-
         var promptRecipeConvert = await aiRepository.GetPrompt("RecipeConvertPrompt", cancellationToken);
 
         var newPromptRecipeConvert = promptRecipeConvert.Prompt;

@@ -25,21 +25,6 @@
 
 <body style="@BgBodyClass">
     <Routes @rendermode="RenderModeForPage" />
-@*     <CascadingAuthenticationState>
-        <Router AppAssembly="@typeof(Program).Assembly">
-            <Found Context="routeData">
-                <AuthorizeRouteView @rendermode="RenderModeForPage" RouteData="@routeData" DefaultLayout="typeof(MainLayout)">
-                    <NotAuthorized>
-                        <RedirectToLogin />
-                    </NotAuthorized>
-                </AuthorizeRouteView>
-            </Found>
-            <NotFound>
-                <p>Page non trouvée.</p>
-            </NotFound>
-        </Router>
-    </CascadingAuthenticationState> *@
-
 
     <script src="_framework/blazor.web.js" autostart="false"></script>
     <script>
@@ -81,8 +66,6 @@
 @code {
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
     private string BgBodyClass = string.Empty;
-    private bool IsAuthenticatedd => HttpContext?.User?.Identity?.IsAuthenticated ?? false;
-    private bool IsAuthenticated;
 
     private IComponentRenderMode? RenderModeForPage
     {
@@ -104,7 +87,7 @@
     protected async override Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        IsAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+        bool IsAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
 
         if (!IsAuthenticated && !HttpContext.Request.Path.StartsWithSegments("/Account"))
             NavigationManager.NavigateTo($"Account/Login", forceLoad: true);

@@ -28,19 +28,24 @@
             <DataAnnotationsValidator />
             <MudGrid>
                 <MudItem md="12">
+                    <MudStaticTextField For="@(() => Input.Nom)" @bind-Value="Input.Nom"
+                    Label="Nom" Placeholder="nom"
+                    UserAttributes="@(new() { { "autocomplete", "true" }, { "aria-required", "true" } } )" />
+                </MudItem>
+                <MudItem md="12">
                     <MudStaticTextField For="@(() => Input.Email)" @bind-Value="Input.Email"
-                                        Label="Email" Placeholder="name@example.com"
-                                        UserAttributes="@(new() { { "autocomplete", "true" }, { "aria-required", "true" } } )" />
+                    Label="Email" Placeholder="name@example.com"
+                    UserAttributes="@(new() { { "autocomplete", "true" }, { "aria-required", "true" } } )" />
                 </MudItem>
                 <MudItem md="12">
                     <MudStaticTextField For="@(() => Input.Password)" @bind-Value="Input.Password"
-                                        Label="Mot de passe" InputType="InputType.Password" Placeholder="mot de passe"
-                                        UserAttributes="@(new() { { "autocomplete", "new-password" }, { "aria-required", "true" } } )" />
+                    Label="Mot de passe" InputType="InputType.Password" Placeholder="mot de passe"
+                    UserAttributes="@(new() { { "autocomplete", "new-password" }, { "aria-required", "true" } } )" />
                 </MudItem>
                 <MudItem md="12">
                     <MudStaticTextField For="@(() => Input.ConfirmPassword)" @bind-Value="Input.ConfirmPassword"
-                                        Label="Confirmer le mot de passe" InputType="InputType.Password" Placeholder="confirmer le mot de passe"
-                                        UserAttributes="@(new() { { "autocomplete", "new-password" }, { "aria-required", "true" } } )" />
+                    Label="Confirmer le mot de passe" InputType="InputType.Password" Placeholder="confirmer le mot de passe"
+                    UserAttributes="@(new() { { "autocomplete", "new-password" }, { "aria-required", "true" } } )" />
                 </MudItem>
                 <MudItem md="12">
                     <MudStaticButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" FormAction="FormAction.Submit">S'enregistrer</MudStaticButton>
@@ -51,6 +56,7 @@
 </MudGrid>
 
 @code {
+
     private IEnumerable<IdentityError>? identityErrors;
 
     [SupplyParameterFromForm]
@@ -65,6 +71,7 @@
     {
         var user = CreateUser();
 
+        user.AccountName = Input.Nom;
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -123,19 +130,23 @@
     private sealed class InputModel
     {
         [Required]
+        [Display(Name = "Nom")]
+        public string Nom { get; set; } = "";
+
+        [Required]
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; } = "";
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [StringLength(100, ErrorMessage = "Le {0} doit comporter au moins {2} et au maximum {1} caractères.", MinimumLength = 6)]
         [DataType(DataType.Password)]
-        [Display(Name = "Password")]
+        [Display(Name = "Mot de passe")]
         public string Password { get; set; } = "";
 
         [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Display(Name = "Confirmer mot de passe")]
+        [Compare("Password", ErrorMessage = "Le mot de passe et le mot de passe de confirmation ne correspondent pas.")]
         public string ConfirmPassword { get; set; } = "";
     }
 }

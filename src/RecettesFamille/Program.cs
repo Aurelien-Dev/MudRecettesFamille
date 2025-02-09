@@ -77,6 +77,8 @@ builder.Services.AddServerSideBlazor()
         options.MaximumReceiveMessageSize = 32 * 1024 * 100;
     });
 
+builder.Logging.AddConsole();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

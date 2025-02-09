@@ -9,20 +9,20 @@ public class AiRecipe
     public string[]? Tags { get; set; }
 }
 
-public abstract class Preparation
+public class Preparation
 {
     public int TempsPreparation { get; set; }
     public int TempsCuisson { get; set; }
     public int Portions { get; set; }
 }
 
-public abstract class IngredientList
+public class IngredientList
 {
     public required string NomListe { get; set; }
     public required Ingredient[] Ingredients { get; set; }
 }
 
-public abstract class Ingredient
+public class Ingredient
 {
     public required string Nom { get; set; }
     public required string Quantite { get; set; }

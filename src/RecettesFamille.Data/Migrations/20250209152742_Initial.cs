@@ -26,8 +26,8 @@ namespace RecettesFamille.Data.Migrations
                     OutputToken = table.Column<int>(type: "integer", nullable: true),
                     InputPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     OutputPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    UseCase = table.Column<string>(type: "text", nullable: false),
-                    AiModelName = table.Column<string>(type: "text", nullable: false)
+                    UseCase = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
+                    AiModelName = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -53,6 +53,7 @@ namespace RecettesFamille.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
+                    AccountName = table.Column<string>(type: "text", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -79,7 +80,7 @@ namespace RecettesFamille.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     Prompt = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -93,16 +94,30 @@ namespace RecettesFamille.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    InformationPreparation = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    InformationPreparation = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     PrepTime = table.Column<int>(type: "integer", nullable: false),
                     CookingTime = table.Column<int>(type: "integer", nullable: false),
                     Portion = table.Column<int>(type: "integer", nullable: false),
-                    Tags = table.Column<string>(type: "text", nullable: false)
+                    Tags = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Recipes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TagName = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    IsVisible = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -240,7 +255,7 @@ namespace RecettesFamille.Data.Migrations
                     Order = table.Column<int>(type: "integer", nullable: false),
                     HalfPage = table.Column<bool>(type: "boolean", nullable: false),
                     RecipeId = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -281,8 +296,8 @@ namespace RecettesFamille.Data.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Quantity = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
+                    Quantity = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     IngredientListId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -386,6 +401,9 @@ namespace RecettesFamille.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Prompts");
+
+            migrationBuilder.DropTable(
+                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

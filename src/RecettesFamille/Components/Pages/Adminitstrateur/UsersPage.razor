@@ -42,26 +42,6 @@
     </MudTable>
 </MudPaper>
 
-@* 
-<AuthorizeView>
-    <Authorized>
-        <p>Bienvenue, utilisateur connecté !</p>
-    </Authorized>
-    <NotAuthorized>
-        <p>Veuillez vous connecter.</p>
-    </NotAuthorized>
-</AuthorizeView> *@
-
-<AuthorizeView Roles="Admin">
-    <p>Bienvenue, Administrateur !</p>
-</AuthorizeView>
-<AuthorizeView Roles="Contributor">
-    <p>Bienvenue, Contributor !</p>
-</AuthorizeView>
-<AuthorizeView Roles="Reader">
-    <p>Bienvenue, Reader !</p>
-</AuthorizeView>
-
 
 @code {
     private List<UserViewModel> users { get; set; } = [];
@@ -76,7 +56,7 @@
             bool IsContributor = item.Roles.Contains("Contributor");
             bool isReader = item.Roles.Contains("Reader");
 
-            users.Add(new UserViewModel(item.User.UserName, IsAdmin, IsContributor, isReader));
+            users.Add(new UserViewModel(item.User?.UserName ?? "Unknown", IsAdmin, IsContributor, isReader));
         }
     }
 
