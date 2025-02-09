@@ -9,7 +9,7 @@
 
 <MudGrid>
     <MudItem md="3">
-        <MudStack Class="mt-15">
+        <MudStack>
 
             <MudPaper>
                 <MudText class="mud-list-subheader mud-list-subheader-gutters" Style="font-weight: 500;">Recherche libre</MudText>
@@ -33,74 +33,31 @@
     </MudItem>
     <MudItem md="9">
 
-        <MudToolBar Class="mb-3" Dense="true">
-            <MudSpacer />
-            <MudToggleGroup T="string" Outlined="true" Delimiters="true" Size="Size.Small" Color="Color.Primary"
-                            @bind-Value="_viewMode">
-                <MudToggleItem Value="Icons.Material.Filled.GridView">
-                    <MudIcon Icon="@Icons.Material.Filled.GridView" />
-                </MudToggleItem>
-                <MudToggleItem Value="Icons.Material.Filled.List">
-                    <MudIcon Icon="@Icons.Material.Filled.List" />
-                </MudToggleItem>
-            </MudToggleGroup>
-        </MudToolBar>
+        <MudPaper Elevation="1">
+            <MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
+                      Filter="new Func<RecipeForListDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 200px)">
+                <RowTemplate>
+                    <MudTd>@context.Name</MudTd>
+                    <MudTd>
+                        @foreach (var item in context.Tags.Split("|"))
+                        {
+                            <MudChip T="string" Variant="Variant.Text" Size="Size.Small" Color="Color.Inherit">@item</MudChip>
+                        }
+                    </MudTd>
+                    <MudTd>
+                        <MudIconButton Href="@($"/recette/{context.Id}")" Icon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Primary" Size="Size.Small" />
+                    </MudTd>
+                </RowTemplate>
 
-        @switch (_viewMode)
-        {
-            case Icons.Material.Filled.GridView:
-                <MudGrid Spacing="5" Justify="Justify.Center">
-                    @foreach (var item in Recipes.EmptyIfNull())
-                    {
-                        <MudItem xs="12" sm="4" md="3" xl="2">
-                            <MudCard Style="height:100%">
-                                @* <MudCardMedia Image="images/door.jpg" Height="200" /> *@
-                                <MudCardHeader>
-                                    <CardHeaderContent>
-                                        <MudText Typo="Typo.subtitle2">@item.Name</MudText>
-                                    </CardHeaderContent>
-                                    <CardHeaderActions>
-                                        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" />
-                                    </CardHeaderActions>
-                                </MudCardHeader>
-                                <MudCardContent>
-                                    @* <MudText Typo="Typo.body2">@item.InformationPreparation</MudText> *@
-                                </MudCardContent>
-                                <MudCardActions>
-                                    <MudIconButton Href="@($"/recette/{item.Id}")" Icon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Secondary" Size="Size.Small" />
-                                </MudCardActions>
-                            </MudCard>
-                        </MudItem>
-                    }
-                </MudGrid>
-                break;
-            case Icons.Material.Filled.List:
-                <MudPaper Elevation="1">
-                    <MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
-                              Filter="new Func<RecipeForListDto,bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 200px)">
-                        <RowTemplate>
-                            <MudTd>@context.Name</MudTd>
-                            <MudTd>
-                                @foreach (var item in context.Tags.Split("|"))
-                                {
-                                    <MudChip T="string" Variant="Variant.Text" Size="Size.Small" Color="Color.Inherit">@item</MudChip>
-                                }
-                            </MudTd>
-                            <MudTd>
-                                <MudIconButton Href="@($"/recette/{context.Id}")" Icon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Primary" Size="Size.Small" />
-                            </MudTd>
-                        </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
+                                   RowsPerPageString="Elements par page :"
+                                   AllItemsText="Tout"
+                                   InfoFormat="{first_item}-{last_item} sur {all_items}" />
+                </PagerContent>
+            </MudTable>
+        </MudPaper>
 
-                        <PagerContent>
-                            <MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
-                                           RowsPerPageString="Elements par page :"
-                                           AllItemsText="Tout"
-                                           InfoFormat="{first_item}-{last_item} sur {all_items}" />
-                        </PagerContent>
-                    </MudTable>
-                </MudPaper>
-                break;
-        }
     </MudItem>
 </MudGrid>
 
