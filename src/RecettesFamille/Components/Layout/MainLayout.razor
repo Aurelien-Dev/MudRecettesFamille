@@ -35,7 +35,7 @@
     </MudAppBar>
 
     <MudMainContent Class="mt-12 pa-4">
-        <MudContainer MaxWidth="MaxWidth.Medium">
+        <MudContainer MaxWidth="MaxWidth.Large">
             @Body
         </MudContainer>
     </MudMainContent>
@@ -53,14 +53,17 @@
     [Inject] private ICookieService CookieService { get; set; } = null!;
 
     private bool _isDarkMode;
-    private MudThemeProvider _mudThemeProvider;
+    private MudThemeProvider? _mudThemeProvider;
 
-    protected override async Task OnInitializedAsync()
-    {
-        var cookie = await CookieService.GetAsync("userPreferenceDarkMode");
-        bool? userPreferenceDarkMode = bool.TryParse(cookie?.Value, out var result) && result;
+    protected override async Task OnInitializedAsync()  
+    {  
+       var cookie = await CookieService.GetAsync("userPreferenceDarkMode");  
+       bool userPreferenceDarkMode = bool.TryParse(cookie?.Value, out var result) && result;  
 
-        _isDarkMode = userPreferenceDarkMode ?? await _mudThemeProvider.GetSystemPreference();
+       if (_mudThemeProvider != null)  
+       {  
+           _isDarkMode = userPreferenceDarkMode || await _mudThemeProvider.GetSystemPreference();  
+       }  
     }
 
     private async Task OnToggledChanged(bool isDark)

@@ -21,7 +21,7 @@ public class OpenAiManager(IConfiguration config, IAiRepository aiRepository) : 
 
         GeneratedImage image = await client.GenerateImageAsync(string.Format(promptImageGenerator.Prompt, recipeName), new ImageGenerationOptions()
         {
-            Quality = GeneratedImageQuality.High,
+            Quality = GeneratedImageQuality.Standard,
             Size = GeneratedImageSize.W1792xH1024,
             ResponseFormat = GeneratedImageFormat.Bytes,
             Style = GeneratedImageStyle.Vivid
