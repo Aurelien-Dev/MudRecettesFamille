@@ -132,6 +132,19 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task UpdateFullRecipe(RecipeDto? recipe, CancellationToken cancellationToken = default)
+    {
+        if (recipe is null)
+            return;
+
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var element = await context.Recipes.FindAsync([recipe.Id], cancellationToken);
+
+        mapper.Map(recipe, element);
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
     #endregion
 
 

@@ -143,7 +143,7 @@
 
         Recipe.BlocksInstructions.Reorder();
         Recipe.BlocksInstructions.MoveUp(block);
-        await RecipeRepository.UpdateRecipe(Recipe);
+        await RecipeRepository.UpdateFullRecipe(Recipe);
         StateHasChanged();
     }
 
@@ -154,7 +154,7 @@
 
         Recipe.BlocksInstructions.Reorder();
         Recipe.BlocksInstructions.MoveDown(block);
-        await RecipeRepository.UpdateRecipe(Recipe);
+        await RecipeRepository.UpdateFullRecipe(Recipe);
         StateHasChanged();
     }
     #endregion

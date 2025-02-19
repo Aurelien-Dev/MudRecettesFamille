@@ -23,4 +23,5 @@ public interface IRecipeRepository
     Task<bool> DeleteBlock(int blockId, CancellationToken cancellationToken = default);
 
     Task<bool> DeleteIngredient(int ingredientId, CancellationToken cancellationToken = default);
+    Task UpdateFullRecipe(RecipeDto? recipe, CancellationToken cancellationToken = default);
 }
