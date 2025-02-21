@@ -19,7 +19,7 @@ public class IngredientEntity()
 {
     public int? Id { get; set; }
     public int Order { get; set; }
-    [MaxLength(30)]
+    [MaxLength(50)]
     public string Name { get; set; } = string.Empty;
     [MaxLength(40)]
     public string Quantity { get; set; } = string.Empty;
