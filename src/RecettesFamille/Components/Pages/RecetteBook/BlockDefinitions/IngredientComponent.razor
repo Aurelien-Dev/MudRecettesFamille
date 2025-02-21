@@ -2,10 +2,10 @@
 @using RecettesFamille.Dto.Models.Blocks
 @inherits BaseBlockDefinition<BlockIngredientListDto>
 
-<MudDataGrid @ref="_dataGrid" Items="@Block.Ingredients" T="IngredientDto" Dense="true" Hover="true" Striped="false" Class="mx-3 mb-2 rounded-lg"
-HeaderClass="hide-header" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false"
-EditMode="DataGridEditMode.Form" edit EditTrigger="DataGridEditTrigger.Manual"
-CommittedItemChanges="@CommittedItemChanges">
+<MudDataGrid @ref="_dataGrid" Items="@Block.Ingredients.OrderBy(i => i.Order)" T="IngredientDto" Dense="true" Hover="true" Striped="false" Class="mx-3 mb-2 rounded-lg"
+             HeaderClass="hide-header" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false"
+             EditMode="DataGridEditMode.Form" edit EditTrigger="DataGridEditTrigger.Manual"
+             CommittedItemChanges="@CommittedItemChanges">
     <ToolBarContent>
         @if (EditMode)
         {
@@ -35,7 +35,7 @@ CommittedItemChanges="@CommittedItemChanges">
 
 <style>
     .hide-header {
-    display: none !important;
+        display: none !important;
     }
 
 </style>

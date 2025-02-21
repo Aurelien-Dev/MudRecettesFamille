@@ -56,7 +56,7 @@
 
     private async Task OnBlockDelete()
     {
-        var result = await DialogService.ShowMessageBox("Warning", "Deleting can not be undone!", yesText: "Delete!", cancelText: "Cancel");
+        var result = await DialogService.ShowMessageBox("Avertissement", "La suppression est irréversible !", yesText: "Supprimer !", cancelText: "Annuler");
 
         if (result is null)
             return;

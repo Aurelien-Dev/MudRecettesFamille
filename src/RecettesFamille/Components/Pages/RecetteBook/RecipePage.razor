@@ -73,7 +73,7 @@
 
     public async Task DeleteRecipe()
     {
-        var result = await DialogService.ShowMessageBox("Warning", "Deleting can not be undone!", yesText: "Delete!", cancelText: "Cancel");
+        var result = await DialogService.ShowMessageBox("Avertissement", "Supprimer cette recette, c'est comme jeter une pâte à pain levée… Impossible de revenir en arrière !", yesText: "Tout mettre à la poubelle !", cancelText: "Garder la recette");
 
         if (result is null || !result.Value)
             return;
