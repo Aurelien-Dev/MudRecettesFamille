@@ -21,7 +21,7 @@ public class IngredientEntity()
     public int Order { get; set; }
     [MaxLength(30)]
     public string Name { get; set; } = string.Empty;
-    [MaxLength(20)]
+    [MaxLength(40)]
     public string Quantity { get; set; } = string.Empty;
     public int IngredientListId { get; set; }
 
