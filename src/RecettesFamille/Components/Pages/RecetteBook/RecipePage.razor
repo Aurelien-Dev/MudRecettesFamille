@@ -16,7 +16,17 @@
     @if (EditorMode)
     {
         <MudTextField @bind-Value="Recipe.Name" Typo="Typo.h3" Style="font-weight: bold;" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
-        @* <MudTextField @bind-Value="Recipe.InformationPreparation" Typo="Typo.subtitle1" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" /> *@
+        @if (!string.IsNullOrEmpty(Recipe.Tags))
+        {
+            <MudStack Row="true" Justify="Justify.Center">
+                <MudChipSet T="string" AllClosable="true" CheckMark="true" OnClose="@OnChipClosed">
+                    @foreach (var item in Recipe.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        <MudChip T="string" Variant="Variant.Text" Color="Color.Info" Value="@item">@item</MudChip>
+                    }
+                </MudChipSet>
+            </MudStack>
+        }
     }
     else
     {
@@ -45,7 +55,7 @@
 
         @if (EditorMode)
         {
-            <ToolsComponent PrecedentIndex="@(Recipe.BlocksInstructions.Count -1)" AddBlockCallback="AddNewBlock" />
+            <ToolsComponent PrecedentIndex="@(Recipe.BlocksInstructions.Count - 1)" AddBlockCallback="AddNewBlock" />
         }
     </MudGrid>
 }
@@ -95,6 +105,16 @@
 
         StateHasChanged();
     }
+
+    private async Task OnChipClosed(MudChip<string> chip)
+    {
+        var tag = chip.Value;
+        var tags = Recipe!.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries);
+
+        Recipe.Tags = string.Join("|", tags.Where(c => c != tag));
+        var success = await RecipeRepository.UpdateRecipe(Recipe);
+    }
+
 
     #region Block edition
     private Task OnBlockHasChanged()
