@@ -60,4 +60,22 @@ public class TagRepository(IMapper mapper, IDbContextFactory<ApplicationDbContex
 
         return result > 0;
     }
+
+    public async Task<bool> DeleteTagOnRecipe(TagDto tag, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var recipes = await context.Recipes.Where(c => c.Tags.Contains(tag.TagName)).ToListAsync(cancellationToken);
+
+        foreach (var recipe in recipes)
+        {
+            var tags = recipe.Tags.Split("|");
+            recipe.Tags = string.Join("|", tags.Where(c => c != tag.TagName));
+        }
+        var tagEntity = await context.Tags.Where(c => c.TagName == tag.TagName).FirstAsync(cancellationToken);
+        context.Tags.Remove(tagEntity);
+
+        int result = await context.SaveChangesAsync(cancellationToken);
+        return result > 0;
+    }
 }

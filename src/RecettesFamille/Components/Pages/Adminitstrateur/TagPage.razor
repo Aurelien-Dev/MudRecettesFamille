@@ -8,15 +8,22 @@
 @using RecettesFamille.Extensions
 @layout AdminLayout
 
+@inject ITagRepository TagRepository
+@inject IRecipeRepository RecipeRepository
+@inject IDialogService DialogService
 
 <MudList T="TagDto" SelectionMode="SelectionMode.MultiSelection" Dense="true">
     <MudListSubheader>
-        Tags :
+        Tags à afficher dans la bar de recherche :
     </MudListSubheader>
     @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
     {
-        <MudCheckBox T="bool" Value="@item.IsVisible" ValueChanged="@(e => Callback(e, item))"
-                     Size="Size.Small" Color="Color.Secondary">@item.TagName</MudCheckBox>
+        <MudStack Row="true">
+            <MudCheckBox T="bool" Value="@item.IsVisible" ValueChanged="@(e => Callback(e, item))"
+                         Size="Size.Small" Color="Color.Secondary">@item.TagName</MudCheckBox>
+
+            <MudIconButton Color="Color.Error" Icon="@Icons.Material.Filled.DeleteSweep" OnClick="@(async () => await DeleteTagOnRecipe(item))" />
+        </MudStack>
     }
 </MudList>
 
@@ -24,9 +31,6 @@
     <MudButton OnClick="PreloadTags">PreloadTags</MudButton>
 </AuthorizeView>
 @code {
-    [Inject] public ITagRepository TagRepository { get; set; } = null!;
-    [Inject] public IRecipeRepository RecipeRepository { get; set; } = null!;
-
     private List<TagDto>? Tags { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -49,6 +53,21 @@
 
         if (success)
             Tags = await TagRepository.GetAll();
+    }
+
+    public async Task DeleteTagOnRecipe(TagDto tag)
+    {
+        var result = await DialogService.ShowMessageBox("Avertissement", "La suppression supprimera le tag sur la recettes aussi et est irréversible !", yesText: "Supprimer !", cancelText: "Annuler");
+
+        if (result is null)
+            return;
+
+        var success = await TagRepository.DeleteTagOnRecipe(tag);
+
+        if (success)
+        {
+            Tags?.Remove(tag);
+        }
     }
 
     private async Task Callback(bool b, TagDto item)

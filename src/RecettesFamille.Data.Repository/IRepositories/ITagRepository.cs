@@ -9,4 +9,5 @@ public interface ITagRepository
     Task<TagDto> AddTag(TagDto tag, CancellationToken cancellationToken = default);
     Task<bool> AddTag(TagDto[] tags, CancellationToken cancellationToken = default);
     Task UpdateTag(TagDto tag, CancellationToken cancellationToken = default);
+    Task<bool> DeleteTagOnRecipe(TagDto tag, CancellationToken cancellationToken = default);
 }
