@@ -23,8 +23,10 @@
         <MudButton Href="/" Style="font-weight: bold;" Class="mud-typography mud-typography-body2" Color="Color.Inherit">Recettes famille</MudButton>
         <MudSpacer />
 
-        <MudInput T="string" Placeholder="Demander une recette" Class="mud-button-text mud-button-text-inherit ms-4" Margin="Margin.Dense" />
-        <MudSpacer />
+        <AuthorizeView Roles="Admin">
+            <MudInput T="string" Placeholder="Demander une recette" Class="mud-button-text mud-button-text-inherit ms-4" Margin="Margin.Dense" />
+            <MudSpacer />
+        </AuthorizeView>
 
         <AuthorizeView Roles="Admin, Contributor">
 
