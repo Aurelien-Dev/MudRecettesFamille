@@ -10,6 +10,7 @@
             {
                 Recipe.PrepTime > 0 ? $"préparation : {Recipe.PrepTime} min" : null,
                 Recipe.CookingTime > 0 ? $"temps de cuisson: {Recipe.CookingTime} min" : null,
+                Recipe.RestTime > 0 ? $"temps de pause: {Recipe.RestTime} min" : null,
                 Recipe.Portion > 0 ? $"pour {Recipe.Portion} portions" : null
             };
 

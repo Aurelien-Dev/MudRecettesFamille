@@ -13,6 +13,7 @@ public class Preparation
 {
     public int TempsPreparation { get; set; }
     public int TempsCuisson { get; set; }
+    public int TempsPause { get; set; }
     public int Portions { get; set; }
 }
 

@@ -15,6 +15,7 @@ namespace RecettesFamille.Managers.Mappers
                 Name = gptRecipe.Nom,
                 PrepTime = gptRecipe.Preparation.TempsPreparation,
                 CookingTime = gptRecipe.Preparation.TempsCuisson,
+                RestTime = gptRecipe.Preparation.TempsPause,
                 Portion = gptRecipe.Preparation.Portions,
                 Tags = gptRecipe.Tags != null ? string.Join("|", gptRecipe.Tags) : string.Empty,
                 BlocksInstructions = new List<BlockBaseDto>()
