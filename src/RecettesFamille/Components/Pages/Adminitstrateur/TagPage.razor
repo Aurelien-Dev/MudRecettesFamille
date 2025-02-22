@@ -13,15 +13,16 @@
     <MudListSubheader>
         Tags :
     </MudListSubheader>
-    @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.Id))
+    @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
     {
         <MudCheckBox T="bool" Value="@item.IsVisible" ValueChanged="@(e => Callback(e, item))"
                      Size="Size.Small" Color="Color.Secondary">@item.TagName</MudCheckBox>
     }
 </MudList>
 
-<MudButton OnClick="PreloadTags">PreloadTags</MudButton>
-
+<AuthorizeView Roles="Admin">
+    <MudButton OnClick="PreloadTags">PreloadTags</MudButton>
+</AuthorizeView>
 @code {
     [Inject] public ITagRepository TagRepository { get; set; } = null!;
     [Inject] public IRecipeRepository RecipeRepository { get; set; } = null!;
