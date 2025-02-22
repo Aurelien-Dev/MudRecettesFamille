@@ -12,6 +12,7 @@ public class RecipeEntity
     public string InformationPreparation { get; set; } = string.Empty;
     public int PrepTime { get; set; }
     public int CookingTime { get; set; }
+    public int RestTime { get; set; }
     public int Portion { get; set; }
  
     [MaxLength(200)]
