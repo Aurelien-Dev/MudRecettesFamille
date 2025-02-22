@@ -10,9 +10,9 @@
             {
                 Recipe.PrepTime > 0 ? $"préparation : {Recipe.PrepTime} min" : null,
                 Recipe.CookingTime > 0 ? $"temps de cuisson: {Recipe.CookingTime} min" : null,
-                Recipe.RestTime > 0 ? $"temps de pause: {Recipe.RestTime} min" : null,
+                Recipe.RestTime > 0 ? $"temps de pause: {(Recipe.RestTime > 60 ? $"{Recipe.RestTime / 60} h" : $"{Recipe.RestTime} min")}" : null,
                 Recipe.Portion > 0 ? $"pour {Recipe.Portion} portions" : null
-            };
+                };
 
             var result = string.Join(", ", instructions.Where(e => !string.IsNullOrEmpty(e))).ToLower();
             result = string.IsNullOrEmpty(result) ? result : char.ToUpper(result[0]) + result[1..];
@@ -24,7 +24,7 @@
     @if (!string.IsNullOrEmpty(Recipe.Tags))
     {
         <MudStack Row="true" Justify="Justify.Center">
-            @foreach (var item in Recipe.Tags.Split("|"))
+            @foreach (var item in Recipe.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries))
             {
                 <MudChip T="string" Variant="Variant.Text" Color="Color.Info">@item</MudChip>
             }
