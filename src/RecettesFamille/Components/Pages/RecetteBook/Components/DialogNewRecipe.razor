@@ -1,0 +1,38 @@
+﻿@using System.ComponentModel.DataAnnotations
+
+
+<MudForm @ref="form">
+    <MudDialog>
+        <TitleContent>
+            Nouvelle recette
+        </TitleContent>
+        <DialogContent>
+            <MudTextField T="string" Label="Nom de la recette" Required="true" RequiredError="Nom de la recette"
+                          @bind-Value="recipeName"
+            Validation="@(new RequiredAttribute() { ErrorMessage = "Le nom de la recette doit être renseignée." })" />
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+        </DialogActions>
+    </MudDialog>
+</MudForm>
+
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    MudForm form = default!;
+    string recipeName = string.Empty;
+
+    private void Submit()
+    {
+        form.Validate();
+        if (form.IsValid)
+        {
+            MudDialog.Close(DialogResult.Ok(recipeName));
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

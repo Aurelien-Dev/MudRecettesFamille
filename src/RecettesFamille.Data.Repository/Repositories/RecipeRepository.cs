@@ -97,10 +97,10 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
     #region Recipe
 
-    public async Task<RecipeDto> AddRecipe(RecipeDto block, CancellationToken cancellationToken = default)
+    public async Task<RecipeDto> AddRecipe(RecipeDto recipe, CancellationToken cancellationToken = default)
     {
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var blockEntity = mapper.Map<RecipeEntity>(block);
+        var blockEntity = mapper.Map<RecipeEntity>(recipe);
 
         await context.Set<RecipeEntity>().AddAsync(blockEntity, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
@@ -119,17 +119,18 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         }
     }
 
-    public async Task UpdateRecipe(RecipeDto? recipe, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdateRecipe(RecipeDto? recipe, CancellationToken cancellationToken = default)
     {
         if (recipe is null)
-            return;
+            return false    ;
 
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var element = await context.Recipes.FindAsync([recipe.Id], cancellationToken);
 
         mapper.Map(recipe, element, opt => { opt.AfterMap((src, dest) => dest!.BlocksInstructions = null!); });
 
-        await context.SaveChangesAsync(cancellationToken);
+        var result = await context.SaveChangesAsync(cancellationToken);
+        return result > 0;
     }
 
     public async Task UpdateFullRecipe(RecipeDto? recipe, CancellationToken cancellationToken = default)

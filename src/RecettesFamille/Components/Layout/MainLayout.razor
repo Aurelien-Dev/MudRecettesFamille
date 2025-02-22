@@ -1,7 +1,16 @@
 ﻿@using BitzArt.Blazor.Cookies
 @using Blazored.LocalStorage
+@using RecettesFamille.Components.Pages.RecetteBook.Components
+@using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Dto.Models
 @using RecettesFamille.Managers
 @inherits LayoutComponentBase
+
+@inject IDialogService DialogService
+@inject ICookieService CookieService
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IRecipeRepository RecipeRepository
+@inject NavigationManager NavigationManager
 
 <MudThemeProvider @ref="_mudThemeProvider" IsDarkMode="_isDarkMode" Theme="CustomThemeManager.Customtheme" />
 <MudDialogProvider />
@@ -19,6 +28,7 @@
 
         <AuthorizeView Roles="Admin, Contributor">
 
+            <MudIconButton OnClick="OpenNewRecipeDialog" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.AddBox" />
             <MudIconButton Href="gpt/import" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.UploadFile" />
             <MudToggleIconButton ToggledChanged="OnToggledChanged"
                                  Icon="@Icons.Material.Outlined.DarkMode"
@@ -49,21 +59,33 @@
 </div>
 
 @code {
-    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
-    [Inject] private ICookieService CookieService { get; set; } = null!;
-
     private bool _isDarkMode;
     private MudThemeProvider? _mudThemeProvider;
 
-    protected override async Task OnInitializedAsync()  
-    {  
-       var cookie = await CookieService.GetAsync("userPreferenceDarkMode");  
-       bool userPreferenceDarkMode = bool.TryParse(cookie?.Value, out var result) && result;  
+    protected override async Task OnInitializedAsync()
+    {
+        var cookie = await CookieService.GetAsync("userPreferenceDarkMode");
+        bool userPreferenceDarkMode = bool.TryParse(cookie?.Value, out var result) && result;
 
-       if (_mudThemeProvider != null)  
-       {  
-           _isDarkMode = userPreferenceDarkMode && await _mudThemeProvider.GetSystemPreference();  
-       }  
+        if (_mudThemeProvider != null)
+        {
+            _isDarkMode = userPreferenceDarkMode && await _mudThemeProvider.GetSystemPreference();
+        }
+    }
+
+    private async Task OpenNewRecipeDialog()
+    {
+        var dialog = await DialogService.ShowAsync<DialogNewRecipe>();
+        var result = await dialog.Result;
+
+        if (result != null && result.Canceled)
+        {
+            return;
+        }
+
+        var recipe = await RecipeRepository.AddRecipe(new RecipeDto() { Name = result.Data.ToString() });
+
+        NavigationManager.NavigateTo($"recette/{recipe.Id}");
     }
 
     private async Task OnToggledChanged(bool isDark)

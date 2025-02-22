@@ -16,7 +16,7 @@ public interface IRecipeRepository
 
     Task DeleteRecipe(int recipeId, CancellationToken cancellationToken = default);
     Task<RecipeDto> AddRecipe(RecipeDto block, CancellationToken cancellationToken = default);
-    Task UpdateRecipe(RecipeDto? recipe, CancellationToken cancellationToken = default);
+    Task<bool> UpdateRecipe(RecipeDto? recipe, CancellationToken cancellationToken = default);
 
     Task<BlockBaseDto> AddBlock(BlockBaseDto block, CancellationToken cancellationToken = default);
     Task UpdateBlock(BlockBaseDto? block, CancellationToken cancellationToken = default);
