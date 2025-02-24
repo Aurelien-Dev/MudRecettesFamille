@@ -1,5 +1,6 @@
 ﻿@page "/"
 @attribute [Authorize]
+@implements IBrowserViewportObserver
 
 @using Microsoft.AspNetCore.Authorization
 @using RecettesFamille.Data.Repository.IRepositories
@@ -17,20 +18,18 @@
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mx-5 mb-2"></MudTextField>
             </MudPaper>
 
-            <MudHidden Breakpoint="Breakpoint.Xs">
-                <MudPaper>
-                    <MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true"
-                             SelectedValuesChanged="OnSelectedValuesChanged">
-                        <MudListSubheader>
-                            Filtre par catégories
-                        </MudListSubheader>
-                        @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
-                        {
-                            <MudListItem Dense="true" Text="@item.TagName" />
-                        }
-                    </MudList>
-                </MudPaper>
-            </MudHidden>
+            <MudPaper>
+                <MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true" SelectedValuesChanged="OnSelectedValuesChanged">
+                    <MudListItem Icon="@Icons.Material.Filled.FilterList" Text="Filtre par catégories" Expanded="@(breakpoint == Breakpoint.Sm)">
+                        <NestedList>
+                            @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
+                            {
+                                <MudListItem Dense="true" Text="@item.TagName" />
+                            }
+                        </NestedList>
+                    </MudListItem>
+                </MudList>
+            </MudPaper>
 
         </MudStack>
     </MudItem>
@@ -56,7 +55,7 @@
                 </RowTemplate>
 
                 <PagerContent>
-                    <MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
+                    <MudTablePager PageSizeOptions="new int[] { 50, 100, 150, 200, int.MaxValue }"
                                    RowsPerPageString="Elements par page :"
                                    AllItemsText="Tout"
                                    InfoFormat="{first_item}-{last_item} sur {all_items}" />
@@ -71,9 +70,14 @@
     [Inject] NavigationManager NavigationManager { get; set; } = null!;
     [Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
     [Inject] ITagRepository TagRepository { get; set; } = null!;
+    [Inject] IBrowserViewportService BrowserViewportService { get; set; } = null!;
 
     List<RecipeForListDto> Recipes { get; set; } = null!;
     List<TagDto> Tags { get; set; } = null!;
+    Breakpoint breakpoint { get; set; }
+
+    public Guid Id => throw new NotImplementedException();
+
     string _searchString = string.Empty;
 
     protected override async Task OnParametersSetAsync()
@@ -82,6 +86,8 @@
 
         Recipes = result.OrderBy(c => c.Name).ToList();
         Tags = await TagRepository.GetAllVisible();
+
+        breakpoint = await BrowserViewportService.GetCurrentBreakpointAsync();
     }
 
     public async Task OnSelectedValuesChanged(IReadOnlyCollection<string>? strings)
@@ -90,6 +96,11 @@
     }
 
     private bool FilterFunc1(RecipeForListDto element) => FilterFunc(element, _searchString);
+
+    public Task NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
+    {
+        return Task.CompletedTask;
+    }
 
     private static bool FilterFunc(RecipeForListDto element, string searchString)
     {
