@@ -8,7 +8,7 @@
 @using RecettesFamille.Extensions
 
 <MudGrid>
-    <MudItem md="3">
+    <MudItem md="3" xs="12">
         <MudStack>
 
             <MudPaper>
@@ -16,25 +16,27 @@
                 <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Clearable="true"
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mx-5 mb-2"></MudTextField>
             </MudPaper>
-            <MudPaper>
-                <MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true"
-                         SelectedValuesChanged="OnSelectedValuesChanged">
-                    <MudListSubheader>
-                        Filtre par catégories
-                    </MudListSubheader>
-                    @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
-                    {
-                        <MudListItem Dense="true" Text="@item.TagName" />
-                    }
-                </MudList>
-            </MudPaper>
+
+            <MudHidden Breakpoint="Breakpoint.Sm">
+                <MudPaper>
+                    <MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true"
+                             SelectedValuesChanged="OnSelectedValuesChanged">
+                        <MudListSubheader>
+                            Filtre par catégories
+                        </MudListSubheader>
+                        @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
+                        {
+                            <MudListItem Dense="true" Text="@item.TagName" />
+                        }
+                    </MudList>
+                </MudPaper>
+            </MudHidden>
 
         </MudStack>
     </MudItem>
-    <MudItem md="9">
-
+    <MudItem md="9" xs="12">
         <MudPaper Elevation="1">
-            <MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
+            <MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.None" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
                       Filter="new Func<RecipeForListDto, bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 130px)">
                 <RowTemplate>
                     <MudTd>@context.Name</MudTd>
