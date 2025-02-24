@@ -23,19 +23,19 @@
         <MudButton Href="/" Style="font-weight: bold;" Class="mud-typography mud-typography-body2" Color="Color.Inherit">Recettes famille</MudButton>
         <MudSpacer />
 
-        <AuthorizeView Roles="Admin">
+        @* <AuthorizeView Roles="Admin">
             <MudInput T="string" Placeholder="Demander une recette" Class="mud-button-text mud-button-text-inherit ms-4" Margin="Margin.Dense" />
             <MudSpacer />
-        </AuthorizeView>
+        </AuthorizeView> *@
 
         <AuthorizeView Roles="Admin, Contributor">
 
             <MudIconButton OnClick="OpenNewRecipeDialog" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.AddBox" />
             <MudIconButton Href="gpt/import" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.UploadFile" />
-            <MudToggleIconButton ToggledChanged="OnToggledChanged"
+            @* <MudToggleIconButton ToggledChanged="OnToggledChanged"
                                  Icon="@Icons.Material.Outlined.DarkMode"
                                  ToggledIcon="@Icons.Material.Filled.LightMode"
-                                 ToggledColor="@Color.Error" Color="Color.Inherit" />
+                                 ToggledColor="@Color.Error" Color="Color.Inherit" /> *@
         </AuthorizeView>
 
         <AuthorizeView Roles="Admin, Contributor">
