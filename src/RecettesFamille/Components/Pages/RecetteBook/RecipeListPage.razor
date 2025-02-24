@@ -39,7 +39,11 @@
             <MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.None" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
                       Filter="new Func<RecipeForListDto, bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 130px)">
                 <RowTemplate>
-                    <MudTd>@context.Name</MudTd>
+                    <MudTd>
+                        <MudText Typo="Typo.subtitle2">
+                            @context.Name
+                        </MudText>
+                    </MudTd>
                     <MudTd>
                         @foreach (var item in context.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries))
                         {
