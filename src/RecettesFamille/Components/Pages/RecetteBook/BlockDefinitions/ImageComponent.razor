@@ -53,7 +53,7 @@ else
 
 @code {
     [Inject] IDialogService DialogService { get; set; } = null!;
-    [Inject(Key = "OpenAi")] IIaManagerBase IaManager { get; set; } = null!;
+    [Inject] IAiManager IaManager { get; set; } = null!;
     [Inject] ErrorManager ErrorManager { get; set; } = null!;
 
     private MudFileUpload<IBrowserFile> MudFileUpload { get; set; } = null!;

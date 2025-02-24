@@ -45,7 +45,7 @@ builder.Services.AddScoped<EmailManager>();
 
 builder.Services.AddRepository();
 
-builder.Services.AddManagers();
+builder.Services.AddManagers(builder.Configuration);
 
 builder.Services.AddAuthentication(options =>
     {
