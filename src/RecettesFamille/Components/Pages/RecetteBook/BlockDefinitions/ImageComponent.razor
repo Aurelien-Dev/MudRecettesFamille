@@ -84,6 +84,12 @@ else
 
     private async Task OpenCropDialog()
     {
+        if (string.IsNullOrEmpty(Block.Image))
+        {
+            ErrorManager.DisplayError("No image to crop.");
+            return;
+        }
+
         var parameters = new DialogParameters<CropDialog>
         {
             { x => x.ImageSource, Block.Image }
@@ -96,7 +102,7 @@ else
         if (result is null || result.Canceled)
             return;
 
-        Block.Image = result.Data.ToString();
+        Block.Image = result.Data?.ToString() ?? string.Empty;
         OnBlockUpdated?.Invoke(Block);
         StateHasChanged();
     }

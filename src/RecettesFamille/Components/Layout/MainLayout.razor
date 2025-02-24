@@ -80,14 +80,17 @@
         var dialog = await DialogService.ShowAsync<DialogNewRecipe>();
         var result = await dialog.Result;
 
-        if (result != null && result.Canceled)
+        if (result?.Canceled != false || result.Data == null)
         {
             return;
         }
 
         var recipe = await RecipeRepository.AddRecipe(new RecipeDto() { Name = result.Data.ToString() });
 
-        NavigationManager.NavigateTo($"recette/{recipe.Id}");
+        if (recipe != null)
+        {
+            NavigationManager.NavigateTo($"recette/{recipe.Id}");
+        }
     }
 
     private async Task OnToggledChanged(bool isDark)
