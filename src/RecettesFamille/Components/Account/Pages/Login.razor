@@ -12,10 +12,10 @@
 <PageTitle>Log in</PageTitle>
 
 <MudGrid Justify="Justify.Center">
-    <MudItem md="12" Class="pa-0 d-flex align-center justify-center mud-width-full">
-        <MudImage Src="logo.png" Width="400" />
+    <MudItem xs="12" Class="pa-0 d-flex align-center justify-center mud-width-full">
+        <MudImage Src="logo.png" Style="width:100%" />
     </MudItem>
-    <MudItem md="12">
+    <MudItem xs="12">
         <StatusMessage Message="@errorMessage" />
 
         <MudText Typo="Typo.h4" GutterBottom="true">Connexion</MudText>
@@ -23,39 +23,33 @@
             <DataAnnotationsValidator />
 
             <MudGrid>
-                <MudItem md="12">
+                <MudItem xs="12">
                     <MudStaticTextField For="@(() => Input.Email)" @bind-Value="Input.Email"
                                         Label="Email" Placeholder="name@example.com"
                                         UserAttributes="@(new() { { "autocomplete", "true" }, { "aria-required", "true" } } )" />
                 </MudItem>
-                <MudItem md="12">
+                <MudItem xs="12">
                     <MudStaticTextField For="@(() => Input.Password)" @bind-Value="Input.Password"
                                         Label="Mot de passe" InputType="InputType.Password" Placeholder="mot de passe"
                                         UserAttributes="@(new() { { "autocomplete", "current-password" }, { "aria-required", "true" } } )" />
                 </MudItem>
-                <MudItem md="12">
+                <MudItem xs="12">
                     <MudStaticCheckBox For="@(() => Input.RememberMe)" @bind-Value="Input.RememberMe">Ce souvenir de moi</MudStaticCheckBox>
                 </MudItem>
-                <MudItem md="12">
+                <MudItem xs="12">
                     <MudStaticButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" FormAction="FormAction.Submit">Connexion</MudStaticButton>
                 </MudItem>
             </MudGrid>
         </EditForm>
 
         <MudGrid Class="mt-4">
-            <MudItem md="12">
+            <MudItem xs="12">
                 <MudLink Href="Account/ForgotPassword">Mot de passe oublié ?</MudLink><br />
                 <MudLink Href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">S'enregistrer en tant que nouvel utilisateur</MudLink><br />
-                @* <MudLink Href="Account/ResendEmailConfirmation">Renvoyer l'e-mail de confirmation</MudLink> *@
             </MudItem>
         </MudGrid>
 
     </MudItem>
-    @*     <MudItem md="6">
-        <MudText GutterBottom="true" Typo="Typo.body1">Use another service to log in.</MudText>
-
-        <ExternalLoginPicker />
-    </MudItem> *@
 </MudGrid>
 
 @code {
