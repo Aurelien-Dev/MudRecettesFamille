@@ -13,7 +13,7 @@
 
             <MudPaper>
                 <MudText class="mud-list-subheader mud-list-subheader-gutters" Style="font-weight: 500;">Recherche libre</MudText>
-                <MudTextField @bind-Value="_searchString1" Placeholder="Search" Adornment="Adornment.Start" Clearable="true"
+                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Clearable="true"
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mx-5 mb-2"></MudTextField>
             </MudPaper>
             <MudPaper>
@@ -68,8 +68,7 @@
 
     List<RecipeForListDto> Recipes { get; set; } = null!;
     List<TagDto> Tags { get; set; } = null!;
-    string _viewMode = Icons.Material.Filled.List;
-    string _searchString1 = string.Empty;
+    string _searchString = string.Empty;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -84,7 +83,7 @@
         Recipes = (await RecipeRepository.GetAllLightRecipe(strings!.ToArray())).OrderBy(c => c.Name).ToList();
     }
 
-    private bool FilterFunc1(RecipeForListDto element) => FilterFunc(element, _searchString1);
+    private bool FilterFunc1(RecipeForListDto element) => FilterFunc(element, _searchString);
 
     private static bool FilterFunc(RecipeForListDto element, string searchString)
     {
