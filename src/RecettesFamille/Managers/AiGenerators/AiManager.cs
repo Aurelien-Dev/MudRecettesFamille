@@ -62,9 +62,9 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
                 throw new ArgumentException("Invalid AI client type", nameof(aiClientTypeEnum));
         }
 
-        var promptRecipeConvert = await aiRepository.GetPrompt("RecipeConvertPrompt", cancellationToken);
+        var promptDto = await aiRepository.GetPrompt("RecipeConvertPrompt", cancellationToken);
+        var promptRecipeConvert = promptDto.Prompt;
 
-        var newPromptRecipeConvert = promptRecipeConvert.Prompt;
         var ask = $@"Voici une recette à convertir en JSON en respectant les instructions du prompt :
 
         === Début de la recette ===
@@ -75,7 +75,7 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
 
         var messages = new ChatMessage[]
         {
-            new (ChatRole.System, newPromptRecipeConvert),
+            new (ChatRole.System, promptRecipeConvert),
             new (ChatRole.User, ask)
         };
 
@@ -118,7 +118,7 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
     /// <exception cref="InvalidOperationException">Thrown when token counts are null.</exception>
     private async Task ReportChatConsumption(ChatResponse completion, AiClientTypeEnum aiClientTypeEnum)
     {
-        if (completion?.Usage?.InputTokenCount == null || completion?.Usage?.OutputTokenCount == null)
+        if (completion?.Usage?.InputTokenCount == null || completion.Usage.OutputTokenCount == null)
         {
             throw new InvalidOperationException("Token counts are null");
         }
