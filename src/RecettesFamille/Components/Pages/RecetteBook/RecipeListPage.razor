@@ -20,7 +20,7 @@
 
             <MudPaper>
                 <MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true" SelectedValuesChanged="OnSelectedValuesChanged">
-                    <MudListItem Icon="@Icons.Material.Filled.FilterList" Text="Filtre par catégories" Expanded="@(breakpoint == Breakpoint.Sm)">
+                    <MudListItem Icon="@Icons.Material.Filled.FilterList" Text="Filtre par catégories" Expanded="@(breakpoint != Breakpoint.Sm)">
                         <NestedList>
                             @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
                             {
@@ -109,5 +109,4 @@
         var comparer = $"{element.Name} - {element.Tags}";
         return comparer.Contains(searchString, StringComparison.OrdinalIgnoreCase);
     }
-
 }
