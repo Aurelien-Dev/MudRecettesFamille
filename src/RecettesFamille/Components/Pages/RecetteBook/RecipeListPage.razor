@@ -20,7 +20,7 @@
 
             <MudPaper>
                 <MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true" SelectedValuesChanged="OnSelectedValuesChanged">
-                    <MudListItem Icon="@Icons.Material.Filled.FilterList" Text="Filtre par catégories" Expanded="@(breakpoint != Breakpoint.Sm)">
+                    <MudListItem Icon="@Icons.Material.Filled.FilterList" Text="Filtre par catégories" Expanded="@(breakpoint > Breakpoint.Sm)">
                         <NestedList>
                             @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
                             {
@@ -36,7 +36,7 @@
     <MudItem md="9" xs="12">
         <MudPaper Elevation="1">
             <MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.None" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
-                      Filter="new Func<RecipeForListDto, bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 130px)">
+            Filter="new Func<RecipeForListDto, bool>(FilterFunc1)" Dense="true" Height="calc(100vh - 135px)">
                 <RowTemplate>
                     <MudTd>
                         <MudText Typo="Typo.subtitle2">
@@ -56,9 +56,9 @@
 
                 <PagerContent>
                     <MudTablePager PageSizeOptions="new int[] { 50, 100, 150, 200, int.MaxValue }"
-                                   RowsPerPageString="Elements par page :"
-                                   AllItemsText="Tout"
-                                   InfoFormat="{first_item}-{last_item} sur {all_items}" />
+                    RowsPerPageString="Elements par page :"
+                    AllItemsText="Tout"
+                    InfoFormat="{first_item}-{last_item} sur {all_items}" />
                 </PagerContent>
             </MudTable>
         </MudPaper>
