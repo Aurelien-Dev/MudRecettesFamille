@@ -19,7 +19,7 @@
         }
     </ToolBarContent>
     <Columns>
-        @* <PropertyColumn Property="x=>x.Id" Hidden="true" InitialDirection="SortDirection.Ascending" Editable="false" HideSmall="true" /> *@
+        @* <PropertyColumn Property="x => x.Order" Hidden="false" InitialDirection="SortDirection.Ascending" Editable="false" HideSmall="true" /> *@
         <PropertyColumn Property="x => x.Name" Editable="true" />
         <PropertyColumn Property="x => x.Quantity" Editable="true" Required="false" />
         <TemplateColumn Hidden="!EditMode" CellClass="d-flex justify-end">
@@ -27,6 +27,9 @@
                 <MudStack Row="true" Spacing="0" AlignItems="AlignItems.End">
                     <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
                     <MudToggleIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Delete" ToggledIcon="@Icons.Material.Filled.Check" Color="Color.Error" ToggledColor="Color.Warning" ToggledChanged="@(async (b) => await ToggleChanged(b, context.Item))" />
+
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.ArrowDropUp" OnClick="@(() => MoveUp(context.Item))" />
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.ArrowDropDown" OnClick="@(() => MoveDown(context.Item))" />
                 </MudStack>
             </CellTemplate>
         </TemplateColumn>
@@ -68,15 +71,46 @@
         await _dataGrid.SetEditingItemAsync(new IngredientDto());
     }
 
-    private void CommittedItemChanges(IngredientDto item)
+    private async Task CommittedItemChanges(IngredientDto item)
     {
         if (!Block.Id.HasValue)
             return;
 
         // Cas d'un nouvel item
         if (!item.Id.HasValue)
+        {
+            item.Order = Block.Ingredients.Select(c => c.Order).DefaultIfEmpty(0).Max() + IngredientComponentService.Step;
             Block.Ingredients.Add(item);
-
-        OnBlockUpdated?.Invoke(Block);
+            OnBlockUpdated?.Invoke(Block);
+        }
+        else
+        {
+            await RecipeRepository.UpdateIngredient(item);
+        }
     }
+
+    private async Task MoveUp(IngredientDto ingredient)
+    {
+        bool shouldRestabilize = IngredientComponentService.ShouldRestabilize(Block.Ingredients);
+
+        IngredientComponentService.MoveUp(Block.Ingredients, ingredient.Id!.Value);
+
+        if (shouldRestabilize)
+            OnBlockUpdated?.Invoke(Block);
+        else
+            await RecipeRepository.UpdateIngredient(ingredient);
+    }
+
+    private async Task MoveDown(IngredientDto ingredient)
+    {
+        bool shouldRestabilize = IngredientComponentService.ShouldRestabilize(Block.Ingredients);
+
+        IngredientComponentService.MoveDown(Block.Ingredients, ingredient.Id!.Value);
+
+        if (shouldRestabilize)
+            OnBlockUpdated?.Invoke(Block);
+        else
+            await RecipeRepository.UpdateIngredient(ingredient);
+    }
+
 }

@@ -174,7 +174,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
         mapper.Map(block, element, opts =>
         {
-            opts.AfterMap((src, dest) => dest!.Recipe = null!); // Conservation de la référence
+            opts.AfterMap((src, dest) => dest!.Recipe = null!);
         });
 
         await context.SaveChangesAsync(cancellationToken);
@@ -206,6 +206,22 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         var result = await context.SaveChangesAsync(cancellationToken);
 
         return result > 0;
+    }
+
+    public async Task UpdateIngredient(IngredientDto block, CancellationToken cancellationToken = default)
+    {
+        if (block is null)
+            return;
+
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var element = await context.Set<IngredientEntity>().FindAsync([block.Id], cancellationToken);
+
+        mapper.Map(block, element, opts =>
+        {
+            opts.AfterMap((src, dest) => dest!.IngredientList = null!);
+        });
+
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     #endregion
