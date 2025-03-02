@@ -1,6 +1,11 @@
-﻿@using RecettesFamille.Data.Repository.IRepositories
+﻿@using RecettesFamille.Components.Dialogs
+@using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Dto.Models.Blocks
+@using RecettesFamille.Services
 @inherits BaseBlockDefinition<BlockIngredientListDto>
+
+@inject IRecipeRepository RecipeRepository
+@inject IDialogService DialogService
 
 <MudDataGrid @ref="_dataGrid" Items="@Block.Ingredients.OrderBy(i => i.Order)" T="IngredientDto" Dense="true" Hover="true" Striped="false" Class="mx-3 mb-2 rounded-lg"
              HeaderClass="hide-header" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false" Breakpoint="Breakpoint.None"
@@ -16,10 +21,11 @@
         else
         {
             <MudText Typo="Typo.h6">@Block.Name</MudText>
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Outlined.Calculate" Size="Size.Small" OnClick="OpenRecalculateIngredientListDialog" />
         }
     </ToolBarContent>
     <Columns>
-        @* <PropertyColumn Property="x => x.Order" Hidden="false" InitialDirection="SortDirection.Ascending" Editable="false" HideSmall="true" /> *@
         <PropertyColumn Property="x => x.Name" Editable="true" />
         <PropertyColumn Property="x => x.Quantity" Editable="true" Required="false" />
         <TemplateColumn Hidden="!EditMode" CellClass="d-flex justify-end">
@@ -44,8 +50,6 @@
 </style>
 
 @code {
-    [Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
-
     MudDataGrid<IngredientDto> _dataGrid = null!;
 
     public void OnNameUpdated()
@@ -71,6 +75,17 @@
         await _dataGrid.SetEditingItemAsync(new IngredientDto());
     }
 
+    public async Task OpenRecalculateIngredientListDialog()
+    {
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraLarge };
+        var parameters = new DialogParameters<RecalculateIngredientListDialog>
+        {
+            { v => v.blockIngredientList, Block}
+        };
+        var dialog = await DialogService.ShowAsync<RecalculateIngredientListDialog>("Delete", parameters, options);
+
+    }
+
     private async Task CommittedItemChanges(IngredientDto item)
     {
         if (!Block.Id.HasValue)
@@ -79,7 +94,7 @@
         // Cas d'un nouvel item
         if (!item.Id.HasValue)
         {
-            item.Order = Block.Ingredients.Select(c => c.Order).DefaultIfEmpty(0).Max() + IngredientComponentService.Step;
+            item.Order = Block.Ingredients.Select(c => c.Order).DefaultIfEmpty(0).Max() + IngredientService.Step;
             Block.Ingredients.Add(item);
             OnBlockUpdated?.Invoke(Block);
         }
@@ -91,9 +106,9 @@
 
     private async Task MoveUp(IngredientDto ingredient)
     {
-        bool shouldRestabilize = IngredientComponentService.ShouldRestabilize(Block.Ingredients);
+        bool shouldRestabilize = IngredientService.ShouldRestabilize(Block.Ingredients);
 
-        IngredientComponentService.MoveUp(Block.Ingredients, ingredient.Id!.Value);
+        IngredientService.MoveUp(Block.Ingredients, ingredient.Id!.Value);
 
         if (shouldRestabilize)
             OnBlockUpdated?.Invoke(Block);
@@ -103,9 +118,9 @@
 
     private async Task MoveDown(IngredientDto ingredient)
     {
-        bool shouldRestabilize = IngredientComponentService.ShouldRestabilize(Block.Ingredients);
+        bool shouldRestabilize = IngredientService.ShouldRestabilize(Block.Ingredients);
 
-        IngredientComponentService.MoveDown(Block.Ingredients, ingredient.Id!.Value);
+        IngredientService.MoveDown(Block.Ingredients, ingredient.Id!.Value);
 
         if (shouldRestabilize)
             OnBlockUpdated?.Invoke(Block);

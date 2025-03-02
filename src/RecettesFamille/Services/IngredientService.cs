@@ -1,8 +1,9 @@
 ﻿using RecettesFamille.Dto.Models.Blocks;
+using System.Text.RegularExpressions;
 
-namespace RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions;
+namespace RecettesFamille.Services;
 
-public static class IngredientComponentService
+public static class IngredientService
 {
     public const int Step = 10; // Default spacing
     private const int MinSpacing = 2; // Critical spacing threshold
@@ -89,7 +90,7 @@ public static class IngredientComponentService
         }
         else
         {
-            current.Order = previous.Order - ((previous.Order - sortedList[index - 2].Order) / 2);
+            current.Order = previous.Order - (previous.Order - sortedList[index - 2].Order) / 2;
         }
 
         reorderCount++;
@@ -120,7 +121,7 @@ public static class IngredientComponentService
         }
         else
         {
-            current.Order = next.Order + ((sortedList[index + 2].Order - next.Order) / 2);
+            current.Order = next.Order + (sortedList[index + 2].Order - next.Order) / 2;
         }
 
         reorderCount++;
@@ -130,5 +131,36 @@ public static class IngredientComponentService
         {
             RestabilizeOrders(ingredients);
         }
+    }
+
+    public static List<IngredientDto> RecalculateRecipe(List<IngredientDto> recetteOriginale, IngredientDto referenceIngredient, double nouvelleQuantite)
+    {
+        double quantiteOriginale = ExtractNumericValue(referenceIngredient.Quantity);
+        double facteur = quantiteOriginale > 0 ? nouvelleQuantite / quantiteOriginale : 1;
+
+        return recetteOriginale.Select(i => new IngredientDto
+        {
+            Name = i.Name,
+            Quantity = string.IsNullOrWhiteSpace(i.Quantity) || !ContainsNumericValue(i.Quantity)
+                ? i.Quantity
+                : Math.Round(ExtractNumericValue(i.Quantity) * facteur, 2) + " " + ExtractUnit(i.Quantity)
+        }).ToList();
+    }
+
+    private static double ExtractNumericValue(string quantity)
+    {
+        var match = Regex.Match(quantity, "\\d+(?:\\.\\d+)?");
+        return match.Success ? double.Parse(match.Value) : 0;
+    }
+
+    private static string ExtractUnit(string quantity)
+    {
+        var match = Regex.Match(quantity, "[a-zA-Zà-ÿ]+$");
+        return match.Success ? match.Value : "";
+    }
+
+    private static bool ContainsNumericValue(string quantity)
+    {
+        return Regex.IsMatch(quantity, "\\d");
     }
 }

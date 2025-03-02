@@ -1,0 +1,100 @@
+﻿@implements IBrowserViewportObserver
+
+@using System.ComponentModel.DataAnnotations
+@using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
+@using RecettesFamille.Dto.Models
+@using RecettesFamille.Dto.Models.Blocks
+@using RecettesFamille.Services
+
+@inject IBrowserViewportService BrowserViewportService
+
+<MudDialog>
+    <TitleContent>
+        Magic
+    </TitleContent>
+    <DialogContent>
+
+        <MudGrid Spacing="0" Class="pa-2 d-flex align-center flex-grow-1 gap-4">
+            <MudItem xs="12" md="5">
+                <MudDataGrid @ref="_dataGrid" Items="@blockIngredientList.Ingredients.OrderBy(i => i.Order)" T="IngredientDto" Dense="true" Hover="true" Striped="false" Class="rounded-lg"
+                HeaderClass="hide-header" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false" Breakpoint="Breakpoint.None">
+                    <Columns>
+                        <SelectColumn T="IngredientDto" />
+                        <PropertyColumn Property="x => x.Name" Editable="true" />
+                        <PropertyColumn Property="x => x.Quantity" Editable="true" Required="false" />
+                    </Columns>
+                </MudDataGrid>
+            </MudItem>
+
+            <MudItem xs="12" md="1">
+                @if (breakpoint > Breakpoint.Sm)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.KeyboardDoubleArrowRight" Title="Conversion" Color="Color.Primary" />
+                }
+                else
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.KeyboardDoubleArrowDown" Title="Conversion" Color="Color.Primary" />
+                }
+            </MudItem>
+
+            <MudItem xs="12" md="5">
+                <MudItem>
+                    <MudDataGrid Items="@newIngredients.OrderBy(i => i.Order)" T="IngredientDto" Dense="true" Hover="true" Striped="false" Class="rounded-lg"
+                    HeaderClass="hide-header" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false" Breakpoint="Breakpoint.None">
+                        <Columns>
+                            <PropertyColumn Property="x => x.Name" Editable="true" />
+                            <PropertyColumn Property="x => x.Quantity" Editable="true" Required="false" />
+                        </Columns>
+                    </MudDataGrid>
+                </MudItem>
+            </MudItem>
+        </MudGrid>
+
+        <MudTextField @bind-Value="newQuantity" Margin="Margin.Dense" Placeholder="Nouvelle quantitée" />
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close">Fermer</MudButton>
+        <MudButton Color="Color.Primary" OnClick="CalculNewIngredients">Calculer</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public BlockIngredientListDto blockIngredientList { get; set; } = default!;
+
+    MudDataGrid<IngredientDto> _dataGrid = null!;
+
+    List<IngredientDto> newIngredients { get; set; } = new();
+
+    IngredientDto? baseOnIngredient { get; set; }
+    double? newQuantity { get; set; }
+    Breakpoint breakpoint { get; set; }
+
+    public Guid Id => throw new NotImplementedException();
+
+    protected async override Task OnInitializedAsync()
+    {
+        newIngredients = blockIngredientList.Ingredients;
+        breakpoint = await BrowserViewportService.GetCurrentBreakpointAsync();
+    }
+
+    private void CalculNewIngredients()
+    {
+        baseOnIngredient = _dataGrid.SelectedItem;
+
+        if (baseOnIngredient is null || newQuantity is null)
+            return;
+
+        newIngredients = IngredientService.RecalculateRecipe(blockIngredientList.Ingredients, baseOnIngredient, newQuantity.Value);
+    }
+
+    private void Close() => MudDialog.Cancel();
+
+
+
+    public Task NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
+    {
+        throw new NotImplementedException();
+    }
+}
