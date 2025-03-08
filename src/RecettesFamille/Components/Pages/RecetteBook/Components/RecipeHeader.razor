@@ -1,6 +1,6 @@
 ﻿@using RecettesFamille.Dto.Models
 @code {
-    private string GetRestTimeText(int restTime)
+    private static string GetRestTimeText(int restTime)
     {
         if (restTime <= 0) return string.Empty;
         return restTime > 60 ? $"temps de pause: {restTime / 60} h" : $"temps de pause: {restTime} min";

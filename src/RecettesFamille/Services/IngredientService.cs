@@ -168,6 +168,6 @@ public static partial class IngredientService
 
     private static bool ContainsNumericValue(string quantity)
     {
-        return Regex.IsMatch(quantity, "\\d");
+        return NumericValueRegex().IsMatch(quantity);
     }
 }
