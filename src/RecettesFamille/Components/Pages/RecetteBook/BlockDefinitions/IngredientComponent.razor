@@ -77,7 +77,7 @@
 
     public async Task OpenRecalculateIngredientListDialog()
     {
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraLarge };
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.Large, FullWidth = true };
         var parameters = new DialogParameters<RecalculateIngredientListDialog>
         {
             { v => v.blockIngredientList, Block}

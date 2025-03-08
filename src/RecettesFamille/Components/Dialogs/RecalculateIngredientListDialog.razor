@@ -10,7 +10,7 @@
 
 <MudDialog>
     <TitleContent>
-        Magic
+        Calculer de nouveaux ratios
     </TitleContent>
     <DialogContent>
 
@@ -39,8 +39,10 @@
 
             <MudItem xs="12" md="5">
                 <MudItem>
-                    <MudDataGrid Items="@newIngredients.OrderBy(i => i.Order)" T="IngredientDto" Dense="true" Hover="true" Striped="false" Class="rounded-lg"
-                    HeaderClass="hide-header" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false" Breakpoint="Breakpoint.None">
+                    <MudDataGrid Items="@newIngredients.OrderBy(i => i.Order)" T="IngredientDto" Dense="true" Hover="true" 
+                                 Striped="false" Class="rounded-lg" HeaderClass="hide-header" Style="height:100%" 
+                                 RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false" 
+                                 Breakpoint="Breakpoint.None">
                         <Columns>
                             <PropertyColumn Property="x => x.Name" Editable="true" />
                             <PropertyColumn Property="x => x.Quantity" Editable="true" Required="false" />
