@@ -85,7 +85,7 @@
             return;
         }
 
-        var recipe = await RecipeRepository.AddRecipe(new RecipeDto() { Name = result.Data.ToString() });
+        var recipe = await RecipeRepository.AddRecipe(new RecipeDto() { Name = result.Data?.ToString() ?? string.Empty });
 
         if (recipe != null)
         {

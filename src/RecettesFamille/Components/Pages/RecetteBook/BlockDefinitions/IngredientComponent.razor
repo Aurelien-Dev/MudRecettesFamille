@@ -82,8 +82,7 @@
         {
             { v => v.blockIngredientList, Block}
         };
-        var dialog = await DialogService.ShowAsync<RecalculateIngredientListDialog>("Delete", parameters, options);
-
+        _ = await DialogService.ShowAsync<RecalculateIngredientListDialog>("Delete", parameters, options);
     }
 
     private async Task CommittedItemChanges(IngredientDto item)

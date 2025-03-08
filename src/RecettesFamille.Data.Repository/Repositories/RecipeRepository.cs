@@ -100,12 +100,12 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
     public async Task<RecipeDto> AddRecipe(RecipeDto recipe, CancellationToken cancellationToken = default)
     {
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var blockEntity = mapper.Map<RecipeEntity>(recipe);
+        var recipeEntity = mapper.Map<RecipeEntity>(recipe);
 
-        await context.Set<RecipeEntity>().AddAsync(blockEntity, cancellationToken);
+        await context.Set<RecipeEntity>().AddAsync(recipeEntity, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
-        return mapper.Map<RecipeDto>(blockEntity);
+        return mapper.Map<RecipeDto>(recipeEntity);
     }
 
     public async Task DeleteRecipe(int recipeId, CancellationToken cancellationToken = default)

@@ -61,7 +61,7 @@
         _cancellationTokenSource = new();
         try
         {
-            var recette = await gptRecipeConverterManager.ConvertRecipe(_recipeDescription, AiClientTypeEnum.OpenAi, _cancellationTokenSource.Token);
+            var recette = await gptRecipeConverterManager.ConvertRecipe(_recipeDescription, AiClientType.OpenAi, _cancellationTokenSource.Token);
 
             var recipeAdded = await RecipeRepository.AddRecipe(recette);
             navigationManager.NavigateTo($"/recette/{recipeAdded.Id}", true);

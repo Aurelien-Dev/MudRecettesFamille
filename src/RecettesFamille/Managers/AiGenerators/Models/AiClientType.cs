@@ -1,6 +1,6 @@
 ﻿namespace RecettesFamille.Managers.AiGenerators.Models;
 
-public enum AiClientTypeEnum
+public enum AiClientType
 {
     OpenAi,
     DeepSeek

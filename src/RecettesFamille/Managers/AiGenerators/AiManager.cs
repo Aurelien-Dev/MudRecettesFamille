@@ -46,16 +46,16 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
     /// <returns>The converted RecipeDto.</returns>
     /// <exception cref="ArgumentException">Thrown when an invalid AI client type is provided.</exception>
     /// <exception cref="InvalidOperationException">Thrown when deserialization fails.</exception>
-    public async Task<RecipeDto> ConvertRecipe(string recipe, AiClientTypeEnum aiClientTypeEnum, CancellationToken cancellationToken = default)
+    public async Task<RecipeDto> ConvertRecipe(string recipe, AiClientType aiClientTypeEnum, CancellationToken cancellationToken = default)
     {
         IChatClient client;
 
         switch (aiClientTypeEnum)
         {
-            case AiClientTypeEnum.OpenAi:
+            case AiClientType.OpenAi:
                 client = serviceProvider.GetRequiredKeyedService<IChatClient>("OpenAi");
                 break;
-            case AiClientTypeEnum.DeepSeek:
+            case AiClientType.DeepSeek:
                 client = serviceProvider.GetRequiredKeyedService<IChatClient>("DeepSeek");
                 break;
             default:
@@ -116,7 +116,7 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
     /// </summary>
     /// <param name="completion">The chat response completion details.</param>
     /// <exception cref="InvalidOperationException">Thrown when token counts are null.</exception>
-    private async Task ReportChatConsumption(ChatResponse completion, AiClientTypeEnum aiClientTypeEnum)
+    private async Task ReportChatConsumption(ChatResponse completion, AiClientType aiClientTypeEnum)
     {
         if (completion?.Usage?.InputTokenCount == null || completion.Usage.OutputTokenCount == null)
         {
@@ -137,12 +137,12 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
         });
     }
 
-    private (decimal inputPrice, decimal outputPrice, string chatModel) GetPrices(AiClientTypeEnum aiClientTypeEnum)
+    private static (decimal inputPrice, decimal outputPrice, string chatModel) GetPrices(AiClientType aiClientTypeEnum)
     {
         return aiClientTypeEnum switch
         {
-            AiClientTypeEnum.OpenAi => (2.50m, 10.00m, "gpt-4o"),
-            AiClientTypeEnum.DeepSeek => (0.27m, 1.10m, "deepseek-chat"),
+            AiClientType.OpenAi => (2.50m, 10.00m, "gpt-4o"),
+            AiClientType.DeepSeek => (0.27m, 1.10m, "deepseek-chat"),
             _ => throw new ArgumentException("Invalid AI client type", nameof(aiClientTypeEnum))
         };
     }

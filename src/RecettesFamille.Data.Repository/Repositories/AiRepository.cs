@@ -11,7 +11,7 @@ public class AiRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext
 
     public async Task<PromptDto> GetPrompt(string promptName, CancellationToken cancellationToken = default)
     {
-        using var context = await contextFactory.CreateDbContextAsync();
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var result = await context.Prompts.Where(r => r.Name == promptName).FirstOrDefaultAsync(cancellationToken);
 
         return mapper.Map<PromptDto>(result);
@@ -19,7 +19,7 @@ public class AiRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext
 
     public async Task<List<PromptDto>> GetPrompt(CancellationToken cancellationToken = default)
     {
-        using var context = await contextFactory.CreateDbContextAsync();
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var result = await context.Prompts.ToListAsync(cancellationToken);
 
         return mapper.Map<List<PromptDto>>(result);
@@ -30,7 +30,7 @@ public class AiRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext
         if (prompt is null)
             return;
 
-        using var context = await contextFactory.CreateDbContextAsync();
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var element = await context.Set<PromptEntity>().FindAsync([prompt.Id], cancellationToken);
 
         mapper.Map(prompt, element);
@@ -43,7 +43,7 @@ public class AiRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext
         if (prompt is null)
             return false;
 
-        using var context = await contextFactory.CreateDbContextAsync();
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var promptEntity = mapper.Map<PromptEntity>(prompt);
 
         await context.AddAsync(promptEntity, cancellationToken);
@@ -54,7 +54,7 @@ public class AiRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext
 
     public async Task ReportConsumption(AiConsumptionDto aiConsumptionDto, CancellationToken cancellationToken = default)
     {
-        using var context = await contextFactory.CreateDbContextAsync();
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var element = mapper.Map<AiConsumptionEntity>(aiConsumptionDto);
         await context.AddAsync(element, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);

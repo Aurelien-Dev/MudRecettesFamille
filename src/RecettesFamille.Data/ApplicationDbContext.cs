@@ -74,6 +74,8 @@ namespace RecettesFamille.Data
                 if (process is null) throw new InvalidOperationException("Process not exist.");
 
                 var output = process.StandardOutput.ReadToEnd();
+                Console.WriteLine($"Output : {output}");
+
                 var error = process.StandardError.ReadToEnd();
                 process.WaitForExit();
 

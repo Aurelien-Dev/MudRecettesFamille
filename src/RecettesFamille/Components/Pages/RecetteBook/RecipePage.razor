@@ -112,7 +112,7 @@
         var tags = Recipe!.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries);
 
         Recipe.Tags = string.Join("|", tags.Where(c => c != tag));
-        var success = await RecipeRepository.UpdateRecipe(Recipe);
+        _ = await RecipeRepository.UpdateRecipe(Recipe);
     }
 
 

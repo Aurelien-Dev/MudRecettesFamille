@@ -8,7 +8,7 @@ public class StatisticRepository(IDbContextFactory<ApplicationDbContext> context
 {
     public async Task<List<StatisticsViewModel>> GetCountCallByDays(CancellationToken cancellationToken = default)
     {
-        using var context = await contextFactory.CreateDbContextAsync();
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var result = await context.AiConsumptions
                              .GroupBy(a => new { a.Date.Date, a.AiModelName })
                              .Select(g => new StatisticsViewModel()
@@ -24,7 +24,7 @@ public class StatisticRepository(IDbContextFactory<ApplicationDbContext> context
 
     public async Task<List<StatisticsViewModel>> GetAvgTokenByDays(CancellationToken cancellationToken = default)
     {
-        using var context = await contextFactory.CreateDbContextAsync();
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var queryAvg = await context.AiConsumptions
                         .GroupBy(a => new { a.Date.Date, a.AiModelName })
                         .Select(g => new StatisticsViewModel()

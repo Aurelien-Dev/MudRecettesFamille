@@ -1,5 +1,12 @@
 ﻿@using RecettesFamille.Dto.Models
-@using System.Globalization
+@code {
+    private string GetRestTimeText(int restTime)
+    {
+        if (restTime <= 0) return string.Empty;
+        return restTime > 60 ? $"temps de pause: {restTime / 60} h" : $"temps de pause: {restTime} min";
+    }
+}
+
 <MudStack Spacing="0">
 
     <MudText Typo="Typo.h3" Class="mb-0" Style="font-weight: bold;" Align="Align.Center" GutterBottom="true">@Recipe.Name</MudText>
@@ -8,10 +15,10 @@
         @{
             var instructions = new[]
             {
-                Recipe.PrepTime > 0 ? $"préparation : {Recipe.PrepTime} min" : null,
-                Recipe.CookingTime > 0 ? $"temps de cuisson: {Recipe.CookingTime} min" : null,
-                Recipe.RestTime > 0 ? $"temps de pause: {(Recipe.RestTime > 60 ? $"{Recipe.RestTime / 60} h" : $"{Recipe.RestTime} min")}" : null,
-                Recipe.Portion > 0 ? $"pour {Recipe.Portion} portions" : null
+                Recipe.PrepTime > 0 ? $"préparation : {Recipe.PrepTime} min" : string.Empty,
+                Recipe.CookingTime > 0 ? $"temps de cuisson: {Recipe.CookingTime} min" : string.Empty,
+                GetRestTimeText(Recipe.RestTime),
+                Recipe.Portion > 0 ? $"pour {Recipe.Portion} portions" : string.Empty
                 };
 
             var result = string.Join(", ", instructions.Where(e => !string.IsNullOrEmpty(e))).ToLower();

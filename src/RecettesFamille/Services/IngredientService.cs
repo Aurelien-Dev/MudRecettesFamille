@@ -3,13 +3,20 @@ using System.Text.RegularExpressions;
 
 namespace RecettesFamille.Services;
 
-public static class IngredientService
+public static partial class IngredientService
 {
     public const int Step = 10; // Default spacing
     private const int MinSpacing = 2; // Critical spacing threshold
     private const int MaxReorderOperations = 10; // Max number of moves before restabilization
 
     private static int reorderCount = 0; // Move counter
+
+
+    [GeneratedRegex("\\d+(?:\\.\\d+)?")]
+    private static partial Regex NumericValueRegex();
+
+    [GeneratedRegex("[a-zA-Zà-ÿ]+$")]
+    private static partial Regex UnitRegex();
 
     /// <summary>
     /// Assigns spaced values to Orders to avoid conflicts.
@@ -149,13 +156,13 @@ public static class IngredientService
 
     private static double ExtractNumericValue(string quantity)
     {
-        var match = Regex.Match(quantity, "\\d+(?:\\.\\d+)?");
+        var match = NumericValueRegex().Match(quantity);
         return match.Success ? double.Parse(match.Value) : 0;
     }
 
     private static string ExtractUnit(string quantity)
     {
-        var match = Regex.Match(quantity, "[a-zA-Zà-ÿ]+$");
+        var match = UnitRegex().Match(quantity);
         return match.Success ? match.Value : "";
     }
 
