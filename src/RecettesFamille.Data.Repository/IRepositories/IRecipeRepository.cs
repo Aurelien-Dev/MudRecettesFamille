@@ -14,8 +14,8 @@ public interface IRecipeRepository
 
     Task<RecipeDto> GetWithInstructions(int recipeId, CancellationToken cancellationToken = default);
 
-    Task DeleteRecipe(int recipeId, CancellationToken cancellationToken = default);
     Task<RecipeDto> AddRecipe(RecipeDto recipe, CancellationToken cancellationToken = default);
+    Task DeleteRecipe(int recipeId, CancellationToken cancellationToken = default);
     Task<bool> UpdateRecipe(RecipeDto? recipe, CancellationToken cancellationToken = default);
     Task UpdateFullRecipe(RecipeDto? recipe, CancellationToken cancellationToken = default);
 
@@ -23,6 +23,7 @@ public interface IRecipeRepository
     Task UpdateBlock(BlockBaseDto? block, CancellationToken cancellationToken = default);
     Task<bool> DeleteBlock(int blockId, CancellationToken cancellationToken = default);
 
+    Task<IngredientDto> AddIngredient(IngredientDto ingredient, CancellationToken cancellationToken = default);
     Task<bool> DeleteIngredient(int ingredientId, CancellationToken cancellationToken = default);
     Task UpdateIngredient(IngredientDto block, CancellationToken cancellationToken = default);
 }

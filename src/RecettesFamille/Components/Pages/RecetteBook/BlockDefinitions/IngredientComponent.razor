@@ -94,8 +94,10 @@
         if (!item.Id.HasValue)
         {
             item.Order = Block.Ingredients.Select(c => c.Order).DefaultIfEmpty(0).Max() + IngredientService.Step;
+            item.IngredientListId = Block.Id.Value;
             Block.Ingredients.Add(item);
-            OnBlockUpdated?.Invoke(Block);
+            var ingredient = await RecipeRepository.AddIngredient(item);
+            item.Id = ingredient.Id;
         }
         else
         {
