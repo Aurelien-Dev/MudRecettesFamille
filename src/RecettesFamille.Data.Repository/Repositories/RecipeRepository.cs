@@ -224,5 +224,19 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<IngredientDto> AddIngredient(IngredientDto ingredient, CancellationToken cancellationToken = default)
+    {
+        if (ingredient is null)
+            throw new ArgumentNullException(nameof(ingredient));
+
+        IngredientEntity ingredientEntity = mapper.Map<IngredientEntity>(ingredient);
+
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        context.Set<IngredientEntity>().Add(ingredientEntity);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return mapper.Map<IngredientDto>(ingredientEntity);
+    }
+
     #endregion
 }
