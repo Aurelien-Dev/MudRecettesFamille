@@ -92,6 +92,34 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
         return GptMapper.ConvertToRecipeDto(serialized);
     }
 
+
+    public async Task<string> GetYoutubeResume(string transcript, CancellationToken cancellationToken = default)
+    {
+
+        IChatClient client = serviceProvider.GetRequiredKeyedService<IChatClient>("OpenAi");
+
+        var ask = $@"Fait moi un résumé de ce transcript, sous forme de point claire et façile à lire :
+
+        === Début du transcript ===
+        {transcript}
+        === Fin du transcript ===";
+
+        var messages = new ChatMessage[]
+        {
+            new (ChatRole.User, ask)
+        };
+
+        ChatResponse completion = await client.GetResponseAsync(messages, new ChatOptions() { ResponseFormat = ChatResponseFormatJson.Text }, cancellationToken: cancellationToken);
+
+        var resultText = completion.Message.Text;
+
+        ArgumentNullException.ThrowIfNullOrEmpty(resultText);
+
+        await ReportChatConsumption(completion, AiClientType.OpenAi);
+        return resultText;
+    }
+
+
     /// <summary>
     /// Reports the consumption of image generation to the AI repository.
     /// </summary>
