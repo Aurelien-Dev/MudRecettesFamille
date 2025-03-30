@@ -98,14 +98,16 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
 
         IChatClient client = serviceProvider.GetRequiredKeyedService<IChatClient>("OpenAi");
 
-        var ask = $@"Fait moi un résumé de ce transcript, sous forme de point claire et façile à lire :
+        var promptDto = await aiRepository.GetPrompt("YoutubeResume", cancellationToken);
 
-        === Début du transcript ===
-        {transcript}
-        === Fin du transcript ===";
+        var ask = $@"
+=== Début du transcript ===
+{transcript}
+=== Fin du transcript ===";
 
         var messages = new ChatMessage[]
         {
+            new (ChatRole.System, promptDto.Prompt),
             new (ChatRole.User, ask)
         };
 
