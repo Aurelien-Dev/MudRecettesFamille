@@ -13,6 +13,8 @@ using RecettesFamille.Data;
 using RecettesFamille.Data.Repository;
 using RecettesFamille.Managers;
 using System.Security.Claims;
+using RecettesFamille.Managers.AiGenerators;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +48,7 @@ builder.Services.AddScoped<EmailManager>();
 builder.Services.AddRepository();
 
 builder.Services.AddManagers(builder.Configuration);
+builder.Services.AddScoped<AiManager>();
 
 builder.Services.AddAuthentication(options =>
     {
@@ -98,5 +101,14 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
+
+// Define a minimal API endpoint that calls the AskImage method of AiManager
+app.MapPost("/api/youtube-summary", async (HttpRequest request, [FromServices] AiManager aiManager, CancellationToken cancellationToken) =>
+{
+    using var reader = new StreamReader(request.Body);
+    var transcript = await reader.ReadToEndAsync();
+    var resume = await aiManager.GetYoutubeResume(transcript, cancellationToken);
+    return Results.Ok(new { result = resume });
+});
 
 await app.RunAsync();
