@@ -31,7 +31,6 @@ public class MappingProfile : Profile
         CreateMap<AiConsumptionEntity, AiConsumptionDto>().ReverseMap();
         CreateMap<TagEntity, TagDto>().ReverseMap();
 
-        CreateMap<YoutubeSummaryRequestEntity, YoutubeSummaryRequestDto>().ReverseMap();
+        CreateMap<YoutubeResumeEntity, YoutubeResumeDto>().ReverseMap();
     }
-
 }

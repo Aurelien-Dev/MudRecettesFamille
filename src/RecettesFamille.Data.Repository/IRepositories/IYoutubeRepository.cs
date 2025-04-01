@@ -6,5 +6,6 @@ namespace RecettesFamille.Data.Repository.IRepositories;
 public interface IYoutubeRepository
 {
 
-    Task<YoutubeSummaryRequestDto> AddSummary(YoutubeSummaryRequestDto youtubeSummary, CancellationToken cancellationToken = default);
+    Task<YoutubeResumeDto> AddSummary(YoutubeResumeDto youtubeSummary, CancellationToken cancellationToken = default);
+    Task<List<YoutubeResumeDto>> GetAllSummary(CancellationToken cancellationToken = default);
 }

@@ -1,6 +1,6 @@
 ﻿namespace RecettesFamille.Data.EntityModel
 {
-    public class YoutubeSummaryRequestEntity
+    public class YoutubeResumeEntity
     {
         public required int Id { get; set; }
         public required string Resume { get; set; }

@@ -116,7 +116,7 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
         ArgumentNullException.ThrowIfNullOrEmpty(resultText);
 
         await ReportChatConsumption(completion, AiClientType.OpenAi);
-        _ = await youtubeRepository.AddSummary(new YoutubeSummaryRequestDto() { Resume = resultText, Title = request.Title, Url = request.Url });
+        _ = await youtubeRepository.AddSummary(new YoutubeResumeDto() { Resume = resultText, Title = request.Title, Url = request.Url });
 
         return resultText;
     }

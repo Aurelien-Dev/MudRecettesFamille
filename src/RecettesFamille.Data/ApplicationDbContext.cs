@@ -15,7 +15,7 @@ namespace RecettesFamille.Data
         public DbSet<PromptEntity> Prompts { get; set; }
         public DbSet<TagEntity> Tags { get; set; }
 
-        public DbSet<YoutubeSummaryRequestEntity> YoutubeSummarys { get; set; }
+        public DbSet<YoutubeResumeEntity> YoutubeSummarys { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -51,7 +51,7 @@ namespace RecettesFamille.Data
             builder.Entity<PromptEntity>().HasKey(c => c.Id);
             builder.Entity<BlockBaseEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
 
-            builder.Entity<YoutubeSummaryRequestEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
+            builder.Entity<YoutubeResumeEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
 
             base.OnModelCreating(builder);
         }
@@ -111,7 +111,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Applicatio
     public ApplicationDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-        var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=test;Username=pguser;Password=PGUserPwd;Pooling=true";
+        var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
         optionsBuilder.UseNpgsql(postgresCs);
 
         return new ApplicationDbContext(optionsBuilder.Options);

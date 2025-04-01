@@ -1,0 +1,54 @@
+@page "/admin/youtube"
+@attribute [Authorize(Roles = "Admin")]
+@layout AdminLayout
+@using System.Text
+@using Microsoft.AspNetCore.Authorization
+@using RecettesFamille.Components.Layout
+@using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
+@using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Dto.Models
+@using RecettesFamille.Dto.Models.Blocks
+@using RecettesFamille.Extensions
+@using RecettesFamille.Managers
+
+<MudGrid>
+    <MudItem xs="12" md="4">
+        <MudList T="string">
+            @foreach (var item in ytResume)
+            {
+                <MudListItem Dense="true" Text="@item.Title" Icon="@Icons.Custom.Brands.YouTube" OnClick="@(() => ShowPrompt(item))" />
+            }
+        </MudList>
+    </MudItem>
+    <MudItem xs="12" md="8">
+        @if (CurrentResume is not null)
+        {
+            <MudStack>
+                <MudText Typo="Typo.h3" GutterBottom="true">@CurrentResume.Title</MudText>
+                <MudMarkdown Value="@CurrentResume.Resume" OverrideHeaderTypo="OverrideHeaderTypo" />
+            </MudStack>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Inject] IYoutubeRepository youtubeRepository { get; set; } = null!;
+
+    private List<YoutubeResumeDto> ytResume { get; set; } = [];
+    private YoutubeResumeDto? CurrentResume { get; set; }
+
+    private Typo OverrideHeaderTypo(Typo x)
+    {
+        return Typo.overline;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ytResume = await youtubeRepository.GetAllSummary();
+    }
+
+    private void ShowPrompt(YoutubeResumeDto? promptEntity)
+    {
+        CurrentResume = promptEntity;
+    }
+}

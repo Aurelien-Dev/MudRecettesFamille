@@ -1,6 +1,6 @@
 namespace RecettesFamille.Dto.Models;
 
-public class YoutubeSummaryRequestDto
+public class YoutubeResumeDto
 {
     public int Id { get; set; }
     public required string Resume { get; set; }
