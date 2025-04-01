@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using RecettesFamille.Data;
 using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.EntityModel.Blocks;
 using System.Diagnostics;
@@ -12,6 +14,8 @@ namespace RecettesFamille.Data
         public DbSet<AiConsumptionEntity> AiConsumptions { get; set; }
         public DbSet<PromptEntity> Prompts { get; set; }
         public DbSet<TagEntity> Tags { get; set; }
+
+        public DbSet<YoutubeSummaryRequestEntity> YoutubeSummarys { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -46,6 +50,8 @@ namespace RecettesFamille.Data
 
             builder.Entity<PromptEntity>().HasKey(c => c.Id);
             builder.Entity<BlockBaseEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
+
+            builder.Entity<YoutubeSummaryRequestEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
 
             base.OnModelCreating(builder);
         }
@@ -93,5 +99,21 @@ namespace RecettesFamille.Data
                 return (false, $"Exception lors du backup : {ex.Message}", string.Empty);
             }
         }
+    }
+}
+
+
+/// <summary>
+/// Classe for EfCore Designer to enable dbContexte when create a new migration
+/// </summary>
+public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
+{
+    public ApplicationDbContext CreateDbContext(string[] args)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=test;Username=pguser;Password=PGUserPwd;Pooling=true";
+        optionsBuilder.UseNpgsql(postgresCs);
+
+        return new ApplicationDbContext(optionsBuilder.Options);
     }
 }

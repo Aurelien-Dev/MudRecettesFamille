@@ -11,7 +11,7 @@ namespace RecettesFamille.Managers.AiGenerators;
 /// <summary>
 /// Manages AI operations for generating images and converting recipes.
 /// </summary>
-public class AiManager(IServiceProvider serviceProvider, IConfiguration config, IAiRepository aiRepository) : IAiManager
+public class AiManager(IServiceProvider serviceProvider, IConfiguration config, IAiRepository aiRepository, IYoutubeRepository youtubeRepository) : IAiManager
 {
     /// <summary>
     /// Asks the AI to generate an image based on the recipe name.
@@ -92,17 +92,15 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
         return GptMapper.ConvertToRecipeDto(serialized);
     }
 
-
-    public async Task<string> GetYoutubeResume(string transcript, CancellationToken cancellationToken = default)
+    public async Task<string> GetYoutubeResume(YoutubeSummaryRequestDto request, CancellationToken cancellationToken = default)
     {
-
         IChatClient client = serviceProvider.GetRequiredKeyedService<IChatClient>("OpenAi");
 
         var promptDto = await aiRepository.GetPrompt("YoutubeResume", cancellationToken);
 
         var ask = $@"
 === Début du transcript ===
-{transcript}
+{request.Transcript}
 === Fin du transcript ===";
 
         var messages = new ChatMessage[]
@@ -118,6 +116,8 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
         ArgumentNullException.ThrowIfNullOrEmpty(resultText);
 
         await ReportChatConsumption(completion, AiClientType.OpenAi);
+        _ = await youtubeRepository.AddSummary(request);
+
         return resultText;
     }
 

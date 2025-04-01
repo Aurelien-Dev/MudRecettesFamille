@@ -3,6 +3,7 @@ using Blazored.LocalStorage;
 using Cropper.Blazor.Extensions;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
@@ -11,10 +12,11 @@ using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
 using RecettesFamille.Data;
 using RecettesFamille.Data.Repository;
+using RecettesFamille.Dto.Models;
 using RecettesFamille.Managers;
-using System.Security.Claims;
 using RecettesFamille.Managers.AiGenerators;
-using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -106,8 +108,9 @@ app.MapAdditionalIdentityEndpoints();
 app.MapPost("/api/youtube-summary", async (HttpRequest request, [FromServices] AiManager aiManager, CancellationToken cancellationToken) =>
 {
     using var reader = new StreamReader(request.Body);
-    var transcript = await reader.ReadToEndAsync();
-    var resume = await aiManager.GetYoutubeResume(transcript, cancellationToken);
+    var body = await reader.ReadToEndAsync();
+    var requestBody = JsonSerializer.Deserialize<YoutubeSummaryRequestDto>(body);
+    var resume = await aiManager.GetYoutubeResume(requestBody, cancellationToken);
     return Results.Ok(new { result = resume });
 });
 

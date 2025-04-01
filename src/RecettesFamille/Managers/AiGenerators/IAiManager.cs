@@ -9,6 +9,6 @@ namespace RecettesFamille.Managers.AiGenerators
         Task<string> AskImage(string recipeName, CancellationToken cancellationToken = default);
 
 
-        Task<string> GetYoutubeResume(string transcript, CancellationToken cancellationToken = default);
+        Task<string> GetYoutubeResume(YoutubeSummaryRequestDto request, CancellationToken cancellationToken = default);
     }
 }

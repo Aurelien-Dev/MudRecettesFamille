@@ -30,6 +30,8 @@ public class MappingProfile : Profile
         CreateMap<PromptEntity, PromptDto>().ReverseMap();
         CreateMap<AiConsumptionEntity, AiConsumptionDto>().ReverseMap();
         CreateMap<TagEntity, TagDto>().ReverseMap();
+
+        CreateMap<YoutubeSummaryRequestEntity, YoutubeSummaryRequestDto>().ReverseMap();
     }
 
 }
