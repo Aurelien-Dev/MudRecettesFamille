@@ -109,9 +109,16 @@ app.MapPost("/api/youtube-summary", async (HttpRequest request, [FromServices] A
 {
     using var reader = new StreamReader(request.Body);
     var body = await reader.ReadToEndAsync();
-    var requestBody = JsonSerializer.Deserialize<YoutubeSummaryRequestDto>(body);
+    var requestBody = JsonSerializer.Deserialize<YoutubeSummaryJson>(body);
     var resume = await aiManager.GetYoutubeResume(requestBody, cancellationToken);
     return Results.Ok(new { result = resume });
 });
 
 await app.RunAsync();
+
+public class YoutubeSummaryJson
+{
+    public required string Transcript { get; set; }
+    public required string Url { get; set; }
+    public required string Title { get; set; }
+}

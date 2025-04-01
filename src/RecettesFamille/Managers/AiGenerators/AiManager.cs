@@ -92,7 +92,7 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
         return GptMapper.ConvertToRecipeDto(serialized);
     }
 
-    public async Task<string> GetYoutubeResume(YoutubeSummaryRequestDto request, CancellationToken cancellationToken = default)
+    public async Task<string> GetYoutubeResume(YoutubeSummaryJson request, CancellationToken cancellationToken = default)
     {
         IChatClient client = serviceProvider.GetRequiredKeyedService<IChatClient>("OpenAi");
 
@@ -116,7 +116,7 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
         ArgumentNullException.ThrowIfNullOrEmpty(resultText);
 
         await ReportChatConsumption(completion, AiClientType.OpenAi);
-        _ = await youtubeRepository.AddSummary(request);
+        _ = await youtubeRepository.AddSummary(new YoutubeSummaryRequestDto() { Resume = resultText, Title = request.Title, Url = request.Url });
 
         return resultText;
     }
