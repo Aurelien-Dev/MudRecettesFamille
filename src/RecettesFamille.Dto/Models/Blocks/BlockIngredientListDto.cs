@@ -5,6 +5,8 @@ namespace RecettesFamille.Dto.Models.Blocks;
 public class BlockIngredientListDto : BlockBaseDto
 {
     public string Name { get; set; } = "Ingrédients";
+    public int? Calories { get; set; }
+
     public List<IngredientDto> Ingredients { get; set; } = [];
 
     public BlockIngredientListDto()

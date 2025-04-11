@@ -1,11 +1,14 @@
 ﻿@using RecettesFamille.Components.Dialogs
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Dto.Models.Blocks
+@using RecettesFamille.Managers.AiGenerators
+@using RecettesFamille.Managers.AiGenerators.Models
 @using RecettesFamille.Services
 @inherits BaseBlockDefinition<BlockIngredientListDto>
 
 @inject IRecipeRepository RecipeRepository
 @inject IDialogService DialogService
+@inject IAiManager AiManager
 
 <MudDataGrid @ref="_dataGrid" Items="@Block.Ingredients.OrderBy(i => i.Order)" T="IngredientDto" Dense="true" Hover="true" Striped="false" Class="mx-3 mb-2 rounded-lg"
              HeaderClass="hide-header" Style="height:100%" RowClass="mud-table-extra-dense" ReadOnly="false" Outlined="false" Bordered="false" Breakpoint="Breakpoint.None"
@@ -20,9 +23,19 @@
         }
         else
         {
-            <MudText Typo="Typo.h6">@Block.Name</MudText>
+
+            <MudPaper Class="d-flex flex-grow-1 gap-4" Elevation="0">
+                <MudText Typo="Typo.h6">@Block.Name</MudText>
+                @* <MudText Typo="Typo.subtitle2" Class="align-self-end" Style="@($"color:{Colors.Orange.Darken2};")">@Block.Calories cal.</MudText> *@
+            </MudPaper>
             <MudSpacer />
-            <MudIconButton Icon="@Icons.Material.Outlined.Calculate" Size="Size.Small" OnClick="OpenRecalculateIngredientListDialog" />
+            <MudPaper Class="d-flex gap-1" Elevation="0">
+                <MudText Typo="Typo.subtitle2" Class="align-self-end" Style="@($"color:{Colors.Orange.Darken2};")">
+                    @(Block.Calories.HasValue ? $"{Block.Calories} cal." : "No calories info ➡️")
+                </MudText>
+                <MudIconButton Icon="@Icons.Material.Filled.Fastfood" Size="Size.Small" OnClick="GetCalories" />
+                <MudIconButton Icon="@Icons.Material.Outlined.Calculate" Size="Size.Small" OnClick="OpenRecalculateIngredientListDialog" />
+            </MudPaper>
         }
     </ToolBarContent>
     <Columns>
@@ -83,6 +96,15 @@
             { v => v.blockIngredientList, Block}
         };
         _ = await DialogService.ShowAsync<RecalculateIngredientListDialog>("Delete", parameters, options);
+    }
+
+
+    public async Task GetCalories()
+    {
+        var result = await AiManager.AskCalories(Block.Ingredients, AiClientType.OpenAi);
+        Block.Calories = result;
+        StateHasChanged();
+        OnBlockUpdated?.Invoke(Block);
     }
 
     private async Task CommittedItemChanges(IngredientDto item)

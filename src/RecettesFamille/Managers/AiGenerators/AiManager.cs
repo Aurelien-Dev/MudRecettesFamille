@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using OpenAI.Images;
 using RecettesFamille.Data.Repository.IRepositories;
 using RecettesFamille.Dto.Models;
+using RecettesFamille.Dto.Models.Blocks;
 using RecettesFamille.Managers.AiGenerators.Models;
 using RecettesFamille.Managers.Mappers;
 
@@ -37,6 +38,34 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
         return $"data:png;base64," + Convert.ToBase64String(image.ImageBytes);
     }
 
+    public async Task<int> AskCalories(List<IngredientDto> ingredients, AiClientType aiClientTypeEnum, CancellationToken cancellationToken = default)
+    {
+        IChatClient client = GetChatClient(aiClientTypeEnum);
+
+        var recipe = ingredients.Select(s => $"{s.Name}:{s.Quantity}").ToList();
+
+
+        var ask = $@"J'aimerais que tu calcule les calories pour cette recette :
+
+=== Début de la liste des ingredients ===
+{string.Join(Environment.NewLine, recipe)}
+=== Fin de la liste des ingredients ===
+
+Réponds uniquement au format json répondant à ce schéma:
+
+{{
+    calories: 10
+}}";
+
+        var messages = new ChatMessage[]
+        {
+            new (ChatRole.User, ask)
+        };
+
+        var result = await GetChatResponse<AiCalorie>(messages, aiClientTypeEnum);
+        return result.Calories;
+    }
+
     /// <summary>
     /// Converts a recipe to a RecipeDto using the specified AI client type.
     /// </summary>
@@ -48,19 +77,7 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
     /// <exception cref="InvalidOperationException">Thrown when deserialization fails.</exception>
     public async Task<RecipeDto> ConvertRecipe(string recipe, AiClientType aiClientTypeEnum, CancellationToken cancellationToken = default)
     {
-        IChatClient client;
-
-        switch (aiClientTypeEnum)
-        {
-            case AiClientType.OpenAi:
-                client = serviceProvider.GetRequiredKeyedService<IChatClient>("OpenAi");
-                break;
-            case AiClientType.DeepSeek:
-                client = serviceProvider.GetRequiredKeyedService<IChatClient>("DeepSeek");
-                break;
-            default:
-                throw new ArgumentException("Invalid AI client type", nameof(aiClientTypeEnum));
-        }
+        IChatClient client = GetChatClient(aiClientTypeEnum);
 
         var promptDto = await aiRepository.GetPrompt("RecipeConvertPrompt", cancellationToken);
         var promptRecipeConvert = promptDto.Prompt;
@@ -79,22 +96,15 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
             new (ChatRole.User, ask)
         };
 
-        ChatResponse completion = await client.GetResponseAsync(messages, new ChatOptions() { ResponseFormat = ChatResponseFormatJson.Json }, cancellationToken: cancellationToken);
+        var result = await GetChatResponse<AiRecipe>(messages, aiClientTypeEnum);
 
-        var resultText = completion.Message.Text;
-
-        ArgumentNullException.ThrowIfNullOrEmpty(resultText);
-
-        await ReportChatConsumption(completion, aiClientTypeEnum);
-
-        var serialized = JsonConvert.DeserializeObject<AiRecipe>(resultText) ?? throw new InvalidOperationException("Deserialization failed");
-
-        return GptMapper.ConvertToRecipeDto(serialized);
+        return GptMapper.ConvertToRecipeDto(result);
     }
 
     public async Task<string> GetYoutubeResume(YoutubeSummaryJson request, CancellationToken cancellationToken = default)
     {
-        IChatClient client = serviceProvider.GetRequiredKeyedService<IChatClient>("OpenAi");
+
+        IChatClient client = GetChatClient(AiClientType.OpenAi);
 
         var promptDto = await aiRepository.GetPrompt("YoutubeResume", cancellationToken);
 
@@ -109,18 +119,55 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
             new (ChatRole.User, ask)
         };
 
-        ChatResponse completion = await client.GetResponseAsync(messages, new ChatOptions() { ResponseFormat = ChatResponseFormatJson.Text }, cancellationToken: cancellationToken);
+        var result = await GetChatResponse(messages, AiClientType.OpenAi);
+
+        _ = await youtubeRepository.AddSummary(new YoutubeResumeDto() { Resume = result, Title = request.Title, Url = request.Url });
+
+        return result;
+    }
+
+
+    public async Task<T> GetChatResponse<T>(ChatMessage[] chatMessages, AiClientType aiClientTypeEnum, CancellationToken cancellationToken = default)
+    {
+        var result = await GetChatResponse(chatMessages, aiClientTypeEnum, cancellationToken);
+        var serialized = JsonConvert.DeserializeObject<T>(result) ?? throw new InvalidOperationException("Deserialization failed");
+
+        return serialized;
+    }
+    
+    public async Task<string> GetChatResponse(ChatMessage[] chatMessages, AiClientType aiClientTypeEnum, CancellationToken cancellationToken = default)
+    {
+        IChatClient client = GetChatClient(aiClientTypeEnum);
+
+        ChatResponse completion = await client.GetResponseAsync(chatMessages, new ChatOptions() { ResponseFormat = ChatResponseFormatJson.Json }, cancellationToken: cancellationToken);
 
         var resultText = completion.Message.Text;
 
-        ArgumentNullException.ThrowIfNullOrEmpty(resultText);
+        ArgumentException.ThrowIfNullOrEmpty(resultText);
 
-        await ReportChatConsumption(completion, AiClientType.OpenAi);
-        _ = await youtubeRepository.AddSummary(new YoutubeResumeDto() { Resume = resultText, Title = request.Title, Url = request.Url });
-
+        await ReportChatConsumption(completion, aiClientTypeEnum);
         return resultText;
     }
 
+
+    private IChatClient GetChatClient(AiClientType aiClientTypeEnum)
+    {
+        IChatClient client;
+
+        switch (aiClientTypeEnum)
+        {
+            case AiClientType.OpenAi:
+                client = serviceProvider.GetRequiredKeyedService<IChatClient>("OpenAi");
+                break;
+            case AiClientType.DeepSeek:
+                client = serviceProvider.GetRequiredKeyedService<IChatClient>("DeepSeek");
+                break;
+            default:
+                throw new ArgumentException("Invalid AI client type", nameof(aiClientTypeEnum));
+        }
+
+        return client;
+    }
 
     /// <summary>
     /// Reports the consumption of image generation to the AI repository.

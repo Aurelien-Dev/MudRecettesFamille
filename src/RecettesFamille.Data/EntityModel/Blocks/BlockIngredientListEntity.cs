@@ -6,6 +6,7 @@ public class BlockIngredientListEntity : BlockBaseEntity
 {
     [MaxLength(100)]
     public string Name { get; set; } = "Ingrédients";
+    public int? Calories { get; set; }
     public List<IngredientEntity> Ingredients { get; set; } = [];
 
     public BlockIngredientListEntity()
