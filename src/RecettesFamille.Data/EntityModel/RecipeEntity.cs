@@ -14,7 +14,9 @@ public class RecipeEntity
     public int CookingTime { get; set; }
     public int RestTime { get; set; }
     public int Portion { get; set; }
- 
+    public DateOnly CreatedDate { get; set; }
+    public DateOnly? UpdatedDate { get; set; }
+
     [MaxLength(200)]
     public string Tags { get; set; } = string.Empty;
 
