@@ -32,7 +32,6 @@ public static class Messages
         "Recettes chaudes bouillantes ! 🍛",
         "Fraîchement sorties du carnet de recettes 📓",
         "Les petits derniers du fourneau 🧁",
-        "En direct de notre cuisine 👩‍🍳",
         "À déguster sans attendre ! 🍽️",
         "Les plats du moment 🌟",
         "Tout juste dressés dans l’assiette 🍽️",

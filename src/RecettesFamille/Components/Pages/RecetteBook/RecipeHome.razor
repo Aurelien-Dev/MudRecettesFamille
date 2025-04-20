@@ -108,7 +108,7 @@
             xsItemSize = 6;
         }
 
-        RecipeGroups = GroupRecipes(Recipes.OrderBy(c => c.CreatedDate).Take(12).ToList(), groupSize);
+        RecipeGroups = GroupRecipes(Recipes.OrderByDescending(c => c.CreatedDate).Take(12).ToList(), groupSize);
     }
 
     private List<List<RecipeForListDto>> GroupRecipes(List<RecipeForListDto> recipes, int groupSize)
