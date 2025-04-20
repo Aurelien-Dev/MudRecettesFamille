@@ -2,7 +2,7 @@
 
 namespace RecettesFamille.Extensions;
 
-public static class ErrorMessages
+public static class Messages
 {
     private static readonly string[] ErrorsMessage = [
         "Oops, la recette a brûlé ! 🫠 Réessayez ou rafraîchissez la page !",
@@ -20,10 +20,38 @@ public static class ErrorMessages
         "Catastrophe en cuisine ! 😱 Retentons la préparation ensemble."
     ];
 
+    private static readonly string[] LatestRecipeTitles = [
+        "Tout juste sortis du four 🔥",
+        "Recettes toutes chaudes 😋",
+        "Fraîchement mijoté 🫕",
+        "Les dernières inspirations du chef 👨‍🍳",
+        "Tout droit sorties des casseroles 🥘",
+        "Encore fumantes ! 💨",
+        "Nouvelles créations maison 🏠",
+        "Ça sent bon la nouveauté ! 👃",
+        "Recettes chaudes bouillantes ! 🍛",
+        "Fraîchement sorties du carnet de recettes 📓",
+        "Les petits derniers du fourneau 🧁",
+        "En direct de notre cuisine 👩‍🍳",
+        "À déguster sans attendre ! 🍽️",
+        "Les plats du moment 🌟",
+        "Tout juste dressés dans l’assiette 🍽️",
+        "Les dernières inspirations du chef 🍽️"
+    ];
+
+    public static string GetRandomLatestRecipeTitles()
+    {
+        return GetRandomString(LatestRecipeTitles);
+    }
     public static string GetRandomErrorMessage()
     {
+        return GetRandomString(ErrorsMessage);
+    }
+
+    private static string GetRandomString(string[] strings)
+    {
         var random = new Random();
-        var index = random.Next(ErrorsMessage.Length);
-        return ErrorsMessage[index];
+        var index = random.Next(strings.Length);
+        return strings[index];
     }
 }

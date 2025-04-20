@@ -6,12 +6,17 @@ namespace RecettesFamille.Managers
     {
         public static readonly MudTheme Customtheme = new()
         {
-            PaletteLight = new PaletteLight()
+            LayoutProperties = new()
             {
-                Primary = Colors.LightBlue.Darken2,
-                AppbarBackground = Colors.LightBlue.Darken2,
+                DefaultBorderRadius = "10px",
+               
             },
-            PaletteDark = new PaletteDark()
+            PaletteLight = new()
+            {
+                Primary = "#d18363",//Colors.LightBlue.Darken2,
+                AppbarBackground = "#84533e", //Colors.LightBlue.Darken2,
+            },
+            PaletteDark = new()
             {
                 TextPrimary = "#ffffffdd",
                 AppbarText = "#ffffffdd",

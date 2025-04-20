@@ -55,7 +55,12 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
             {
                 Id = c.Id,
                 Name = c.Name,
-                Tags = c.Tags
+                Tags = c.Tags,
+                CreatedDate = c.CreatedDate,
+                Image = c.BlocksInstructions
+                         .Where(c => c is BlockImageEntity)
+                         .Select(b => (b as BlockImageEntity).Image)
+                         .FirstOrDefault()
             })
             .ToListAsync(cancellationToken);
 
@@ -76,7 +81,8 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         {
             Id = c.Id,
             Name = c.Name,
-            Tags = c.Tags
+            Tags = c.Tags,
+            CreatedDate = c.CreatedDate
         }).ToListAsync(cancellationToken);
 
         return result;
@@ -122,7 +128,7 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
     public async Task<bool> UpdateRecipe(RecipeDto? recipe, CancellationToken cancellationToken = default)
     {
         if (recipe is null)
-            return false    ;
+            return false;
 
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var element = await context.Recipes.FindAsync([recipe.Id], cancellationToken);

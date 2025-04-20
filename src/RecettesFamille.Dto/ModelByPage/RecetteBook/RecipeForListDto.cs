@@ -5,5 +5,7 @@
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Tags { get; set; } = string.Empty;
+        public DateOnly CreatedDate { get; set; }
+        public string? Image { get; set; }
     }
 }

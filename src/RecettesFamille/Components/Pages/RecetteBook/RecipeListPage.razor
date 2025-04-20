@@ -1,6 +1,4 @@
-﻿@page "/"
-@attribute [Authorize]
-@implements IBrowserViewportObserver
+﻿@implements IBrowserViewportObserver
 
 @using Microsoft.AspNetCore.Authorization
 @using RecettesFamille.Data.Repository.IRepositories
@@ -8,15 +6,16 @@
 @using RecettesFamille.Dto.Models
 @using RecettesFamille.Extensions
 
+
+<!-- Recherche & Filtres -->
+<MudStack Row="true" Spacing="3">
+    <MudTextField T="string" @bind-Value="_searchString" Label="Rechercher des recettes ..." Variant="Variant.Outlined" Class="ma-0" />
+    <MudButton Variant="Variant.Filled" DropShadow="false" Color="Color.Primary" Class="py-0">Je suis curieux</MudButton>
+</MudStack>
+
 <MudGrid>
     <MudItem md="3" xs="12">
         <MudStack>
-
-            <MudPaper>
-                <MudText class="mud-list-subheader mud-list-subheader-gutters" Style="font-weight: 500;">Recherche libre</MudText>
-                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Clearable="true"
-                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mx-5 mb-2"></MudTextField>
-            </MudPaper>
 
             <MudPaper>
                 <MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true" SelectedValuesChanged="OnSelectedValuesChanged">

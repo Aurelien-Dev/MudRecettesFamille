@@ -1,0 +1,131 @@
+﻿@page "/"
+@attribute [Authorize]
+@implements IBrowserViewportObserver
+
+@using Microsoft.AspNetCore.Authorization
+@using MudBlazor
+@using RecettesFamille.Components.Pages.RecetteBook.Components
+@using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Dto.ModelByPage.RecetteBook
+@using RecettesFamille.Extensions
+
+@inject IRecipeRepository RecipeRepository
+@inject IBrowserViewportService BrowserViewportService
+
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-3">
+
+    <!-- Dernières recettes -->
+    <MudStack Row="true" Class="mt-0 mb-0">
+        <MudText Typo="Typo.h5" Style="font-weight:900;">@Messages.GetRandomLatestRecipeTitles()</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.ArrowBackIosNew" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" OnClick="@(() => mudCarousel.Previous())" />
+        <MudIconButton Icon="@Icons.Material.Filled.ArrowForwardIos" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" OnClick="@(() => mudCarousel.Next())" />
+    </MudStack>
+
+    @if (RecipeGroups != null && RecipeGroups.Any())
+    {
+        <MudCarousel @ref="mudCarousel" TData="RecipeForListDto" Class="mud-width-full pa-0 ma-0 mb-10" Style="min-height:440px;" AutoCycle="false" ShowBullets="false" ShowArrows="false">
+            @foreach (var group in RecipeGroups)
+            {
+                <MudCarouselItem Class="pa-0 ma-0">
+                    <MudGrid Class="" Justify="Justify.Center" Style="height:100%;">
+                        @foreach (var recipe in group)
+                        {
+                            <MudItem xs="@xsItemSize">
+                                <RecipeCard Recipes="@recipe" />
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </MudCarouselItem>
+            }
+        </MudCarousel>
+    }
+    else
+    {
+        <MudText Typo="Typo.h6">Aucune recette trouvée.</MudText>
+    }
+
+    @* <!-- Recette du jour -->
+    <MudPaper Class="mb-6 rounded-xl">
+        <MudGrid>
+            <MudItem xs="12" md="5" Class="d-flex py-0 my-0">
+                <MudImage Src="https://images.getrecipekit.com/20221202154358-pouletfrittomahawk.jpg?aspect_ratio=16:9&quality=90&"
+                          Alt="Ailes de poulet croustillantes" Class="rounded-l-xl" ObjectFit="ObjectFit.Cover" Fluid="true" />
+            </MudItem>
+            <MudItem xs="12" md="7" Class="align-content-center">
+
+                <MudText Typo="Typo.h6">Recette du jour</MudText>
+                <MudText Typo="Typo.h4" Style="font-weight:900;" Class="mb-4">Ailes de poulet croustillantes</MudText>
+
+                <MudButton Color="Color.Primary" Variant="Variant.Filled">Voir la recette</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper> *@
+
+
+
+    <MudStack Class="mt-6 mb-6">
+
+        <RecipeListPage />
+    </MudStack>
+
+    @* <!-- Catégories -->
+    <MudText Typo="Typo.h5" Class="mt-6 mb-6" Style="font-weight:900;">Recettes par catégorie</MudText>
+    <MudGrid Class="justify-space-around">
+        @for (int i = 0; i < 8; i++)
+        {
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-5" Style="cursor: pointer;">
+                    <MudStack AlignItems="AlignItems.Center">
+                        <MudIcon Icon="fas fa-ice-cream" Size="Size.Large" Class="mb-2" />
+                        <MudText Typo="Typo.h6" Align="Align.Center">Salé</MudText>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        }
+    </MudGrid> *@
+
+</MudContainer>
+
+@code {
+    MudCarousel<RecipeForListDto> mudCarousel { get; set; } = default!;
+    List<RecipeForListDto> Recipes { get; set; } = null!;
+    List<List<RecipeForListDto>> RecipeGroups { get; set; } = new();
+
+    int groupSize = 4;
+    int xsItemSize = 3;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var result = await RecipeRepository.GetAllLightRecipe();
+        Recipes = result.OrderBy(c => c.Name).ToList();
+
+        var breakpoint = await BrowserViewportService.GetCurrentBreakpointAsync();
+        if (breakpoint <= Breakpoint.Sm)
+        {
+            groupSize = 2;
+            xsItemSize = 6;
+        }
+
+        RecipeGroups = GroupRecipes(Recipes.OrderBy(c => c.CreatedDate).Take(12).ToList(), groupSize);
+    }
+
+    private List<List<RecipeForListDto>> GroupRecipes(List<RecipeForListDto> recipes, int groupSize)
+    {
+        var result = new List<List<RecipeForListDto>>();
+
+        for (int i = 0; i < recipes.Count; i += groupSize)
+        {
+            result.Add(recipes.Skip(i).Take(groupSize).ToList());
+        }
+
+        return result;
+    }
+
+    public Guid Id => throw new NotImplementedException();
+    public Task NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
+    {
+        return Task.CompletedTask;
+    }
+}

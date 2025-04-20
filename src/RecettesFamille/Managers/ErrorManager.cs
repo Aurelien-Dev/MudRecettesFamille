@@ -9,7 +9,7 @@ public class ErrorManager(ISnackbar snackbar)
     {
         snackbar.Clear();
         snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomEnd;
-        snackbar.Add(ErrorMessages.GetRandomErrorMessage(), Severity.Error);
+        snackbar.Add(Messages.GetRandomErrorMessage(), Severity.Error);
     }
     public void DisplayError(string message)
     {
