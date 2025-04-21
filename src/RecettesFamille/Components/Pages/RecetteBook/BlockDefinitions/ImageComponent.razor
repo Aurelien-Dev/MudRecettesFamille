@@ -114,7 +114,7 @@ else
             _cancellationTokenSource = new();
 
             _isWorkInProgress = true;
-            var base64Image = await IaManager.AskImage(Block.Recipe.Name, _cancellationTokenSource.Token);
+            var base64Image = await IaManager.AskImage(Block.Recipe.Id, _cancellationTokenSource.Token);
             _isWorkInProgress = false;
 
             var parameters = new DialogParameters<CropDialog>

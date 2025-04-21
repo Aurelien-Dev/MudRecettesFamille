@@ -6,6 +6,7 @@ using RecettesFamille.Data.Repository.IRepositories;
 using RecettesFamille.Dto.ModelByPage.RecetteBook;
 using RecettesFamille.Dto.Models;
 using RecettesFamille.Dto.Models.Blocks;
+using System.Text;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
@@ -100,6 +101,42 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
         return mapper.Map<RecipeDto>(result);
     }
+
+
+    public async Task<string> GetRawRecipe(int recipeId, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var result = await context.Recipes.Include(s => s.BlocksInstructions)
+            .ThenInclude(b => ((BlockIngredientListEntity)b).Ingredients)
+            .Where(r => r.Id == recipeId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (result == null)
+            return string.Empty;
+
+        StringBuilder builder = new StringBuilder();
+
+        builder.AppendLine(result.Name);
+        builder.AppendLine();
+
+        foreach (var item in result.BlocksInstructions.OfType<BlockIngredientListEntity>())
+        {
+            var ingredientList = item.Ingredients.Select(s => $"{s.Name}:{s.Quantity}").ToList();
+            builder.AppendLine("---- Ingredient List");
+            builder.AppendLine(string.Join(Environment.NewLine, ingredientList));
+        }
+
+        builder.AppendLine();
+        builder.AppendLine("---- Instructions");
+        foreach (var item in result.BlocksInstructions.OfType<BlockInstructionEntity>())
+        {
+            builder.AppendLine(item.Instruction);
+        }
+
+        return builder.ToString();
+    }
+
 
     #region Recipe
 

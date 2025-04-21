@@ -13,6 +13,7 @@ public interface IRecipeRepository
     Task<List<RecipeForListDto>> GetAllLightRecipe(string[] tags, CancellationToken cancellationToken = default);
 
     Task<RecipeDto> GetWithInstructions(int recipeId, CancellationToken cancellationToken = default);
+    Task<string> GetRawRecipe(int recipeId, CancellationToken cancellationToken = default);
 
     Task<RecipeDto> AddRecipe(RecipeDto recipe, CancellationToken cancellationToken = default);
     Task DeleteRecipe(int recipeId, CancellationToken cancellationToken = default);

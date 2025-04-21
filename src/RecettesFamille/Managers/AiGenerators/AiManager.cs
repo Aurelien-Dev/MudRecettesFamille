@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using OpenAI.Images;
 using RecettesFamille.Data.Repository.IRepositories;
+using RecettesFamille.Data.Repository.Repositories;
 using RecettesFamille.Dto.Models;
 using RecettesFamille.Dto.Models.Blocks;
 using RecettesFamille.Managers.AiGenerators.Models;
@@ -12,7 +13,7 @@ namespace RecettesFamille.Managers.AiGenerators;
 /// <summary>
 /// Manages AI operations for generating images and converting recipes.
 /// </summary>
-public class AiManager(IServiceProvider serviceProvider, IConfiguration config, IAiRepository aiRepository, IYoutubeRepository youtubeRepository) : IAiManager
+public class AiManager(IServiceProvider serviceProvider, IConfiguration config, IAiRepository aiRepository, IYoutubeRepository youtubeRepository, IRecipeRepository recipeRepository) : IAiManager
 {
     /// <summary>
     /// Asks the AI to generate an image based on the recipe name.
@@ -20,12 +21,14 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
     /// <param name="recipeName">The name of the recipe.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A base64 string representation of the generated image.</returns>
-    public async Task<string> AskImage(string recipeName, CancellationToken cancellationToken = default)
+    public async Task<string> AskImage(int recipeId, CancellationToken cancellationToken = default)
     {
         var client = new ImageClient(model: "dall-e-3", apiKey: config["OPENAI_SECRET"]);
         var promptImageGenerator = await aiRepository.GetPrompt("ImageGeneratorPrompt", cancellationToken);
 
-        GeneratedImage image = await client.GenerateImageAsync(string.Format(promptImageGenerator.Prompt, recipeName), new ImageGenerationOptions()
+        string rawRecipe = await recipeRepository.GetRawRecipe(recipeId, cancellationToken);
+
+        GeneratedImage image = await client.GenerateImageAsync(string.Format(promptImageGenerator.Prompt, rawRecipe), new ImageGenerationOptions()
         {
             Quality = GeneratedImageQuality.Standard,
             Size = GeneratedImageSize.W1792xH1024,
@@ -134,14 +137,14 @@ Réponds uniquement au format json répondant à ce schéma:
 
         return serialized;
     }
-    
+
     public async Task<string> GetChatResponse(ChatMessage[] chatMessages, AiClientType aiClientTypeEnum, CancellationToken cancellationToken = default)
     {
         IChatClient client = GetChatClient(aiClientTypeEnum);
 
         ChatResponse completion = await client.GetResponseAsync(chatMessages, new ChatOptions() { ResponseFormat = ChatResponseFormatJson.Json }, cancellationToken: cancellationToken);
 
-        var resultText = completion.Message.Text;
+        var resultText = completion.Text;
 
         ArgumentException.ThrowIfNullOrEmpty(resultText);
 
