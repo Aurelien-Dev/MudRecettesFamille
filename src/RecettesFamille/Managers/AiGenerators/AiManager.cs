@@ -45,7 +45,7 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
         var recipe = ingredients.Select(s => $"{s.Name}:{s.Quantity}").ToList();
 
 
-        var ask = $@"J'aimerais que tu calcule les calories pour cette recette :
+        var ask = $@"J'aimerais que tu calcule les calories pour 100 grammes de cette recette :
 
 === Début de la liste des ingredients ===
 {string.Join(Environment.NewLine, recipe)}

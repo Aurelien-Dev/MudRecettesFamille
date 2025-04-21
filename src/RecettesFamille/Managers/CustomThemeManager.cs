@@ -18,7 +18,7 @@ namespace RecettesFamille.Managers
             },
             PaletteDark = new()
             {
-                TextPrimary = "#ffffffdd",
+                TextPrimary = "#1e1e1e",
                 AppbarText = "#ffffffdd",
                 DrawerText = "#ffffffbc",
             },
