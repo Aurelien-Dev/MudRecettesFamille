@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using OpenAI.Images;
 using RecettesFamille.Data.Repository.IRepositories;
-using RecettesFamille.Data.Repository.Repositories;
 using RecettesFamille.Dto.Models;
 using RecettesFamille.Dto.Models.Blocks;
 using RecettesFamille.Managers.AiGenerators.Models;
@@ -21,12 +20,21 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
     /// <param name="recipeName">The name of the recipe.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A base64 string representation of the generated image.</returns>
-    public async Task<string> AskImage(int recipeId, CancellationToken cancellationToken = default)
+    public async Task<string> AskImage(int recipeId, bool includeFullRecipe, CancellationToken cancellationToken = default)
     {
         var client = new ImageClient(model: "dall-e-3", apiKey: config["OPENAI_SECRET"]);
         var promptImageGenerator = await aiRepository.GetPrompt("ImageGeneratorPrompt", cancellationToken);
+        string rawRecipe = string.Empty;
 
-        string rawRecipe = await recipeRepository.GetRawRecipe(recipeId, cancellationToken);
+        if (includeFullRecipe)
+        {
+            rawRecipe = await recipeRepository.GetRawRecipe(recipeId, cancellationToken);
+        }
+        else
+        {
+            var recipe = await recipeRepository.GetLightRecipe(recipeId);
+            rawRecipe = recipe.Name;
+        }
 
         GeneratedImage image = await client.GenerateImageAsync(string.Format(promptImageGenerator.Prompt, rawRecipe), new ImageGenerationOptions()
         {

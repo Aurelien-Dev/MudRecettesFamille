@@ -103,6 +103,28 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
     }
 
 
+    public async Task<RecipeForListDto> GetLightRecipe(int recipeId, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var result = await context.Recipes.Where(c => c.Id == recipeId)
+            .Select(c => new RecipeForListDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Tags = c.Tags,
+                CreatedDate = c.CreatedDate,
+                Image = c.BlocksInstructions
+                         .Where(c => c is BlockImageEntity)
+                         .Select(b => (b as BlockImageEntity).Image)
+                         .FirstOrDefault()
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return result;
+    }
+
+
     public async Task<string> GetRawRecipe(int recipeId, CancellationToken cancellationToken = default)
     {
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
