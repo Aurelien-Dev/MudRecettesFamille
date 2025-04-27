@@ -1,0 +1,156 @@
+﻿@page "/ChatAiTest"
+@using System.ComponentModel
+@using RecettesFamille.Components.AiChat.ChatMessageTypes
+@inject IChatClient ChatClient
+@inject SemanticSearch Search
+@inject IScrollManager ScrollManager
+
+<h3>ChatTest</h3>
+
+@foreach (var message in messages)
+{
+    if (message is UserChatMessageModel user)
+    {
+        Console.WriteLine("UserChatMessageModel");
+        <UserChatMessageItem Message="user" />
+    }
+    else if (message is AssistantChatMessageModel assistant)
+    {
+        Console.WriteLine("AssistantChatMessageModel");
+        <AssistantChatMessageItem Message="assistant" />
+    }
+    else
+    {
+        Console.WriteLine(message.GetType());
+    }
+}
+
+
+@if (currentResponseMessage is not null)
+{
+    <ProgressChatMessageItem @ref="currentChatMessageItem" Message="@currentResponseMessage" InProgress="true" />
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+}
+<MudTextField id="input-ai" @ref="mudTextInput" T="string" ValueChanged="@(s => MessageChange(s))" Label="Question ?" Variant="Variant.Outlined" />
+
+@code {
+
+    private const string SystemPrompt = @"You are an assistant who answers questions about information you retrieve.
+- Always answer in French.
+- Do not answer questions about anything else.
+- Use only simple markdown to format your responses.
+
+Searching:
+- Always use the search tool to find relevant information.
+- If the user provides only a keyword (ingredient or recipe name), perform a search based on this keyword.
+
+Formatting the reply:
+- Write the answer text in French.
+- After the answer, display the JSON results directly, without adding any introductory sentence before the JSON block.
+- Always include the citation if results are found.
+
+Example of reply:
+(French text answer)
+```json
+           {
+               ""result"":[
+                   {
+                       ""RecipeName"": ""Soupe parmentière"",
+                       ""RecipeId"": ""82_1"",
+                       ""Tags"": []
+                   },
+                   {
+                       ""RecipeName"": ""Potage du cultivateur"",
+                       ""RecipeId"": ""85_1"",
+                       ""Tags"": []
+                   },
+                   {
+                       ""RecipeName"": ""Soupe à l’oseille et au cerfeuil"",
+                       ""RecipeId"": ""86_1"",
+                       ""Tags"": []
+                   },
+                   ...
+               ]
+           }
+```
+           ";
+
+    private readonly ChatOptions chatOptions = new();
+    private CancellationTokenSource? responseCancellation;
+
+    private readonly List<ChatMessage> messages = new();
+
+    private AssistantChatMessageModel? currentResponseMessage;
+
+
+
+    private ProgressChatMessageItem currentChatMessageItem;
+    private MudTextField<string> mudTextInput;
+
+
+    protected override void OnInitialized()
+    {
+        messages.Add(new(ChatRole.System, SystemPrompt));
+        chatOptions.Tools = [AIFunctionFactory.Create(SearchAsync)];
+        chatOptions.ResponseFormat = ChatResponseFormat.Text;
+    }
+
+    private async Task MessageChange(string message)
+    {
+        if (string.IsNullOrEmpty(message))
+            return;
+        StateHasChanged();
+
+        CancelAnyCurrentResponse();
+
+        // Add the user message to the conversation
+        messages.Add(new UserChatMessageModel(message));
+        StateHasChanged();
+
+        // Stream and display a new response from the IChatClient
+        var responseText = new TextContent("");
+        currentResponseMessage = new AssistantChatMessageModel([responseText]);
+        responseCancellation = new();
+        await foreach (var update in ChatClient.GetStreamingResponseAsync([.. messages], chatOptions, responseCancellation.Token))
+        {
+            messages.AddMessages(update, filter: c => c is not TextContent);
+            responseText.Text += update.Text;
+            ProgressChatMessageItem.NotifyChanged(currentResponseMessage);
+            await ScrollManager.ScrollToBottomAsync("input-ai");
+        }
+        StateHasChanged();
+
+        messages.Add(currentResponseMessage!);
+
+        currentResponseMessage = null;
+        StateHasChanged();
+
+        mudTextInput?.Clear();
+    }
+
+    private void CancelAnyCurrentResponse()
+    {
+        // If a response was cancelled while streaming, include it in the conversation so it's not lost
+        if (currentResponseMessage is not null)
+        {
+            messages.Add(currentResponseMessage);
+        }
+
+        responseCancellation?.Cancel();
+        currentResponseMessage = null;
+    }
+
+    [Description("Searches for information using a phrase or keyword")]
+    private async Task<IEnumerable<string>> SearchAsync(
+        [Description("The phrase to search for.")] string searchPhrase,
+        [Description("If possible, specify the filename to search that file only. If not provided or empty, the search includes all files.")] string? filenameFilter = null)
+    {
+        await InvokeAsync(StateHasChanged);
+        var results = await Search.SearchAsync(searchPhrase, filenameFilter, maxResults: 25);
+        return results.Select(result => result.ToString());
+    }
+
+    public void Dispose() => responseCancellation?.Cancel();
+}
+
+

@@ -1,0 +1,16 @@
+@using System.Runtime.CompilerServices
+@using System.Text.RegularExpressions
+@using System.Linq
+@using System.Text.Json
+
+<MudChat ChatPosition="ChatBubblePosition.Start">
+    <MudAvatar Color="Color.Primary">ME</MudAvatar>
+    <MudChatBubble>
+        @Message.Text
+    </MudChatBubble>
+</MudChat>
+
+@code {
+    [Parameter, EditorRequired]
+    public required UserChatMessageModel Message { get; set; }
+}

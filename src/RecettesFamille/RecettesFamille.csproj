@@ -30,6 +30,7 @@
     <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RecettesFamille.Ai\RecettesFamille.Ai.csproj" />
     <ProjectReference Include="..\RecettesFamille.Data.Repository\RecettesFamille.Data.Repository.csproj" />
   </ItemGroup>
 </Project>
