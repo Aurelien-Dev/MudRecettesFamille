@@ -116,16 +116,6 @@ app.MapPost("/api/youtube-summary", async (HttpRequest request, [FromServices] A
     return Results.Ok(new { result = resume });
 });
 
-
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var dbContext = services.GetRequiredService<ApplicationDbContext>();
-
-    await DataIngestor.IngestDataAsync(app.Services, new SQLRecipeSource(dbContext));
-}
-
 await app.RunAsync();
 
 public class YoutubeSummaryJson
