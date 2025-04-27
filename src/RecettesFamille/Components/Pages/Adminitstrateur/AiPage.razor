@@ -9,16 +9,11 @@
 @attribute [Authorize(Roles = "Admin, Contributor")]
 @layout AdminLayout
 
-<AuthorizeView Roles="Admin">
-    <p>Bienvenue, Administrateur !</p>
-</AuthorizeView>
-<AuthorizeView Roles="Contributor">
-    <p>Bienvenue, Contributor !</p>
-</AuthorizeView>
-<AuthorizeView Roles="Reader">
-    <p>Bienvenue, Reader !</p>
-</AuthorizeView>
+<MudStack Spacing="5">
 
+    <MudButton Variant="Variant.Filled" OnClick="IngestNewData">Ingest new data</MudButton>
+
+</MudStack>
 
 
 @code {
