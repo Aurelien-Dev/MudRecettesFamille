@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecettesFamille.Dto", "Rece
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecettesFamille.Data.Repository", "RecettesFamille.Data.Repository\RecettesFamille.Data.Repository.csproj", "{EC82FB27-55CE-4D15-89E0-ABF959A8DF46}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecettesFamille.Ai", "RecettesFamille.Ai\RecettesFamille.Ai.csproj", "{C74CA820-FC8F-40AF-8D02-9C1E54F4CE88}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{EC82FB27-55CE-4D15-89E0-ABF959A8DF46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC82FB27-55CE-4D15-89E0-ABF959A8DF46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC82FB27-55CE-4D15-89E0-ABF959A8DF46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C74CA820-FC8F-40AF-8D02-9C1E54F4CE88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C74CA820-FC8F-40AF-8D02-9C1E54F4CE88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C74CA820-FC8F-40AF-8D02-9C1E54F4CE88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C74CA820-FC8F-40AF-8D02-9C1E54F4CE88}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

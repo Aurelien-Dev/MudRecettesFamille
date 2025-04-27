@@ -1,0 +1,63 @@
+@using System.Runtime.CompilerServices
+@using System.Text.RegularExpressions
+@using System.Linq
+@using System.Text.Json
+
+@if (Message.Role == ChatRole.Assistant)
+{
+    foreach (var content in Message.Contents)
+    {
+        if (content is TextContent { Text: { Length: > 0 } text })
+        {
+            <MudChat ChatPosition="ChatBubblePosition.Start">
+                <MudAvatar>IA</MudAvatar>
+                <MudChatBubble>
+                    @if (content is TextContent { Text: { Length: > 0 } text })
+                    {
+                        string trueContent = RetirerJson(content);
+
+                        <MudMarkdown Value="@trueContent" />
+                    }
+                </MudChatBubble>
+            </MudChat>
+        }
+    }
+}
+
+@code {
+    private static readonly ConditionalWeakTable<ChatMessage, ProgressChatMessageItem> SubscribersLookup = new();
+    private static readonly Regex CitationRegex = new(@"<citation filename='(?<file>[^']*)' page_number='(?<page>\d*)'>(?<quote>.*?)</citation>", RegexOptions.NonBacktracking);
+
+
+    [Parameter, EditorRequired]
+    public required ChatMessage Message { get; set; }
+
+    [Parameter]
+    public bool InProgress { get; set; }
+
+    protected override void OnInitialized()
+    {
+        SubscribersLookup.AddOrUpdate(Message, this);
+    }
+
+    public static string RetirerJson(AIContent content)
+    {
+        if (content is not TextContent { Text: { Length: > 0 } text })
+        {
+            return string.Empty;
+        }
+
+        // On enlève tout ce qui commence par ```json jusqu'à la fin ou jusqu'à ```
+        var sansJson = Regex.Replace(text, @"```json[\s\S]*?(```|$)", "", RegexOptions.IgnoreCase).Trim();
+
+        return sansJson;
+    }
+
+    public static void NotifyChanged(ChatMessage source)
+    {
+        if (SubscribersLookup.TryGetValue(source, out var subscriber))
+        {
+            subscriber.StateHasChanged();
+        }
+    }
+}

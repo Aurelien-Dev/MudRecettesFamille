@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
 using RecettesFamille;
+using RecettesFamille.Ai.Services.Ingestion;
 using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
 using RecettesFamille.Data;
 using RecettesFamille.Data.Repository;
-using RecettesFamille.Dto.Models;
 using RecettesFamille.Managers;
 using RecettesFamille.Managers.AiGenerators;
 using System.Security.Claims;
@@ -48,6 +48,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 builder.Services.AddScoped<EmailManager>();
 
 builder.Services.AddRepository();
+builder.Services.AddAi(builder.Configuration);
 
 builder.Services.AddManagers(builder.Configuration);
 builder.Services.AddScoped<AiManager>();
@@ -85,6 +86,7 @@ builder.Services.AddServerSideBlazor()
 builder.Logging.AddConsole();
 
 var app = builder.Build();
+IngestionCacheDbContext.Initialize(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -113,6 +115,16 @@ app.MapPost("/api/youtube-summary", async (HttpRequest request, [FromServices] A
     var resume = await aiManager.GetYoutubeResume(requestBody, cancellationToken);
     return Results.Ok(new { result = resume });
 });
+
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var dbContext = services.GetRequiredService<ApplicationDbContext>();
+
+    await DataIngestor.IngestDataAsync(app.Services, new SQLRecipeSource(dbContext));
+}
 
 await app.RunAsync();
 

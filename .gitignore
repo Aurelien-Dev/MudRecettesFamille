@@ -82,3 +82,6 @@ _[Ss]cripts
 /Sources/Web/Client/Properties/launchSettings.json
 /Sources/Web/Client/Properties/launchSettings.json
 /Sources/.idea
+/src/RecettesFamille/ingestioncache.db
+/src/RecettesFamille/ingestioncache.db-shm
+/src/RecettesFamille/ingestioncache.db-wal

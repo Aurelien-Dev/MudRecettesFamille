@@ -139,8 +139,14 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
         StringBuilder builder = new StringBuilder();
 
-        builder.AppendLine(result.Name);
+        builder.AppendLine($"Title : {result.Name}");
         builder.AppendLine();
+        builder.AppendLine($"Temps de préparation : {result.PrepTime} min, Cuisson : {result.CookingTime} min, Repos : {result.RestTime} min");
+        builder.AppendLine($"Portions : {result.Portion}");
+        if (!string.IsNullOrWhiteSpace(result.Tags))
+        {
+            builder.AppendLine($"Tags : {result.Tags}");
+        }
 
         foreach (var item in result.BlocksInstructions.OfType<BlockIngredientListEntity>())
         {
