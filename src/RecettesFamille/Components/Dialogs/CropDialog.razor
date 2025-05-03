@@ -1,4 +1,6 @@
-﻿@using Cropper.Blazor.Extensions
+﻿@using Cropper.Blazor.Events
+@using Cropper.Blazor.Events.CropEvent
+@using Cropper.Blazor.Extensions
 @using Cropper.Blazor.Models
 
 <MudDialog>
@@ -7,7 +9,7 @@
     </TitleContent>
     <DialogContent>
         <MudPaper Height="200">
-            <CropperComponent @ref="_cropperComponent" Class="big-img" Src="@ImageSource" Options="@_options" />
+            <CropperComponent @ref="_cropperComponent" Class="big-img" Src="@ImageSource.ToImageSrc()" OnCropEvent="OnCropEvent" Options="_options" />
         </MudPaper>
     </DialogContent>
     <DialogActions>
@@ -23,31 +25,53 @@
         max-width: 100%;
     }
 </style>
+
 @code {
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = null!;
 
     [Parameter]
-    public string ImageSource { get; set; } = "https://via.placeholder.com/1600x900";
+    public byte[] ImageSource { get; set; }
 
     private CropperComponent? _cropperComponent;
+    private CropperData _currentCropperData = null!;
+
     private readonly Options _options = new()
-        {
-            AspectRatio = (decimal)16 / 11,
-        };
-
-    private async Task Submit()
     {
-        var getCroppedCanvasOptions = new GetCroppedCanvasOptions
+        AspectRatio = (decimal)4 / 3,
+    };
+
+
+    public async void OnCropEvent(JSEventData<CropEvent> cropJSEvent)
+    {
+        await InvokeAsync(() =>
+        {
+            if (cropJSEvent?.Detail is not null)
             {
-                MaxHeight = 4096,
-                MaxWidth = 4096,
-                ImageSmoothingQuality = ImageSmoothingQuality.High.ToEnumString()
-            };
+                _currentCropperData = cropJSEvent.Detail;
+            }
+        });
+    }
 
-        var newImage = await _cropperComponent!.GetCroppedCanvasDataURLAsync(getCroppedCanvasOptions);
+    private void Submit()
+    {
+        try
+        {
+            var getCroppedCanvasOptions = new GetCroppedCanvasOptions();
 
-        MudDialog.Close(DialogResult.Ok(newImage));
+            if (_currentCropperData is null)
+            {
+                return;
+            }
+
+            ImageSource = ImageSource.CropImage(_currentCropperData.X, _currentCropperData.Y, _currentCropperData.Width, _currentCropperData.Height);
+
+            MudDialog.Close(DialogResult.Ok(ImageSource));
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     private void Cancel() => MudDialog.Cancel();
