@@ -1,11 +1,14 @@
-﻿namespace RecettesFamille.Data.EntityModel.Blocks;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace RecettesFamille.Data.EntityModel.Blocks;
 public class BlockImageEntity : BlockBaseEntity
 {
-    public string Image { get; set; }
+
+    [MaxLength(1 * 1024 * 1024)] // 1 Mo en bytes
+    public byte[]? Image { get; set; }
 
     public BlockImageEntity()
     {
         HalfPage = true;
-        Image = "DALL·E.webp";
     }
 }

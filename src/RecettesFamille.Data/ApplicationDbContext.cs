@@ -35,7 +35,13 @@ namespace RecettesFamille.Data
                       .IsRequired();
             });
 
-            builder.Entity<BlockImageEntity>();
+            builder.Entity<BlockImageEntity>(entity =>
+            {
+
+                entity.Property(p => p.Image).HasColumnType("BYTEA").IsRequired(false);
+                entity.ToTable(t => t.HasCheckConstraint("CHK_Photo_ImageDataSize", $"octet_length(image_data) <= {1 * 1024 * 1024}")); // 1 Mo en bytes
+            });
+
             builder.Entity<BlockIngredientListEntity>();
             builder.Entity<BlockInstructionEntity>();
 
@@ -111,7 +117,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Applicatio
     public ApplicationDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-        var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
+        var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=test;Username=pguser;Password=PGUserPwd;Pooling=true";
         optionsBuilder.UseNpgsql(postgresCs);
 
         return new ApplicationDbContext(optionsBuilder.Options);

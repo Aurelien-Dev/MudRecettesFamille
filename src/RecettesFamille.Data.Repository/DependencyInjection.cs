@@ -22,6 +22,7 @@ public static class DependencyInjection
         //AutoMapper
         var mapperConfig = new MapperConfiguration(cfg =>
         {
+            cfg.AllowNullCollections = true;
             cfg.AddProfile<MappingProfile>();
         });
         var mapper = mapperConfig.CreateMapper();

@@ -2,11 +2,10 @@
 
 public class BlockImageDto : BlockBaseDto
 {
-    public string Image { get; set; }
+    public byte[]? Image { get; set; }
 
     public BlockImageDto()
     {
         HalfPage = true;
-        Image = "DALL·E.webp";
     }
 }

@@ -1,7 +1,7 @@
 ﻿@using RecettesFamille.Dto.ModelByPage.RecetteBook
 
 <MudCard>
-    <MudCardMedia Image="@Image" Height="200" Style="@ClassImage" />
+    <MudCardMedia Image="@Image.ToImageSrc()" Height="200" Style="@ClassImage" />
     <MudCardContent Class="pb-0" Style="min-height:140px;">
         <MudText Typo="Typo.h6" Style="font-weight:600;">@Recipes.Name</MudText>
         <MudChipSet T="string">
@@ -16,6 +16,6 @@
 @code {
     [Parameter] public RecipeForListDto Recipes { get; set; } = default!;
 
-    string Image => Recipes.Image ?? "empty.png";
-    string ClassImage => Recipes.Image ?? "opacity: 0.23;";
+    byte[] Image => Recipes.Image;
+    string ClassImage => Recipes.Image == null ? "opacity: 0.23;": string.Empty;
 }

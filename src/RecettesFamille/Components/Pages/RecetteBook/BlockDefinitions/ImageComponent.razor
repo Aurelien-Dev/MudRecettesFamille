@@ -3,9 +3,9 @@
 @using RecettesFamille.Components.Dialogs
 @using Cropper.Blazor
 @using RecettesFamille.Dto.Models.Blocks
-@using RecettesFamille.Extensions
 @using RecettesFamille.Managers
 @using RecettesFamille.Managers.AiGenerators
+@using ImageMagick
 @inherits BaseBlockDefinition<BlockImageDto>
 
 @if (EditMode)
@@ -40,14 +40,14 @@
                 <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
             </MudOverlay>
 
-            <MudImage Src="@Block.Image" Fluid="false" ObjectFit="ObjectFit.Cover" Height="300" Elevation="25" Class="rounded-lg" Style="width:100%">
+            <MudImage Src="@(Block.Image != null ? Block.Image.ToImageSrc() : "empty.png")" Fluid="false" ObjectFit="ObjectFit.Cover" Height="350" Elevation="25" Class="rounded-lg" Style="@($"width:100%;{ClassImage}")">
             </MudImage>
         </MudItem>
     </MudGrid>
 }
 else
 {
-    <MudImage Src="@Block.Image" Fluid="false" ObjectFit="ObjectFit.Cover" Height="300" Elevation="25" Class="rounded-lg">
+    <MudImage Src="@(Block.Image != null ? Block.Image.ToImageSrc() : "empty.png")" Fluid="false" ObjectFit="ObjectFit.Cover" Height="350" Elevation="25" Class="rounded-lg" Style="@($"width:100%;{ClassImage}")">
     </MudImage>
 }
 
@@ -60,20 +60,19 @@ else
     private readonly long _maxFileSize = 1024 * 1024 * 15;
     private bool _isWorkInProgress;
     private CancellationTokenSource _cancellationTokenSource = null!;
-
+    private string ClassImage => Block.Image == null ? "opacity: 0.23;" : string.Empty;
 
     private async Task OnInputFileChanged(IBrowserFile e)
     {
         try
         {
-            var base64Image = await ConvertToBase64Async(e);
-            Block.Image = base64Image;
+            var imageBytes = await ConvertToByteArrayAsync(e);
+            var compressedImageBytes = imageBytes.CompressImage();
+
+            await OpenCropDialogWithImage(compressedImageBytes);
 
             ErrorManager.DisplaySuccess("Image envoyé au serveur.");
-
             OnBlockUpdated?.Invoke(Block);
-
-            await MudFileUpload.ClearAsync();
             StateHasChanged();
         }
         catch (Exception)
@@ -84,27 +83,13 @@ else
 
     private async Task OpenCropDialog()
     {
-        if (string.IsNullOrEmpty(Block.Image))
+        if (Block.Image is null || Block.Image.Count() == 0)
         {
             ErrorManager.DisplayError("No image to crop.");
             return;
         }
 
-        var parameters = new DialogParameters<CropDialog>
-        {
-            { x => x.ImageSource, Block.Image }
-        };
-        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
-
-        var dialog = await DialogService.ShowAsync<CropDialog>("Delete", parameters, options);
-        var result = await dialog.Result;
-
-        if (result is null || result.Canceled)
-            return;
-
-        Block.Image = result.Data?.ToString() ?? string.Empty;
-        OnBlockUpdated?.Invoke(Block);
-        StateHasChanged();
+        await OpenCropDialogWithImage(Block.Image);
     }
 
     private async Task AskImageToAi()
@@ -117,19 +102,12 @@ else
             var base64Image = await IaManager.AskImage(Block.Recipe.Id, includeFullRecipe: false, _cancellationTokenSource.Token);
             _isWorkInProgress = false;
 
-            var parameters = new DialogParameters<CropDialog>
-            {
-                { x => x.ImageSource, base64Image }
-            };
-            var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+            var base64Data = base64Image.Substring(base64Image.IndexOf(",") + 1);
+            byte[] imageBytes = Convert.FromBase64String(base64Data);
+            imageBytes = imageBytes.CompressImage();
 
-            var dialog = await DialogService.ShowAsync<CropDialog>("Delete", parameters, options);
-            var result = await dialog.Result;
+            await OpenCropDialogWithImage(imageBytes);
 
-            if (result is null || result.Canceled)
-                return;
-
-            Block.Image = result.Data?.ToString() ?? string.Empty;
             OnBlockUpdated?.Invoke(Block);
             StateHasChanged();
         }
@@ -147,17 +125,34 @@ else
             _cancellationTokenSource.Dispose();
         }
     }
+
+    private async Task OpenCropDialogWithImage(byte[] imageBytes)
+    {
+        var parameters = new DialogParameters<CropDialog>
+        {
+            { x => x.ImageSource, imageBytes }
+        };
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = await DialogService.ShowAsync<CropDialog>("Delete", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled)
+            return;
+
+        Block.Image = result.Data as byte[] ?? Array.Empty<byte>();
+    }
+
     private void StopAskImageToAi()
     {
         _cancellationTokenSource?.Cancel();
     }
 
-    private async Task<string> ConvertToBase64Async(IBrowserFile file)
+    private async Task<byte[]> ConvertToByteArrayAsync(IBrowserFile file)
     {
         await using var stream = file.OpenReadStream(_maxFileSize);
         using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);
-        var bytes = memoryStream.ToArray();
-        return $"data:{file.ContentType};base64," + Convert.ToBase64String(bytes);
+        return memoryStream.ToArray();
     }
 }
