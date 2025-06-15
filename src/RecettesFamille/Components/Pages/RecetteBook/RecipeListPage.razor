@@ -120,6 +120,12 @@
 
     public async Task Ask()
     {
+        if (string.IsNullOrEmpty(_searchString))
+        {
+            var result = await RecipeRepository.GetAllLightRecipe();
+            Recipes = result.OrderBy(c => c.Name).ToList();
+            return;
+        }
         var resultFromSementicSearch = await SearchAsync(_searchString);
         Recipes = await RecipeRepository.GetAllLightRecipe(resultFromSementicSearch.ToArray());
     }
