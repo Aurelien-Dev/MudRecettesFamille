@@ -20,6 +20,7 @@ services:
       - EMAIL_BACKUP_FROM=${EMAIL_BACKUP_FROM}
       - EMAIL_BACKUP_DEST=${EMAIL_BACKUP_DEST}
       - DB_HOST_URL=${DB_HOST_URL}
+      - DB_HOST_PORT=${DB_HOST_PORT}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
     depends_on:
       - recettesfamille.data
