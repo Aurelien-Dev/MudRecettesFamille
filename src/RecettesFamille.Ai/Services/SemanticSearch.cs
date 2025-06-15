@@ -5,7 +5,12 @@ namespace RecettesFamille.Ai.Services;
 
 public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator, IVectorStore vectorStore)
 {
-    public async Task<IReadOnlyList<SemanticSearchRecord>> SearchAsync(string text, string? recipeNameFilter, int maxResults)
+    public async Task<IReadOnlyList<SemanticSearchRecord>> SearchAsync(
+        string text,
+        string? recipeNameFilter = null,
+        string? tagFilter = null,
+        string? ingredientFilter = null,
+        int maxResults = 5)
     {
         var queryEmbedding = await embeddingGenerator.GenerateVectorAsync(text);
         var vectorCollection = vectorStore.GetCollection<string, SemanticSearchRecord>("data-chatapp2-ingested");
@@ -13,8 +18,12 @@ public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embedd
         var nearest = await vectorCollection.VectorizedSearchAsync(queryEmbedding, new VectorSearchOptions<SemanticSearchRecord>
         {
             Top = maxResults,
-            Filter = recipeNameFilter is { Length: > 0 } ? record => record.RecipeName == recipeNameFilter : null,
+            Filter = record =>
+                (string.IsNullOrEmpty(recipeNameFilter) || record.RecipeName == recipeNameFilter) &&
+                (string.IsNullOrEmpty(tagFilter) || (record.Tags ?? string.Empty).Contains(tagFilter)) &&
+                (string.IsNullOrEmpty(ingredientFilter) || (record.Ingredients ?? string.Empty).Contains(ingredientFilter)),
         });
+
         var results = new List<SemanticSearchRecord>();
         await foreach (var item in nearest.Results)
         {
