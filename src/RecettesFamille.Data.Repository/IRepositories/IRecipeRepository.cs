@@ -11,6 +11,7 @@ public interface IRecipeRepository
     Task<List<RecipeDto>> GetAll(string[] tags, CancellationToken cancellationToken = default);
     Task<List<RecipeForListDto>> GetAllLightRecipe(CancellationToken cancellationToken = default);
     Task<List<RecipeForListDto>> GetAllLightRecipe(string[] tags, CancellationToken cancellationToken = default);
+    Task<List<RecipeForListDto>> GetAllLightRecipe(int[] ids, CancellationToken cancellationToken = default);
 
     Task<RecipeForListDto> GetLightRecipe(int recipeId, CancellationToken cancellationToken = default);
     Task<RecipeDto> GetWithInstructions(int recipeId, CancellationToken cancellationToken = default);

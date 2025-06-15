@@ -147,7 +147,7 @@ Example of reply:
         [Description("If possible, specify the recipe name to search that recipe only. If not provided or empty, the search includes all recipes.")] string? recipeName = null)
     {
         await InvokeAsync(StateHasChanged);
-        var results = await Search.SearchAsync(searchPhrase, recipeNameFilter: recipeName, maxResults: 10);
+        var results = await Search.SearchLightAsync(searchPhrase, maxResults: 50);
         return results.Select(result => result.ToString());
     }
 

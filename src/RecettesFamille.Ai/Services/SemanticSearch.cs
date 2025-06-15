@@ -20,10 +20,10 @@ public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embedd
         {
             Top = maxResults,
             Filter = record =>
-                (!recipeIdFilter.HasValue || record.RecipeId == recipeIdFilter) &&
-                (string.IsNullOrEmpty(recipeNameFilter) || record.RecipeName == recipeNameFilter) &&
-                (string.IsNullOrEmpty(tagFilter) || (record.Tags ?? string.Empty).Contains(tagFilter)) &&
-                (string.IsNullOrEmpty(ingredientFilter) || (record.Ingredients ?? string.Empty).Contains(ingredientFilter)),
+                (!string.IsNullOrEmpty(record.Ingredients) && record.Ingredients.Contains(text, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(record.Instructions) && record.Instructions.Contains(text, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(record.RecipeName) && record.RecipeName.Contains(text, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(record.Tags) && record.Tags.Contains(text, StringComparison.OrdinalIgnoreCase))
         });
 
         var results = new List<SemanticSearchRecord>();
@@ -34,4 +34,31 @@ public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embedd
 
         return results;
     }
+    public async Task<IReadOnlyList<SemanticSearchRecord>> SearchLightAsync(
+        string text,
+        int maxResults = 5)
+    {
+        var queryEmbedding = await embeddingGenerator.GenerateVectorAsync(text);
+        var vectorCollection = vectorStore.GetCollection<string, SemanticSearchRecord>("data-chatapp2-ingested");
+
+        // Recherche vectorielle avec filtre textuel
+        var nearest = await vectorCollection.VectorizedSearchAsync(queryEmbedding, new VectorSearchOptions<SemanticSearchRecord>
+        {
+            Top = maxResults,
+            Filter = record =>
+                (!string.IsNullOrEmpty(record.Ingredients) && record.Ingredients.Contains(text, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(record.Instructions) && record.Instructions.Contains(text, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(record.RecipeName) && record.RecipeName.Contains(text, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(record.Tags) && record.Tags.Contains(text, StringComparison.OrdinalIgnoreCase))
+        });
+
+        var results = new List<SemanticSearchRecord>();
+        await foreach (var item in nearest.Results)
+        {
+            results.Add(item.Record);
+        }
+
+        return results;
+    }
+
 }
