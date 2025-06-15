@@ -55,8 +55,8 @@ public static class ImageExtensions
 
         using (var image = new MagickImage(imageBytes))
         {
-            if (x < 0 || y < 0 || x + width > image.Width || y + height > image.Height)
-                throw new ArgumentOutOfRangeException("Crop dimensions are out of the image bounds.");
+            //if (x < 0 || y < 0 || x + width > image.Width || y + height > image.Height)
+            //    throw new ArgumentOutOfRangeException("Crop dimensions are out of the image bounds.");
 
             uint uWidth = Convert.ToUInt32(width);
             uint uHeight = Convert.ToUInt32(height);

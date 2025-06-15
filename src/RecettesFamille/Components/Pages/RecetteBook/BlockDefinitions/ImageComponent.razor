@@ -99,7 +99,7 @@ else
             _cancellationTokenSource = new();
 
             _isWorkInProgress = true;
-            var base64Image = await IaManager.AskImage(Block.Recipe.Id, includeFullRecipe: false, _cancellationTokenSource.Token);
+            var base64Image = await IaManager.AskImage(Block.Recipe.Id, includeFullRecipe: true, _cancellationTokenSource.Token);
             _isWorkInProgress = false;
 
             var base64Data = base64Image.Substring(base64Image.IndexOf(",") + 1);

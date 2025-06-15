@@ -22,31 +22,39 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
     /// <returns>A base64 string representation of the generated image.</returns>
     public async Task<string> AskImage(int recipeId, bool includeFullRecipe, CancellationToken cancellationToken = default)
     {
-        var client = new ImageClient(model: "dall-e-3", apiKey: config["OPENAI_SECRET"]);
-        var promptImageGenerator = await aiRepository.GetPrompt("ImageGeneratorPrompt", cancellationToken);
-        string rawRecipe = string.Empty;
-
-        if (includeFullRecipe)
+        try
         {
-            rawRecipe = await recipeRepository.GetRawRecipe(recipeId, cancellationToken);
+            var client = new ImageClient(model: "gpt-image-1", apiKey: config["OPENAI_SECRET"]);
+            var promptImageGenerator = await aiRepository.GetPrompt("ImageGeneratorPrompt", cancellationToken);
+            string rawRecipe = string.Empty;
+
+            if (includeFullRecipe)
+            {
+                rawRecipe = await recipeRepository.GetRawRecipe(recipeId, cancellationToken);
+            }
+            else
+            {
+                var recipe = await recipeRepository.GetLightRecipe(recipeId);
+                rawRecipe = recipe.Name;
+            }
+
+            GeneratedImage image = await client.GenerateImageAsync(string.Format(promptImageGenerator.Prompt, rawRecipe), new ImageGenerationOptions()
+            {
+                //Quality = GeneratedImageQuality.Standard,
+                Size = new GeneratedImageSize(1536, 1024),
+                //ResponseFormat = GeneratedImageFormat.Bytes,
+                //Style = GeneratedImageStyle.Vivid
+            }, cancellationToken);
+
+            await ReportImageConsumption();
+
+            return $"data:png;base64," + Convert.ToBase64String(image.ImageBytes);
         }
-        else
+        catch (Exception)
         {
-            var recipe = await recipeRepository.GetLightRecipe(recipeId);
-            rawRecipe = recipe.Name;
+
+            throw;
         }
-
-        GeneratedImage image = await client.GenerateImageAsync(string.Format(promptImageGenerator.Prompt, rawRecipe), new ImageGenerationOptions()
-        {
-            Quality = GeneratedImageQuality.Standard,
-            Size = GeneratedImageSize.W1792xH1024,
-            ResponseFormat = GeneratedImageFormat.Bytes,
-            Style = GeneratedImageStyle.Vivid
-        }, cancellationToken);
-
-        await ReportImageConsumption();
-
-        return $"data:png;base64," + Convert.ToBase64String(image.ImageBytes);
     }
 
     public async Task<int> AskCalories(List<IngredientDto> ingredients, AiClientType aiClientTypeEnum, CancellationToken cancellationToken = default)

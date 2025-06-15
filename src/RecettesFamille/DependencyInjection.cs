@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.AI;
-using OpenAI;
 using RecettesFamille.Managers;
 using RecettesFamille.Managers.AiGenerators;
 using System.ClientModel;
@@ -20,7 +19,12 @@ public static class DependencyInjection
         ArgumentNullException.ThrowIfNull(openAiSecret);
         ArgumentNullException.ThrowIfNull(deepSeekSecret);
 
-        services.AddKeyedChatClient("OpenAi", new OpenAIClient(new ApiKeyCredential(openAiSecret)).AsChatClient("gpt-4o"));
-        services.AddKeyedChatClient("DeepSeek", new OpenAIClient(new ApiKeyCredential(deepSeekSecret), new OpenAIClientOptions() { Endpoint = new Uri("https://api.deepseek.com") }).AsChatClient("deepseek-chat"));
+
+
+        services.AddKeyedChatClient("OpenAi", new OpenAI.Chat.ChatClient("gpt-4o", openAiSecret).AsIChatClient());
+
+        //IChatClient client = new OllamaChatClient(new Uri("http://localhost:11434"), "llama3.1")
+
+        //services.AddKeyedChatClient("DeepSeek", new OpenAIClientExtensions(new ApiKeyCredential(deepSeekSecret), new OpenAIClientOptions() { Endpoint = new Uri("https://api.deepseek.com") }).AsIChatClient());
     }
 }
