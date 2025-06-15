@@ -146,7 +146,7 @@ Example of reply:
         [Description("If possible, specify the filename to search that file only. If not provided or empty, the search includes all files.")] string? filenameFilter = null)
     {
         await InvokeAsync(StateHasChanged);
-        var results = await Search.SearchAsync(searchPhrase, filenameFilter, maxResults: 25);
+        var results = await Search.SearchAsync(searchPhrase, recipeNameFilter: filenameFilter, maxResults: 25);
         return results.Select(result => result.ToString());
     }
 
