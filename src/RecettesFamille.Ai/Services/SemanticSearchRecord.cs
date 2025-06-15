@@ -13,10 +13,7 @@ public class SemanticSearchRecord
 
     [VectorStoreRecordData(IsFilterable = true)]
     public required string RecipeName { get; set; } // Updated from FileName to RecipeName
-
-    [VectorStoreRecordData]
-    public required string Text { get; set; }
-
+    
     [VectorStoreRecordData(IsFilterable = true)]
     public string? Tags { get; set; }
 
@@ -45,7 +42,6 @@ public class SemanticSearchRecord
         sb.AppendLine($"Key: {Key}");
         sb.AppendLine($"RecipeId: {RecipeId}");
         sb.AppendLine($"RecipeName: {RecipeName}");
-        sb.AppendLine($"Text: {Text}");
         sb.AppendLine($"Tags: {Tags ?? "N/A"}");
         sb.AppendLine($"Ingredients: {Ingredients ?? "N/A"}");
         sb.AppendLine($"Instructions: {Instructions ?? "N/A"}");
