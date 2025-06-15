@@ -19,6 +19,7 @@ services:
       - DEEPSEEK_SECRET=${DEEPSEEK_SECRET}
       - EMAIL_BACKUP_FROM=${EMAIL_BACKUP_FROM}
       - EMAIL_BACKUP_DEST=${EMAIL_BACKUP_DEST}
+      - DB_HOST_URL=${DB_HOST_URL}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
     depends_on:
       - recettesfamille.data

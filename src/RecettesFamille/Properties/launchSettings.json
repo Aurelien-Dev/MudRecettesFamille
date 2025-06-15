@@ -3,11 +3,6 @@
     "http": {
       "commandName": "Project",
       "launchBrowser": false,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "OPENAI_SECRET": "",
-        "DEEPSEEK_SECRET": ""
-      },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5158"
     },

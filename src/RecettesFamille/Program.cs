@@ -20,6 +20,12 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration
+       .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+       //.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+       .AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
+
 // Configure Kestrel
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -62,7 +68,10 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
-    var postgresCs = "Host=recettesfamille.data;Port=5432;Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
+    var serverUrl = builder.Configuration["DB_HOST_URL"];
+    var serverPort = builder.Configuration["DB_HOST_PORT"];
+
+    var postgresCs = $"Host={serverUrl};Port={serverPort};Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
     options.UseNpgsql(postgresCs);
 }, ServiceLifetime.Scoped);
 

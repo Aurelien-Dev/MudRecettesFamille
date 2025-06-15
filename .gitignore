@@ -85,3 +85,4 @@ _[Ss]cripts
 /src/RecettesFamille/ingestioncache.db
 /src/RecettesFamille/ingestioncache.db-shm
 /src/RecettesFamille/ingestioncache.db-wal
+/src/RecettesFamille/appsettings.Local.json

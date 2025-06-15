@@ -9,9 +9,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Components\Pages\RecetteBook\BlockDefinitions\Components\**" />
+    <Compile Remove="Properties\PublishProfiles\**" />
     <Content Remove="Components\Pages\RecetteBook\BlockDefinitions\Components\**" />
+    <Content Remove="Properties\PublishProfiles\**" />
     <EmbeddedResource Remove="Components\Pages\RecetteBook\BlockDefinitions\Components\**" />
+    <EmbeddedResource Remove="Properties\PublishProfiles\**" />
     <None Remove="Components\Pages\RecetteBook\BlockDefinitions\Components\**" />
+    <None Remove="Properties\PublishProfiles\**" />
+    <_WebToolingArtifacts Remove="Properties\PublishProfiles\**" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BitzArt.Blazor.Cookies.Server" Version="1.4.0" />
@@ -32,9 +37,6 @@
     <PackageReference Include="Extensions.MudBlazor.StaticInput" Version="3.2.0" />
     <PackageReference Include="MudBlazor.Markdown" Version="8.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RecettesFamille.Ai\RecettesFamille.Ai.csproj" />
