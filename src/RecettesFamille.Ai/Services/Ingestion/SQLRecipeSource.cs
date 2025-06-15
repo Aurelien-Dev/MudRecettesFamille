@@ -68,6 +68,7 @@ public class SQLRecipeSource(ApplicationDbContext dbContext) : IIngestionSource
         return paragraphs.Zip(embeddings).Select((pair, index) => new SemanticSearchRecord
         {
             Key = $"{recipe.Id}_{index}",
+            RecipeId = recipe.Id,
             RecipeName = recipe.Name, // Updated property
             Text = pair.First,
             Tags = recipe.Tags,

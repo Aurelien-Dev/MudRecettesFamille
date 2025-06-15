@@ -7,6 +7,7 @@ public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embedd
 {
     public async Task<IReadOnlyList<SemanticSearchRecord>> SearchAsync(
         string text,
+        int? recipeIdFilter = null,
         string? recipeNameFilter = null,
         string? tagFilter = null,
         string? ingredientFilter = null,
@@ -19,6 +20,7 @@ public class SemanticSearch(IEmbeddingGenerator<string, Embedding<float>> embedd
         {
             Top = maxResults,
             Filter = record =>
+                (!recipeIdFilter.HasValue || record.RecipeId == recipeIdFilter) &&
                 (string.IsNullOrEmpty(recipeNameFilter) || record.RecipeName == recipeNameFilter) &&
                 (string.IsNullOrEmpty(tagFilter) || (record.Tags ?? string.Empty).Contains(tagFilter)) &&
                 (string.IsNullOrEmpty(ingredientFilter) || (record.Ingredients ?? string.Empty).Contains(ingredientFilter)),
