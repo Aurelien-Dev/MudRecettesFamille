@@ -10,6 +10,8 @@ RecettesFamille est une application web pour gérer et partager des recettes de 
 - Confirmation par email
 - Gestion des ingrédients et des instructions de recette
 - Génération d'images de recettes avec OpenAI
+- Recherche sémantique filtrable par nom, tag ou ingrédient
+- Les résultats de recherche incluent maintenant l'identifiant de la recette
 
 ## Structure du projet
 

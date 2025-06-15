@@ -9,11 +9,11 @@ public class SemanticSearchRecord
     public required string Key { get; set; }
 
     [VectorStoreRecordData(IsFilterable = true)]
+    public int RecipeId { get; set; }
+
+    [VectorStoreRecordData(IsFilterable = true)]
     public required string RecipeName { get; set; } // Updated from FileName to RecipeName
-
-    [VectorStoreRecordData]
-    public required string Text { get; set; }
-
+    
     [VectorStoreRecordData(IsFilterable = true)]
     public string? Tags { get; set; }
 
@@ -40,8 +40,8 @@ public class SemanticSearchRecord
         var sb = new StringBuilder();
 
         sb.AppendLine($"Key: {Key}");
+        sb.AppendLine($"RecipeId: {RecipeId}");
         sb.AppendLine($"RecipeName: {RecipeName}");
-        sb.AppendLine($"Text: {Text}");
         sb.AppendLine($"Tags: {Tags ?? "N/A"}");
         sb.AppendLine($"Ingredients: {Ingredients ?? "N/A"}");
         sb.AppendLine($"Instructions: {Instructions ?? "N/A"}");

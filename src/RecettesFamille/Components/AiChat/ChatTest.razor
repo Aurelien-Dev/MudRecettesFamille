@@ -42,6 +42,7 @@
 
 Searching:
 - Always use the search tool to find relevant information.
+- Use all result of the tool
 - If the user provides only a keyword (ingredient or recipe name), perform a search based on this keyword.
 
 Formatting the reply:
@@ -143,10 +144,10 @@ Example of reply:
     [Description("Searches for information using a phrase or keyword")]
     private async Task<IEnumerable<string>> SearchAsync(
         [Description("The phrase to search for.")] string searchPhrase,
-        [Description("If possible, specify the filename to search that file only. If not provided or empty, the search includes all files.")] string? filenameFilter = null)
+        [Description("If possible, specify the recipe name to search that recipe only. If not provided or empty, the search includes all recipes.")] string? recipeName = null)
     {
         await InvokeAsync(StateHasChanged);
-        var results = await Search.SearchAsync(searchPhrase, filenameFilter, maxResults: 25);
+        var results = await Search.SearchAsync(searchPhrase, recipeNameFilter: recipeName, maxResults: 10);
         return results.Select(result => result.ToString());
     }
 

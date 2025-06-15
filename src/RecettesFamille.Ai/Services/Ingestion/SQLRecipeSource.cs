@@ -21,14 +21,14 @@ public class SQLRecipeSource(ApplicationDbContext dbContext) : IIngestionSource
         foreach (var recipe in recipes)
         {
             var existingDocument = await existingDocuments
-                .Where(d => d.SourceId == SourceId && d.Id == recipe.Id.ToString())
+                .Where(d => d.SourceId == SourceId && d.Id == recipe.Id)
                 .FirstOrDefaultAsync();
 
             if (existingDocument is null)
             {
                 results.Add(new IngestedDocument
                 {
-                    Id = recipe.Id.ToString(),
+                    Id = recipe.Id,
                     Version = recipe.UpdatedDate.ToString(),
                     SourceId = SourceId
                 });
@@ -45,18 +45,18 @@ public class SQLRecipeSource(ApplicationDbContext dbContext) : IIngestionSource
 
     public async Task<IEnumerable<IngestedDocument>> GetDeletedDocumentsAsync(IQueryable<IngestedDocument> existingDocuments)
     {
-        var recipeIds = await _dbContext.Recipes.Select(r => r.Id.ToString()).ToListAsync();
+        var recipeIds = await _dbContext.Recipes.Select(r => r.Id).ToListAsync();
         return await existingDocuments
             .Where(d => d.SourceId == SourceId && !recipeIds.Contains(d.Id))
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<SemanticSearchRecord>> CreateRecordsForDocumentAsync(IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator, string documentId)
+    public async Task<IEnumerable<SemanticSearchRecord>> CreateRecordsForDocumentAsync(IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator, int documentId)
     {
         var recipe = await _dbContext.Recipes
                                      .Include(s => s.BlocksInstructions)
                                      .ThenInclude(b => ((BlockIngredientListEntity)b).Ingredients)
-                                     .FirstOrDefaultAsync(s => s.Id == int.Parse(documentId));
+                                     .FirstOrDefaultAsync(s => s.Id == documentId);
         if (recipe == null) throw new FileNotFoundException($"Recipe with ID {documentId} not found.");
 
         var paragraphs = SplitIntoParagraphs(recipe.BlocksInstructions);
@@ -68,14 +68,14 @@ public class SQLRecipeSource(ApplicationDbContext dbContext) : IIngestionSource
         return paragraphs.Zip(embeddings).Select((pair, index) => new SemanticSearchRecord
         {
             Key = $"{recipe.Id}_{index}",
-            RecipeName = recipe.Name, // Updated property
-            Text = pair.First,
+            RecipeId = recipe.Id,
+            RecipeName = recipe.Name,
             Tags = recipe.Tags,
             Ingredients = string.Join("; ", recipe.BlocksInstructions.OfType<BlockIngredientListEntity>().SelectMany(b => b.Ingredients.Select(i => $"{i.Name}: {i.Quantity}"))),
             Instructions = string.Join(Environment.NewLine, recipe.BlocksInstructions.OfType<BlockInstructionEntity>().Select(s => s.Instruction)),
-            PrepTime = recipe.PrepTime, // New property
-            CookingTime = recipe.CookingTime, // New property
-            Portion = recipe.Portion, // New property
+            PrepTime = recipe.PrepTime,
+            CookingTime = recipe.CookingTime,
+            Portion = recipe.Portion,
             Vector = pair.Second.Vector
         });
     }
