@@ -117,7 +117,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Applicatio
     public ApplicationDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-        var postgresCs = "Host=recettes.atelier-cremazie.com;Port=5442;Database=test;Username=pguser;Password=PGUserPwd;Pooling=true";
+        var postgresCs = "Host=recettes-db.atelier-cremazie.com;Port=5442;Database=test;Username=pguser;Password=PGUserPwd;Pooling=true";
         optionsBuilder.UseNpgsql(postgresCs);
 
         return new ApplicationDbContext(optionsBuilder.Options);
