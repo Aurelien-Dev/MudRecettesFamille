@@ -43,6 +43,8 @@ jobs:
             echo "DEEPSEEK_SECRET=${{ secrets.DEEPSEEK_SECRET }}" >> .env
             echo "EMAIL_BACKUP_DEST=${{ vars.EMAIL_BACKUP_DEST }}" >> .env
             echo "EMAIL_BACKUP_FROM=${{ vars.EMAIL_BACKUP_FROM }}" >> .env
+            echo "DB_HOST_URL=${{ vars.DB_HOST_URL }}" >> .env
+            echo "DB_HOST_PORT=${{ vars.DB_HOST_PORT }}" >> .env
             echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
 
             docker compose -f RecettesFamille.Docker/docker-compose-light.yml down
