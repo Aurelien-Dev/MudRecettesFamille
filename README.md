@@ -26,6 +26,7 @@ RecettesFamille est une application web pour gérer et partager des recettes de 
 - .NET 9.0 SDK
 - PostgreSQL
 - Docker (optionnel)
+- Un identifiant de Vector Store OpenAI disponible via la variable d'environnement `OPENAI_VECTOR_STORE_ID`
 
 ## Installation
 
@@ -60,6 +61,8 @@ RecettesFamille est une application web pour gérer et partager des recettes de 
     ```
 
 2. Accédez à l'application via l'adresse configurée dans Docker.
+
+Assurez-vous de définir également la variable `OPENAI_VECTOR_STORE_ID` pour fournir l'identifiant de votre Vector Store OpenAI.
 
 
 ## Tips

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.VectorData;
 using OpenAI;
+using OpenAI.VectorStores;
 using RecettesFamille.Ai.Services;
 using RecettesFamille.Ai.Services.Ingestion;
 using System.ClientModel;
@@ -23,7 +24,9 @@ public static class DependencyInjection
         var chatClient = openAIClient.GetChatClient("gpt-4o-mini").AsIChatClient();
         var embeddingGenerator = openAIClient.GetEmbeddingClient("text-embedding-3-small").AsIEmbeddingGenerator();
 
-        var vectorStore = new JsonVectorStore(Path.Combine(AppContext.BaseDirectory, "vector-store"));
+        var vectorStoreId = configuration["OPENAI_VECTOR_STORE_ID"] ?? throw new InvalidOperationException("Missing configuration: OPENAI_VECTOR_STORE_ID");
+        var vectorStoreClient = openAIClient.GetVectorStoreClient(vectorStoreId);
+        var vectorStore = vectorStoreClient.AsIVectorStore();
 
         services.AddSingleton<IVectorStore>(vectorStore);
         services.AddScoped<DataIngestor>();
