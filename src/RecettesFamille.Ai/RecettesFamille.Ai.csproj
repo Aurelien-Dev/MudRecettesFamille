@@ -7,10 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\Ingestion\**" />
+    <EmbeddedResource Remove="Services\Ingestion\**" />
+    <None Remove="Services\Ingestion\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Services\EmptyRecipeException.cs" />
+    <Compile Remove="Services\JsonVectorStore.cs" />
+    <Compile Remove="Services\SemanticSearch.cs" />
+    <Compile Remove="Services\SemanticSearchRecord.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.5.0-preview.1.25265.7" />
-    <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.47.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.57.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.57.0" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
   </ItemGroup>
 
@@ -18,6 +32,10 @@
     <ProjectReference Include="..\RecettesFamille.Data.Repository\RecettesFamille.Data.Repository.csproj" />
     <ProjectReference Include="..\RecettesFamille.Data\RecettesFamille.Data.csproj" />
     <ProjectReference Include="..\RecettesFamille.Dto\RecettesFamille.Dto.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

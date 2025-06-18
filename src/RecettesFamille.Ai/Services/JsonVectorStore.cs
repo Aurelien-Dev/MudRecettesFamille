@@ -1,170 +1,133 @@
-﻿using Microsoft.Extensions.VectorData;
-using System.Numerics.Tensors;
-using System.Reflection;
+﻿using Microsoft.SemanticKernel.Memory;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
-namespace RecettesFamille.Ai.Services;
-
-/// <summary>
-/// This IVectorStore implementation is for prototyping only. Do not use this in production.
-/// In production, you must replace this with a real vector store. There are many IVectorStore
-/// implementations available, including ones for standalone vector databases like Qdrant or Milvus,
-/// or for integrating with relational databases such as SQL Server or PostgreSQL.
-///
-/// This implementation stores the vector records in large JSON files on disk. It is very inefficient
-/// and is provided only for convenience when prototyping.
-/// </summary>
-public class JsonVectorStore(string basePath) : IVectorStore
+public class JsonMemoryStore(string basePath) : IMemoryStore
 {
-    public IVectorStoreRecordCollection<TKey, TRecord> GetCollection<TKey, TRecord>(string name, VectorStoreRecordDefinition? vectorStoreRecordDefinition = null) where TKey : notnull
-        => new JsonVectorStoreRecordCollection<TKey, TRecord>(name, Path.Combine(basePath, name + ".json"), vectorStoreRecordDefinition);
+    private readonly Dictionary<string, Dictionary<string, MemoryRecord>> _collections = [];
 
-    public IAsyncEnumerable<string> ListCollectionNamesAsync(CancellationToken cancellationToken = default)
-        => Directory.EnumerateFiles(basePath, "*.json").ToAsyncEnumerable();
-
-    private class JsonVectorStoreRecordCollection<TKey, TRecord> : IVectorStoreRecordCollection<TKey, TRecord>
-        where TKey : notnull
+    public Task CreateCollectionAsync(string collection, CancellationToken cancellationToken = default)
     {
-        private static readonly Func<TRecord, TKey> _getKey = CreateKeyReader();
-        private static readonly Func<TRecord, ReadOnlyMemory<float>> _getVector = CreateVectorReader();
-
-        private readonly string _name;
-        private readonly string _filePath;
-        private Dictionary<TKey, TRecord>? _records;
-
-        public JsonVectorStoreRecordCollection(string name, string filePath, VectorStoreRecordDefinition? vectorStoreRecordDefinition)
+        if (!_collections.ContainsKey(collection))
         {
-            _name = name;
-            _filePath = filePath;
+            _collections[collection] = [];
+        }
+        return SaveCollectionAsync(collection, cancellationToken);
+    }
 
-            if (File.Exists(filePath))
-            {
-                _records = JsonSerializer.Deserialize<Dictionary<TKey, TRecord>>(File.ReadAllText(filePath));
-            }
+    public Task DeleteCollectionAsync(string collection, CancellationToken cancellationToken = default)
+    {
+        _collections.Remove(collection);
+        File.Delete(GetFilePath(collection));
+        return Task.CompletedTask;
+    }
+
+    public Task<IEnumerable<string>> GetCollectionsAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(_collections.Keys.AsEnumerable());
+    }
+
+    public Task<MemoryRecord?> GetAsync(string collection, string key, bool withEmbedding = false, CancellationToken cancellationToken = default)
+    {
+        if (_collections.TryGetValue(collection, out var records) && records.TryGetValue(key, out var record))
+        {
+            return Task.FromResult<MemoryRecord?>(record);
         }
 
-        public string CollectionName => _name;
+        return Task.FromResult<MemoryRecord?>(null);
+    }
 
-        public Task<bool> CollectionExistsAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult(_records is not null);
-
-        public async Task CreateCollectionAsync(CancellationToken cancellationToken = default)
-        {
-            _records = [];
-            await WriteToDiskAsync(cancellationToken);
-        }
-
-        public async Task CreateCollectionIfNotExistsAsync(CancellationToken cancellationToken = default)
-        {
-            if (_records is null)
-            {
-                await CreateCollectionAsync(cancellationToken);
-            }
-        }
-
-        public Task DeleteAsync(TKey key, CancellationToken cancellationToken = default)
-        {
-            _records!.Remove(key);
-            return WriteToDiskAsync(cancellationToken);
-        }
-
-        public Task DeleteBatchAsync(IEnumerable<TKey> keys, CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<MemoryRecord> GetBatchAsync(string collection, IEnumerable<string> keys, bool withEmbedding = false, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        if (_collections.TryGetValue(collection, out var records))
         {
             foreach (var key in keys)
             {
-                _records!.Remove(key);
-            }
-
-            return WriteToDiskAsync(cancellationToken);
-        }
-
-        public Task DeleteCollectionAsync(CancellationToken cancellationToken = default)
-        {
-            _records = null;
-            File.Delete(_filePath);
-            return Task.CompletedTask;
-        }
-
-        public Task<TRecord?> GetAsync(TKey key, GetRecordOptions? options = null, CancellationToken cancellationToken = default)
-            => Task.FromResult(_records!.GetValueOrDefault(key));
-
-        public IAsyncEnumerable<TRecord> GetBatchAsync(IEnumerable<TKey> keys, GetRecordOptions? options = null, CancellationToken cancellationToken = default)
-            => keys.Select(key => _records!.GetValueOrDefault(key)!).Where(r => r is not null).ToAsyncEnumerable();
-
-        public async Task<TKey> UpsertAsync(TRecord record, CancellationToken cancellationToken = default)
-        {
-            var key = _getKey(record);
-            _records![key] = record;
-            await WriteToDiskAsync(cancellationToken);
-            return key;
-        }
-
-        public async IAsyncEnumerable<TKey> UpsertBatchAsync(IEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken cancellationToken = default)
-        {
-            var results = new List<TKey>();
-            foreach (var record in records)
-            {
-                var key = _getKey(record);
-                _records![key] = record;
-                results.Add(key);
-            }
-
-            await WriteToDiskAsync(cancellationToken);
-
-            foreach (var key in results)
-            {
-                yield return key;
+                if (records.TryGetValue(key, out var record))
+                {
+                    yield return record;
+                }
             }
         }
+        await Task.CompletedTask;
+    }
 
-        public Task<VectorSearchResults<TRecord>> VectorizedSearchAsync<TVector>(TVector vector, VectorSearchOptions<TRecord>? options = null, CancellationToken cancellationToken = default)
+    public Task RemoveAsync(string collection, string key, CancellationToken cancellationToken = default)
+    {
+        if (_collections.TryGetValue(collection, out var records))
         {
-            if (vector is not ReadOnlyMemory<float> floatVector)
-            {
-                throw new NotSupportedException($"The provided vector type {vector!.GetType().FullName} is not supported.");
-            }
+            records.Remove(key);
+        }
+        return SaveCollectionAsync(collection, cancellationToken);
+    }
 
-            IEnumerable<TRecord> filteredRecords = _records!.Values;
-            if (options?.Filter is { } filter)
-            {
-                filteredRecords = filteredRecords.AsQueryable().Where(filter);
-            }
+    public async IAsyncEnumerable<(MemoryRecord, double)> GetNearestMatchesAsync(string collection, ReadOnlyMemory<float> embedding, int limit, double minRelevanceScore, bool withEmbedding = false, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        if (!_collections.TryGetValue(collection, out var records))
+            yield break;
 
-            var ranked = from record in filteredRecords
-                         let candidateVector = _getVector(record)
-                         let similarity = TensorPrimitives.CosineSimilarity(candidateVector.Span, floatVector.Span)
-                         orderby similarity descending
-                         select (Record: record, Similarity: similarity);
+        var results = records.Values
+            .Select(r => (Record: r, Score: CosineSimilarity(r.Embedding?.ToArray(), embedding.ToArray())))
+            .Where(x => x.Score >= minRelevanceScore)
+            .OrderByDescending(x => x.Score)
+            .Take(limit);
 
-            var results = ranked.Skip(options?.Skip ?? 0).Take(options?.Top ?? int.MaxValue);
-            return Task.FromResult(new VectorSearchResults<TRecord>(
-                results.Select(r => new VectorSearchResult<TRecord>(r.Record, r.Similarity)).ToAsyncEnumerable()));
+        foreach (var (record, score) in results)
+        {
+            yield return (record, score);
         }
 
-        private static Func<TRecord, TKey> CreateKeyReader()
+        await Task.CompletedTask;
+    }
+
+    public async Task UpsertAsync(string collection, MemoryRecord record, CancellationToken cancellationToken = default)
+    {
+        if (!_collections.TryGetValue(collection, out var records))
         {
-            var propertyInfo = typeof(TRecord).GetProperties()
-                .Where(p => p.GetCustomAttribute<VectorStoreRecordKeyAttribute>() is not null
-                    && p.PropertyType == typeof(TKey))
-                .Single();
-            return record => (TKey)propertyInfo.GetValue(record)!;
+            records = [];
+            _collections[collection] = records;
         }
 
-        private static Func<TRecord, ReadOnlyMemory<float>> CreateVectorReader()
+        records[record.Id] = record;
+        await SaveCollectionAsync(collection, cancellationToken);
+    }
+
+    private static double CosineSimilarity(float[]? v1, float[]? v2)
+    {
+        if (v1 is null || v2 is null || v1.Length != v2.Length)
+            return 0;
+
+        double dot = 0, mag1 = 0, mag2 = 0;
+        for (int i = 0; i < v1.Length; i++)
         {
-            var propertyInfo = typeof(TRecord).GetProperties()
-                .Where(p => p.GetCustomAttribute<VectorStoreRecordVectorAttribute>() is not null
-                    && p.PropertyType == typeof(ReadOnlyMemory<float>))
-                .Single();
-            return record => (ReadOnlyMemory<float>)propertyInfo.GetValue(record)!;
+            dot += v1[i] * v2[i];
+            mag1 += v1[i] * v1[i];
+            mag2 += v2[i] * v2[i];
         }
 
-        private async Task WriteToDiskAsync(CancellationToken cancellationToken = default)
+        return dot / (Math.Sqrt(mag1) * Math.Sqrt(mag2) + 1e-8); // stabilité numérique
+    }
+
+    private string GetFilePath(string collection) => Path.Combine(basePath, $"{collection}.json");
+
+    private async Task SaveCollectionAsync(string collection, CancellationToken cancellationToken)
+    {
+        var path = GetFilePath(collection);
+        var content = JsonSerializer.Serialize(_collections[collection]);
+        Directory.CreateDirectory(basePath);
+        await File.WriteAllTextAsync(path, content, cancellationToken);
+    }
+
+    // (Optionnel) pour charger les collections existantes au démarrage
+    public void LoadAll()
+    {
+        foreach (var file in Directory.EnumerateFiles(basePath, "*.json"))
         {
-            var json = JsonSerializer.Serialize(_records);
-            Directory.CreateDirectory(Path.GetDirectoryName(_filePath)!);
-            await File.WriteAllTextAsync(_filePath, json, cancellationToken);
+            var collectionName = Path.GetFileNameWithoutExtension(file);
+            var json = File.ReadAllText(file);
+            var dict = JsonSerializer.Deserialize<Dictionary<string, MemoryRecord>>(json);
+            if (dict != null)
+                _collections[collectionName] = dict;
         }
     }
 }

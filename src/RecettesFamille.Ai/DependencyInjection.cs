@@ -1,12 +1,7 @@
-﻿
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.AI;
+﻿using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.VectorData;
 using OpenAI;
-using RecettesFamille.Ai.Services;
-using RecettesFamille.Ai.Services.Ingestion;
 using System.ClientModel;
 
 namespace RecettesFamille.Data.Repository;
@@ -23,14 +18,15 @@ public static class DependencyInjection
         var chatClient = openAIClient.GetChatClient("gpt-4o-mini").AsIChatClient();
         var embeddingGenerator = openAIClient.GetEmbeddingClient("text-embedding-3-small").AsIEmbeddingGenerator();
 
-        var vectorStore = new JsonVectorStore(Path.Combine(AppContext.BaseDirectory, "vector-store"));
 
-        services.AddSingleton<IVectorStore>(vectorStore);
-        services.AddScoped<DataIngestor>();
-        services.AddSingleton<SemanticSearch>();
+        //var vectorStore = new JsonVectorStore(Path.Combine(AppContext.BaseDirectory, "vector-store"));
+
+        //services.AddSingleton<IVectorStore>(vectorStore);
+        //services.AddScoped<DataIngestor>();
+        //services.AddSingleton<SemanticSearch>();
         services.AddChatClient(chatClient).UseFunctionInvocation().UseLogging();
         services.AddEmbeddingGenerator(embeddingGenerator);
 
-        services.AddDbContext<IngestionCacheDbContext>(options => options.UseSqlite("Data Source=ingestioncache.db"));
+        //services.AddDbContext<IngestionCacheDbContext>(options => options.UseSqlite("Data Source=ingestioncache.db"));
     }
 }
