@@ -2,6 +2,7 @@ using BitzArt.Blazor.Cookies;
 using Blazored.LocalStorage;
 using Cropper.Blazor.Extensions;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,8 @@ using System.Security.Claims;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
+StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 
 builder.Configuration
        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
