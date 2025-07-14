@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
 using RecettesFamille;
+using RecettesFamille.Ai.Services;
 using RecettesFamille.Ai.Services.Ingestion;
 using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
@@ -88,6 +89,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role;
 });
 
+builder.Services.AddSingleton<IEmbeddingGenerator, OpenAiEmbeddingGenerator>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddServerSideBlazor()
     .AddHubOptions(options =>

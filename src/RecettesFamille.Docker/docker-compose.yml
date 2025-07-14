@@ -25,7 +25,7 @@ services:
     depends_on:
       - recettesfamille.data
     volumes:
-      - /home/data/client:/app/data:ro  # Mapping du volume
+      - /home/data/client:/app/data  # Mapping du volume
       
   recettesfamille.data:
     image: postgres:latest
