@@ -7,17 +7,13 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-# Installer le client SSH pour pouvoir exécuter des commandes SSH vers l’hôte
+# Client postgresql and ssh pour créer les backups de la base de données
 USER root
-# Ajouter le dépôt officiel PostgreSQL pour Debian 12 (Bookworm)
-RUN apt-get update && apt-get install -y wget gnupg \
-    && mkdir -p /etc/apt/keyrings \
-    && wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --batch --yes --dearmor -o /etc/apt/keyrings/pgdg-keyring.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/pgdg-keyring.gpg] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list \
-    && apt-get update \
-    && apt-get install -y postgresql-client-17 \
-    && rm -rf /var/lib/apt/lists/*
-USER $APP_UID  # Revenir à l'utilisateur non root après l'installation
+RUN apt-get update \
+  && apt-get install -y postgresql-client openssh-client \
+  && rm -rf /var/lib/apt/lists/*
+USER $APP_UID
+
 
 # Étape 2 : Build l’application
 FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS build
