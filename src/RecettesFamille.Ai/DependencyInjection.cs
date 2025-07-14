@@ -23,7 +23,9 @@ public static class DependencyInjection
         var chatClient = openAIClient.GetChatClient("gpt-4o-mini").AsIChatClient();
         var embeddingGenerator = openAIClient.GetEmbeddingClient("text-embedding-3-small").AsIEmbeddingGenerator();
 
-        var vectorStore = new JsonVectorStore(Path.Combine(AppContext.BaseDirectory, "vector-store"));
+        var vectorStorePath = Path.Combine("/app/data", "vector-store");
+
+        var vectorStore = new JsonVectorStore(vectorStorePath);
 
         services.AddSingleton<IVectorStore>(vectorStore);
         services.AddScoped<DataIngestor>();
@@ -31,6 +33,6 @@ public static class DependencyInjection
         services.AddChatClient(chatClient).UseFunctionInvocation().UseLogging();
         services.AddEmbeddingGenerator(embeddingGenerator);
 
-        services.AddDbContext<IngestionCacheDbContext>(options => options.UseSqlite("Data Source=ingestioncache.db"));
+        services.AddDbContext<IngestionCacheDbContext>(options => options.UseSqlite("Data Source=/app/data/ingestioncache.db"));
     }
 }

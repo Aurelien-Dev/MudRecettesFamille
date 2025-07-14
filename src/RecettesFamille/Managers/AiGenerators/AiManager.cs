@@ -122,43 +122,50 @@ Réponds uniquement au format json répondant à ce schéma:
 
     public async Task<string> GetYoutubeResume(YoutubeSummaryJson request, CancellationToken cancellationToken = default)
     {
+        try
+        {
+            IChatClient client = GetChatClient(AiClientType.OpenAi);
 
-        IChatClient client = GetChatClient(AiClientType.OpenAi);
+            var promptDto = await aiRepository.GetPrompt("YoutubeResume", cancellationToken);
 
-        var promptDto = await aiRepository.GetPrompt("YoutubeResume", cancellationToken);
-
-        var ask = $@"
+            var ask = $@"
 === Début du transcript ===
 {request.Transcript}
 === Fin du transcript ===";
 
-        var messages = new ChatMessage[]
-        {
+            var messages = new ChatMessage[]
+            {
             new (ChatRole.System, promptDto.Prompt),
             new (ChatRole.User, ask)
-        };
+            };
 
-        var result = await GetChatResponse(messages, AiClientType.OpenAi);
+            var result = await GetChatResponse(messages, AiClientType.OpenAi, ChatResponseFormat.Text);
 
-        _ = await youtubeRepository.AddSummary(new YoutubeResumeDto() { Resume = result, Title = request.Title, Url = request.Url });
+            _ = await youtubeRepository.AddSummary(new YoutubeResumeDto() { Resume = result, Title = request.Title, Url = request.Url });
 
-        return result;
+            return result;
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
     }
 
 
     public async Task<T> GetChatResponse<T>(ChatMessage[] chatMessages, AiClientType aiClientTypeEnum, CancellationToken cancellationToken = default)
     {
-        var result = await GetChatResponse(chatMessages, aiClientTypeEnum, cancellationToken);
+        var result = await GetChatResponse(chatMessages, aiClientTypeEnum, ChatResponseFormat.Json, cancellationToken);
         var serialized = JsonConvert.DeserializeObject<T>(result) ?? throw new InvalidOperationException("Deserialization failed");
 
         return serialized;
     }
 
-    public async Task<string> GetChatResponse(ChatMessage[] chatMessages, AiClientType aiClientTypeEnum, CancellationToken cancellationToken = default)
+    public async Task<string> GetChatResponse(ChatMessage[] chatMessages, AiClientType aiClientTypeEnum, ChatResponseFormat chatResponseFormat, CancellationToken cancellationToken = default)
     {
         IChatClient client = GetChatClient(aiClientTypeEnum);
 
-        ChatResponse completion = await client.GetResponseAsync(chatMessages, new ChatOptions() { ResponseFormat = ChatResponseFormatJson.Json }, cancellationToken: cancellationToken);
+        ChatResponse completion = await client.GetResponseAsync(chatMessages, new ChatOptions() { ResponseFormat = chatResponseFormat }, cancellationToken: cancellationToken);
 
         var resultText = completion.Text;
 

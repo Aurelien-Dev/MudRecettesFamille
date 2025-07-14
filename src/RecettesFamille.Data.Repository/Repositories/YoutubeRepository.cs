@@ -17,10 +17,10 @@ public class YoutubeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCo
     public async Task<YoutubeResumeDto> AddSummary(YoutubeResumeDto youtubeSummary, CancellationToken cancellationToken = default)
     {
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var recipeEntity = mapper.Map<YoutubeResumeEntity>(youtubeSummary);
+        var youtubeResumeEntity = mapper.Map<YoutubeResumeEntity>(youtubeSummary);
 
-        await context.YoutubeSummarys.AddAsync(recipeEntity, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
+        await context.YoutubeSummarys.AddAsync(youtubeResumeEntity, cancellationToken);
+        _ = await context.SaveChangesAsync(cancellationToken);
 
         return youtubeSummary;
     }

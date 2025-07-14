@@ -2,12 +2,14 @@ using BitzArt.Blazor.Cookies;
 using Blazored.LocalStorage;
 using Cropper.Blazor.Extensions;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
 using RecettesFamille;
+using RecettesFamille.Ai.Services;
 using RecettesFamille.Ai.Services.Ingestion;
 using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
@@ -19,6 +21,8 @@ using System.Security.Claims;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
+StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 
 builder.Configuration
        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -85,6 +89,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role;
 });
 
+builder.Services.AddSingleton<IEmbeddingGenerator, OpenAiEmbeddingGenerator>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddServerSideBlazor()
     .AddHubOptions(options =>
