@@ -15,6 +15,9 @@ public static class DependencyInjection
 {
     public static void AddAi(this IServiceCollection services, IConfigurationManager configuration)
     {
+        var path = "/app/data";
+        Directory.CreateDirectory(path);
+
         // You will need to set the endpoint and key to your own values
         // You can do this using Visual Studio's "Manage User Secrets" UI, or on the command line:
         //   cd this-project-directory
