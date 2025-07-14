@@ -100,7 +100,6 @@ builder.Services.AddServerSideBlazor()
 builder.Logging.AddConsole();
 
 var app = builder.Build();
-IngestionCacheDbContext.Initialize(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

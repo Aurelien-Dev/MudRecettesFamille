@@ -22,6 +22,8 @@ public class DataIngestor(
 
     public async Task IngestDataAsync(IIngestionSource source)
     {
+        _ = await ingestionCacheDb.Database.EnsureCreatedAsync();
+
         var vectorCollection = vectorStore.GetCollection<string, SemanticSearchRecord>("data-chatapp2-ingested");
         await vectorCollection.CreateCollectionIfNotExistsAsync();
 

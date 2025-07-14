@@ -11,13 +11,6 @@ public class IngestionCacheDbContext(DbContextOptions<IngestionCacheDbContext> o
     public DbSet<IngestedDocument> Documents { get; set; } = default!;
     public DbSet<IngestedRecord> Records { get; set; } = default!;
 
-    public static void Initialize(IServiceProvider services)
-    {
-        using var scope = services.CreateScope();
-        using var db = scope.ServiceProvider.GetRequiredService<IngestionCacheDbContext>();
-        db.Database.EnsureCreated();
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
