@@ -6,6 +6,7 @@
     <UserSecretsId>aspnet-RecettesFamille-f509197d-e4c8-4df4-8a02-860845703b36</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+	<IncludePrerelease>true</IncludePrerelease>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Components\Pages\RecetteBook\BlockDefinitions\Components\**" />
