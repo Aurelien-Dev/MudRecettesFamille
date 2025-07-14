@@ -20,24 +20,24 @@
     <_WebToolingArtifacts Remove="Properties\PublishProfiles\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BitzArt.Blazor.Cookies.Server" />
-    <PackageReference Include="Blazored.LocalStorage" />
-    <PackageReference Include="Cropper.Blazor" />
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" />
-    <PackageReference Include="Magick.NET.Core" />
-    <PackageReference Include="MailKit" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+    <PackageReference Include="BitzArt.Blazor.Cookies.Server" Version="1.4.0" />
+    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+    <PackageReference Include="Cropper.Blazor" Version="1.4.0" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.6.0" />
+    <PackageReference Include="Magick.NET.Core" Version="14.6.0" />
+    <PackageReference Include="MailKit" Version="4.12.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.AI" />
-    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
-    <PackageReference Include="MimeKit" />
-    <PackageReference Include="MudBlazor" />
-    <PackageReference Include="Extensions.MudBlazor.StaticInput" />
-    <PackageReference Include="MudBlazor.Markdown" />
-    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="9.7.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.7.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.5.0-preview.1.25265.7" />
+    <PackageReference Include="MimeKit" Version="4.12.0" />
+    <PackageReference Include="MudBlazor" Version="8.3.0" />
+    <PackageReference Include="Extensions.MudBlazor.StaticInput" Version="3.2.0" />
+    <PackageReference Include="MudBlazor.Markdown" Version="8.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RecettesFamille.Ai\RecettesFamille.Ai.csproj" />

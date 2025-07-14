@@ -1,14 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="AutoMapper" />
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\RecettesFamille.Data\RecettesFamille.Data.csproj" />
     <ProjectReference Include="..\RecettesFamille.Dto\RecettesFamille.Dto.csproj" />
   </ItemGroup>
+
 </Project>
