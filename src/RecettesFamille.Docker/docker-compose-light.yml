@@ -23,7 +23,7 @@ services:
       - DB_HOST_PORT=${DB_HOST_PORT}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
     volumes:
-      - /home/data/client:/app/data:ro  # Mapping du volume
+      - /home/data/client:/app/data  # Mapping du volume
         
 networks:
   testnet:
