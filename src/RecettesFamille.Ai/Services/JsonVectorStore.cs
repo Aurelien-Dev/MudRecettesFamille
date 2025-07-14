@@ -68,20 +68,48 @@ public class JsonVectorStore : IVectorStore
         public Task DeleteBatchAsync(IEnumerable<TKey> keys, CancellationToken cancellationToken = default) { foreach (var key in keys) _records!.Remove(key); return WriteToDiskAsync(cancellationToken); }
         public Task DeleteCollectionAsync(CancellationToken cancellationToken = default) { _records = null; File.Delete(_filePath); return Task.CompletedTask; }
         public Task<TRecord?> GetAsync(TKey key, CancellationToken cancellationToken = default) => Task.FromResult(_records!.GetValueOrDefault(key));
-        public IAsyncEnumerable<TRecord> GetBatchAsync(IEnumerable<TKey> keys, CancellationToken cancellationToken = default) => keys.Select(key => _records!.GetValueOrDefault(key)!).Where(r => r is not null).ToAsyncEnumerable();
+        public async IAsyncEnumerable<TRecord> GetBatchAsync(IEnumerable<TKey> keys, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            foreach (var key in keys)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (_records!.TryGetValue(key, out var record) && record is not null)
+                {
+                    yield return record;
+                    await Task.Yield(); // pour que ce soit vraiment async si nécessaire
+                }
+            }
+        }
         public async Task<TKey> UpsertAsync(TRecord record, CancellationToken cancellationToken = default) { var key = _getKey(record); _records![key] = record; await WriteToDiskAsync(cancellationToken); return key; }
         public async IAsyncEnumerable<TKey> UpsertBatchAsync(IEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken cancellationToken = default) { var results = new List<TKey>(); foreach (var record in records) { var key = _getKey(record); _records![key] = record; results.Add(key); } await WriteToDiskAsync(cancellationToken); foreach (var key in results) yield return key; }
-        public Task<VectorSearchResults<TRecord>> VectorizedSearchAsync(ReadOnlyMemory<float> vector, int top = 5, Func<TRecord, bool>? filter = null, CancellationToken cancellationToken = default)
+        public Task<VectorSearchResults<TRecord>> VectorizedSearchAsync(
+            ReadOnlyMemory<float> vector,
+            int top = 5,
+            Func<TRecord, bool>? filter = null,
+            CancellationToken cancellationToken = default)
         {
             IEnumerable<TRecord> filteredRecords = _records!.Values;
-            if (filter is not null) filteredRecords = filteredRecords.Where(filter);
+            if (filter is not null)
+                filteredRecords = filteredRecords.Where(filter);
+
             var ranked = from record in filteredRecords
                          let candidateVector = _getVector(record)
                          let similarity = TensorPrimitives.CosineSimilarity(candidateVector.Span, vector.Span)
                          orderby similarity descending
-                         select (Record: record, Similarity: similarity);
-            var results = ranked.Take(top);
-            return Task.FromResult(new VectorSearchResults<TRecord>(results.Select(r => new VectorSearchResult<TRecord>(r.Record, r.Similarity)).ToAsyncEnumerable()));
+                         select new VectorSearchResult<TRecord>(record, similarity);
+
+            var topResults = ranked.Take(top);
+            return Task.FromResult(new VectorSearchResults<TRecord>(ToAsync(topResults)));
+        }
+
+        private static async IAsyncEnumerable<VectorSearchResult<TRecord>> ToAsync(IEnumerable<VectorSearchResult<TRecord>> source)
+        {
+            foreach (var item in source)
+            {
+                yield return item;
+                await Task.Yield(); // facultatif, juste pour que ce soit vraiment async
+            }
         }
         private static Func<TRecord, TKey> CreateKeyReader()
         {

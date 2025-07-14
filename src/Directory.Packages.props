@@ -13,11 +13,11 @@
     <PackageVersion Include="Magick.NET.Core" Version="14.6.0" />
     <PackageVersion Include="Magick.NET-Q8-AnyCPU" Version="14.6.0" />
     <PackageVersion Include="MailKit" Version="4.12.1" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0-preview.5.25277.114" />
-    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0-preview.5.25277.114" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0-preview.5.25277.114" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0-preview.5.25277.114" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0-preview.5.25277.114" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7" />
     <PackageVersion Include="Microsoft.Extensions.AI" Version="9.7.0" />
     <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="9.7.0" />
     <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="9.7.0-preview.1.25356.2" />
@@ -26,7 +26,7 @@
     <PackageVersion Include="MudBlazor" Version="8.8.0" />
     <PackageVersion Include="MudBlazor.Markdown" Version="8.7.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0-preview.5" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
   </ItemGroup>
 </Project>
