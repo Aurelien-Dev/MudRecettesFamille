@@ -28,7 +28,7 @@ services:
       - /home/data/client:/app/data  # Mapping du volume
       
   recettesfamille.data:
-    image: postgres:latest
+    image: postgres:17
     container_name: recettesfamille.data
     environment:
       POSTGRES_USER: pguser

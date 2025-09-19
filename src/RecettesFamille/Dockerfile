@@ -10,7 +10,7 @@ EXPOSE 8081
 # Client postgresql and ssh pour créer les backups de la base de données
 USER root
 RUN apt-get update \
-  && apt-get install -y postgresql-client openssh-client \
+  && apt-get install -y postgresql-client-17 openssh-client \
   && rm -rf /var/lib/apt/lists/*
 USER $APP_UID
 
