@@ -47,5 +47,8 @@ jobs:
             echo "DB_HOST_PORT=${{ vars.DB_HOST_PORT }}" >> .env
             echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
 
+            docker builder prune -f
+            docker image prune -f
+
             docker compose -f RecettesFamille.Docker/docker-compose-light.yml down
-            docker compose -f RecettesFamille.Docker/docker-compose-light.yml --env-file .env up --build -d
+            docker compose -f RecettesFamille.Docker/docker-compose-light.yml --env-file .env up --build --no-cache -d
