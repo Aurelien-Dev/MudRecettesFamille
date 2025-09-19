@@ -10,7 +10,6 @@ using MudBlazor;
 using MudBlazor.Services;
 using RecettesFamille;
 using RecettesFamille.Ai.Services;
-using RecettesFamille.Ai.Services.Ingestion;
 using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
 using RecettesFamille.Data;
@@ -79,7 +78,15 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseNpgsql(postgresCs);
 }, ServiceLifetime.Scoped);
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false;
+    options.Password.RequireDigit = true;          // au moins un chiffre
+    options.Password.RequireLowercase = true;      // au moins une minuscule
+    options.Password.RequireUppercase = true;      // au moins une majuscule
+    options.Password.RequireNonAlphanumeric = false; // pas d’obligation de symbole
+
+})
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
