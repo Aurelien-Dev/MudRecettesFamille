@@ -25,7 +25,7 @@
         {
             <MudStack>
                 <MudText Typo="Typo.h3" GutterBottom="true">@CurrentResume.Title</MudText>
-                <MudMarkdown Value="@CurrentResume.Resume" OverrideHeaderTypo="OverrideHeaderTypo" />
+                <MudMarkdown Value="@CurrentResume.Resume" />
             </MudStack>
         }
     </MudItem>
@@ -37,10 +37,6 @@
     private List<YoutubeResumeDto> ytResume { get; set; } = [];
     private YoutubeResumeDto? CurrentResume { get; set; }
 
-    private Typo OverrideHeaderTypo(Typo x)
-    {
-        return Typo.overline;
-    }
 
     protected override async Task OnInitializedAsync()
     {

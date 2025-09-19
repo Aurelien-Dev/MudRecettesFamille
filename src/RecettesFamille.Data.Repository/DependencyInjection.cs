@@ -20,12 +20,10 @@ public static class DependencyInjection
         services.AddScoped<IYoutubeRepository, YoutubeRepository>();
 
         //AutoMapper
-        var mapperConfig = new MapperConfiguration(cfg =>
+        services.AddAutoMapper(cfg =>
         {
             cfg.AllowNullCollections = true;
             cfg.AddProfile<MappingProfile>();
         });
-        var mapper = mapperConfig.CreateMapper();
-        services.AddSingleton(mapper);
     }
 }
