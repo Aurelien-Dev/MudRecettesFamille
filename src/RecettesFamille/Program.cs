@@ -81,11 +81,10 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
-    options.Password.RequireDigit = true;          // au moins un chiffre
-    options.Password.RequireLowercase = true;      // au moins une minuscule
-    options.Password.RequireUppercase = true;      // au moins une majuscule
-    options.Password.RequireNonAlphanumeric = false; // pas d’obligation de symbole
-
+    options.Password.RequireDigit = false;          
+    options.Password.RequireLowercase = false;      
+    options.Password.RequireUppercase = false;      
+    options.Password.RequireNonAlphanumeric = false;
 })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
