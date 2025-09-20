@@ -6,11 +6,14 @@
 @using RecettesFamille.Components.Layout
 @using RecettesFamille.Data
 @using RecettesFamille.Data.Repository.IRepositories
+@using MudBlazor
 @layout AdminLayout
 
 @inject IUserRepository userRepository
 @inject SignInManager<ApplicationUser> signInManager
 @inject UserManager<ApplicationUser> userManager
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudPaper Elevation="1">
     <MudTable Items="users" Hover="true" Dense="true" Height="calc(100vh - 200px)" Style="@($"background: #fbf6ef;")">
@@ -19,6 +22,7 @@
             <MudTh>Is Admin</MudTh>
             <MudTh>Is Contributor</MudTh>
             <MudTh>Is Reader</MudTh>
+            <MudTh>Actions</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd>@context.Name</MudTd>
@@ -30,6 +34,12 @@
             </MudTd>
             <MudTd>
                 <MudCheckBox T="bool" Value="@context.IsReader" ValueChanged="@((e) => CheckReaderChanged(e, context))" />
+            </MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                               Color="Color.Error" 
+                               Size="Size.Small" 
+                               OnClick="@(() => DeleteUserDialog(context))" />
             </MudTd>
         </RowTemplate>
 
@@ -45,6 +55,7 @@
 
 @code {
     private List<UserViewModel> users { get; set; } = [];
+    private bool isDeleting = false;
 
     protected async override Task OnInitializedAsync()
     {
@@ -85,6 +96,51 @@
             await userRepository.AssignRoleAsync(userVm.Name, "Reader");
         else
             await userRepository.RemoveRoleAsync(userVm.Name, "Reader");
+    }
+
+    private async Task DeleteUserDialog(UserViewModel userVm)
+    {
+        if (isDeleting)
+            return;
+
+        bool? result = await DialogService.ShowMessageBox(
+            "Confirmation de suppression",
+            $"Êtes-vous sûr de vouloir supprimer l'utilisateur {userVm.Name}?",
+            yesText: "Supprimer", 
+            noText: "Annuler");
+
+        if (result == true)
+        {
+            await DeleteUser(userVm);
+        }
+    }
+
+    private async Task DeleteUser(UserViewModel userVm)
+    {
+        try
+        {
+            isDeleting = true;
+            var result = await userRepository.DeleteUserAsync(userVm.Name);
+            
+            if (result.Succeeded)
+            {
+                users.Remove(userVm);
+                Snackbar.Add($"L'utilisateur {userVm.Name} a été supprimé avec succès", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Erreur lors de la suppression: {string.Join(", ", result.Errors.Select(e => e.Description))}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Une erreur est survenue: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isDeleting = false;
+            StateHasChanged();
+        }
     }
 
     public class UserViewModel

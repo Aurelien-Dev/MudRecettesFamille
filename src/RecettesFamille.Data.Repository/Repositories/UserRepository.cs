@@ -45,4 +45,14 @@ public class UserRepository(UserManager<ApplicationUser> userManager, RoleManage
 
         return usersWithRoles;
     }
+
+    public async Task<IdentityResult> DeleteUserAsync(string userEmail)
+    {
+        var user = await userManager.FindByEmailAsync(userEmail);
+        if (user != null)
+        {
+            return await userManager.DeleteAsync(user);
+        }
+        return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+    }
 }
