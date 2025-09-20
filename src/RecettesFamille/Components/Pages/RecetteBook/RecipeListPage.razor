@@ -9,138 +9,171 @@
 @using RecettesFamille.Extensions
 
 
-<!-- Recherche & Filtres -->
-<MudStack Row="true" Spacing="3">
-    <MudTextField T="string" @bind-Value="_searchString" Label="Rechercher des recettes ..." Variant="Variant.Outlined" Class="ma-0" />
-    <MudButton Variant="Variant.Filled" DropShadow="false" Color="Color.Primary" Class="py-0" OnClick="@Ask">Je suis curieux</MudButton>
-</MudStack>
 
 <MudGrid>
-    <MudItem md="3" xs="12">
-        <MudStack>
+	<MudItem md="3" xs="12"></MudItem>
+	<MudItem md="9" xs="12">
+		<!-- Recherche & Filtres -->
+		<MudStack Row="true" Spacing="3" StretchItems="StretchItems.Start">
+			<MudStack Spacing="0">
+				<MudTextField T="string" @bind-Value="_searchString" Label="Rechercher des recettes ..." Variant="Variant.Outlined" Class="ma-0"
+							  Immediate="true" OnKeyDown="OnKeyDown" Clearable="true" OnClearButtonClick="@Ask" />
+				<MudProgressLinear Color="Color.Primary" Indeterminate="_workInProgress" Rounded="true" Class="mx-3" />
+			</MudStack>
+			<MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search" DropShadow="false" Color="Color.Primary" Class="py-0" OnClick="@Ask">Je suis curieux</MudButton>
+		</MudStack>
+	</MudItem>
+</MudGrid>
 
-            <MudPaper>
-                <MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true" SelectedValuesChanged="OnSelectedValuesChanged">
-                    <MudListItem Icon="@Icons.Material.Filled.FilterList" Text="Filtre par catégories" Expanded="@(breakpoint > Breakpoint.Sm)">
-                        <NestedList>
-                            @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
-                            {
-                                <MudListItem Dense="true" Text="@item.TagName" />
-                            }
-                        </NestedList>
-                    </MudListItem>
-                </MudList>
-            </MudPaper>
+<MudGrid>
+	<MudItem md="3" xs="12">
+		<MudStack>
 
-        </MudStack>
-    </MudItem>
-    <MudItem md="9" xs="12">
-        <MudPaper Elevation="1">
-            <MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.None" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
-                      Dense="true" Height="calc(100vh - 135px)">
-                <RowTemplate>
-                    <MudTd>
-                        <MudText Typo="Typo.subtitle2">
-                            @context.Name
-                        </MudText>
-                    </MudTd>
-                    <MudTd>
-                        @foreach (var item in context.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries))
-                        {
-                            <MudChip T="string" Variant="Variant.Text" Size="Size.Small" Color="Color.Inherit">@item</MudChip>
-                        }
-                    </MudTd>
-                    <MudTd>
-                        <MudIconButton Href="@($"/recette/{context.Id}")" Icon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Primary" Size="Size.Small" />
-                    </MudTd>
-                </RowTemplate>
+			<MudPaper>
+				<MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true" SelectedValuesChanged="OnSelectedValuesChanged">
+					<MudListItem Icon="@Icons.Material.Filled.FilterList" Text="Filtre par catégories" Expanded="@(breakpoint > Breakpoint.Sm)">
+						<NestedList>
+							@foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
+							{
+								<MudListItem Dense="true" Text="@item.TagName" />
+							}
+						</NestedList>
+					</MudListItem>
+				</MudList>
+			</MudPaper>
 
-                <PagerContent>
-                    <MudTablePager PageSizeOptions="new int[] { 50, 100, 150, 200, int.MaxValue }"
-                                   RowsPerPageString="Elements par page :"
-                                   AllItemsText="Tout"
-                                   InfoFormat="{first_item}-{last_item} sur {all_items}" />
-                </PagerContent>
-            </MudTable>
-        </MudPaper>
+		</MudStack>
+	</MudItem>
+	<MudItem md="9" xs="12">
+		<MudPaper Elevation="1">
+			<MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.None" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
+					  Dense="true" Height="calc(100vh - 135px)">
+				<RowTemplate>
+					<MudTd>
+						<MudText Typo="Typo.subtitle2">
+							@context.Name
+						</MudText>
+					</MudTd>
+					<MudTd>
+						@foreach (var item in context.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries))
+						{
+							<MudChip T="string" Variant="Variant.Text" Size="Size.Small" Color="Color.Inherit">@item</MudChip>
+						}
+					</MudTd>
+					<MudTd>
+						<MudIconButton Href="@($"/recette/{context.Id}")" Icon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Primary" Size="Size.Small" />
+					</MudTd>
+				</RowTemplate>
 
-    </MudItem>
+				<PagerContent>
+					<MudTablePager PageSizeOptions="new int[] { 50, 100, 150, 200, int.MaxValue }"
+								   RowsPerPageString="Elements par page :"
+								   AllItemsText="Tout"
+								   InfoFormat="{first_item}-{last_item} sur {all_items}" />
+				</PagerContent>
+			</MudTable>
+		</MudPaper>
+
+	</MudItem>
 </MudGrid>
 
 @code {
-    [Inject] NavigationManager NavigationManager { get; set; } = null!;
-    [Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
-    [Inject] ITagRepository TagRepository { get; set; } = null!;
-    [Inject] IBrowserViewportService BrowserViewportService { get; set; } = null!;
+	[Inject] NavigationManager NavigationManager { get; set; } = null!;
+	[Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
+	[Inject] ITagRepository TagRepository { get; set; } = null!;
+	[Inject] IBrowserViewportService BrowserViewportService { get; set; } = null!;
 
-    List<RecipeForListDto> Recipes { get; set; } = null!;
-    List<TagDto> Tags { get; set; } = null!;
-    Breakpoint breakpoint { get; set; }
+	List<RecipeForListDto> Recipes { get; set; } = null!;
+	List<TagDto> Tags { get; set; } = null!;
+	Breakpoint breakpoint { get; set; }
 
-    public Guid Id => throw new NotImplementedException();
+	public Guid Id => throw new NotImplementedException();
 
-    string _searchString = string.Empty;
+	string _searchString = string.Empty;
+	bool _workInProgress = false;
 
-    protected override async Task OnParametersSetAsync()
-    {
-        var result = await RecipeRepository.GetAllLightRecipe();
+	protected override async Task OnParametersSetAsync()
+	{
+		var result = await RecipeRepository.GetAllLightRecipe();
 
-        Recipes = result.OrderBy(c => c.Name).ToList();
-        Tags = await TagRepository.GetAllVisible();
+		Recipes = result.OrderBy(c => c.Name).ToList();
+		Tags = await TagRepository.GetAllVisible();
 
-        breakpoint = await BrowserViewportService.GetCurrentBreakpointAsync();
-    }
+		breakpoint = await BrowserViewportService.GetCurrentBreakpointAsync();
+	}
 
-    public async Task OnSelectedValuesChanged(IReadOnlyCollection<string>? strings)
-    {
-        Recipes = (await RecipeRepository.GetAllLightRecipe(strings!.ToArray())).OrderBy(c => c.Name).ToList();
-    }
+	public async Task OnSelectedValuesChanged(IReadOnlyCollection<string>? strings)
+	{
+		Recipes = (await RecipeRepository.GetAllLightRecipe(strings!.ToArray())).OrderBy(c => c.Name).ToList();
+	}
 
-    private bool FilterFunc1(RecipeForListDto element)
-    {
-        return FilterFunc(element, _searchString);
-    }
+	// Handle the key down event to detect Enter key presses
+	private async Task OnKeyDown(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+		{
+			await Ask();
+		}
+	}
 
-    public Task NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
-    {
-        return Task.CompletedTask;
-    }
+	private bool FilterFunc1(RecipeForListDto element)
+	{
+		return FilterFunc(element, _searchString);
+	}
 
-    private static bool FilterFunc(RecipeForListDto element, string searchString)
-    {
-        if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-        var comparer = $"{element.Name} - {element.Tags}";
-        return comparer.Contains(searchString, StringComparison.OrdinalIgnoreCase);
-    }
+	public Task NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
+	{
+		return Task.CompletedTask;
+	}
 
-
-
-    #region AI
-
-    public async Task Ask()
-    {
-        if (string.IsNullOrEmpty(_searchString))
-        {
-            var result = await RecipeRepository.GetAllLightRecipe();
-            Recipes = result.OrderBy(c => c.Name).ToList();
-            return;
-        }
-        var resultFromSementicSearch = await SearchAsync(_searchString);
-        Recipes = await RecipeRepository.GetAllLightRecipe(resultFromSementicSearch.ToArray());
-    }
+	private static bool FilterFunc(RecipeForListDto element, string searchString)
+	{
+		if (string.IsNullOrWhiteSpace(searchString))
+			return true;
+		var comparer = $"{element.Name} - {element.Tags}";
+		return comparer.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+	}
 
 
-    [Description("Searches for information using a phrase or keyword")]
-    private async Task<IEnumerable<int>> SearchAsync(
-        [Description("The phrase to search for.")] string searchPhrase,
-        [Description("If possible, specify the recipe name to search that recipe only. If not provided or empty, the search includes all recipes.")] string? recipeName = null)
-    {
-        await InvokeAsync(StateHasChanged);
-        var results = await Search.SearchLightAsync(searchPhrase, maxResults: 100);
-        return results.Select(result => result.RecipeId);
-    }
+
+	#region AI
+
+	public async Task Ask()
+	{
+		try
+		{
+			_workInProgress = true;
+
+			if (string.IsNullOrEmpty(_searchString))
+			{
+				var result = await RecipeRepository.GetAllLightRecipe();
+				Recipes = result.OrderBy(c => c.Name).ToList();
+				return;
+			}
+			var resultFromSementicSearch = await SearchAsync(_searchString);
+			Recipes = await RecipeRepository.GetAllLightRecipe(resultFromSementicSearch.ToArray());
+		}
+		catch (Exception)
+		{
+			throw;
+		}
+		finally
+		{
+			_workInProgress = false;
+		}
+	}
 
 
-    #endregion
+	[Description("Searches for information using a phrase or keyword")]
+	private async Task<IEnumerable<int>> SearchAsync(
+		[Description("The phrase to search for.")] string searchPhrase,
+		[Description("If possible, specify the recipe name to search that recipe only. If not provided or empty, the search includes all recipes.")] string? recipeName = null)
+	{
+		await InvokeAsync(StateHasChanged);
+		var results = await Search.SearchLightAsync(searchPhrase, maxResults: 100);
+		return results.Select(result => result.RecipeId);
+	}
+
+
+	#endregion
 }

@@ -15,38 +15,39 @@
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-3">
 
-    <!-- Dernières recettes -->
-    <MudStack Row="true" Class="mt-0 mb-0">
-        <MudText Typo="Typo.h5" Style="font-weight:900;">@Messages.GetRandomLatestRecipeTitles()</MudText>
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.ArrowBackIosNew" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" OnClick="@(() => mudCarousel.Previous())" />
-        <MudIconButton Icon="@Icons.Material.Filled.ArrowForwardIos" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" OnClick="@(() => mudCarousel.Next())" />
-    </MudStack>
+	<!-- Dernières recettes -->
+	<MudStack Row="true" Class="mt-0 mb-0">
+		<MudText Typo="Typo.h5" Style="font-weight:900;">@carouselTitle</MudText>
+		<MudSpacer />
+		<MudIconButton Icon="@Icons.Material.Filled.ArrowBackIosNew" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" OnClick="@(() => mudCarousel.Previous())" />
+		<MudIconButton Icon="@Icons.Material.Filled.ArrowForwardIos" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" OnClick="@(() => mudCarousel.Next())" />
+	</MudStack>
 
-    @if (RecipeGroups != null && RecipeGroups.Any())
-    {
-        <MudCarousel @ref="mudCarousel" TData="RecipeForListDto" Class="mud-width-full pa-0 ma-0 mb-10" Style="min-height:440px;" AutoCycle="false" ShowBullets="false" ShowArrows="false">
-            @foreach (var group in RecipeGroups)
-            {
-                <MudCarouselItem Class="pa-0 ma-0">
-                    <MudGrid Class="" Justify="Justify.Center" Style="height:100%;">
-                        @foreach (var recipe in group)
-                        {
-                            <MudItem xs="@xsItemSize">
-                                <RecipeCard Recipes="@recipe" />
-                            </MudItem>
-                        }
-                    </MudGrid>
-                </MudCarouselItem>
-            }
-        </MudCarousel>
-    }
-    else
-    {
-        <MudText Typo="Typo.h6">Aucune recette trouvée.</MudText>
-    }
+	@if (RecipeGroups != null && RecipeGroups.Any())
+	{
+		<MudCarousel @ref="mudCarousel" TData="RecipeForListDto" Class="mud-width-full pa-0 ma-0 mb-0" Style="min-height:440px;" AutoCycle="false"
+					 ShowBullets="false" ShowArrows="false">
+			@foreach (var group in RecipeGroups)
+			{
+				<MudCarouselItem Class="pa-0 ma-0">
+					<MudGrid Class="" Justify="Justify.Center" Style="height:100%;">
+						@foreach (var recipe in group)
+						{
+							<MudItem xs="@xsItemSize">
+								<RecipeCard Recipes="@recipe" />
+							</MudItem>
+						}
+					</MudGrid>
+				</MudCarouselItem>
+			}
+		</MudCarousel>
+	}
+	else
+	{
+		<MudText Typo="Typo.h6">Aucune recette trouvée.</MudText>
+	}
 
-    @* <!-- Recette du jour -->
+	@* <!-- Recette du jour -->
     <MudPaper Class="mb-6 rounded-xl">
         <MudGrid>
             <MudItem xs="12" md="5" Class="d-flex py-0 my-0">
@@ -63,14 +64,11 @@
         </MudGrid>
     </MudPaper> *@
 
+	<MudStack Class="mt-0 mb-6">
+		<RecipeListPage />
+	</MudStack>
 
-
-    <MudStack Class="mt-6 mb-6">
-
-        <RecipeListPage />
-    </MudStack>
-
-    @* <!-- Catégories -->
+	@* <!-- Catégories -->
     <MudText Typo="Typo.h5" Class="mt-6 mb-6" Style="font-weight:900;">Recettes par catégorie</MudText>
     <MudGrid Class="justify-space-around">
         @for (int i = 0; i < 8; i++)
@@ -89,43 +87,49 @@
 </MudContainer>
 
 @code {
-    MudCarousel<RecipeForListDto> mudCarousel { get; set; } = default!;
-    List<RecipeForListDto> Recipes { get; set; } = null!;
-    List<List<RecipeForListDto>> RecipeGroups { get; set; } = new();
+	MudCarousel<RecipeForListDto> mudCarousel { get; set; } = default!;
+	List<RecipeForListDto> Recipes { get; set; } = null!;
+	List<List<RecipeForListDto>> RecipeGroups { get; set; } = new();
 
-    int groupSize = 4;
-    int xsItemSize = 3;
+	int groupSize = 4;
+	int xsItemSize = 3;
+	string carouselTitle = string.Empty;
 
-    protected override async Task OnParametersSetAsync()
-    {
-        var result = await RecipeRepository.GetAllLightRecipe();
-        Recipes = result.OrderBy(c => c.Name).ToList();
+	protected override void OnInitialized()
+	{
+		carouselTitle = Messages.GetRandomLatestRecipeTitles();
+	}
 
-        var breakpoint = await BrowserViewportService.GetCurrentBreakpointAsync();
-        if (breakpoint <= Breakpoint.Sm)
-        {
-            groupSize = 2;
-            xsItemSize = 6;
-        }
+	protected override async Task OnParametersSetAsync()
+	{
+		var result = await RecipeRepository.GetAllLightRecipe();
+		Recipes = result.OrderBy(c => c.Name).ToList();
 
-        RecipeGroups = GroupRecipes(Recipes.OrderByDescending(c => c.CreatedDate).Take(12).ToList(), groupSize);
-    }
+		var breakpoint = await BrowserViewportService.GetCurrentBreakpointAsync();
+		if (breakpoint <= Breakpoint.Sm)
+		{
+			groupSize = 2;
+			xsItemSize = 6;
+		}
 
-    private List<List<RecipeForListDto>> GroupRecipes(List<RecipeForListDto> recipes, int groupSize)
-    {
-        var result = new List<List<RecipeForListDto>>();
+		RecipeGroups = GroupRecipes(Recipes.OrderByDescending(c => c.CreatedDate).Take(12).ToList(), groupSize);
+	}
 
-        for (int i = 0; i < recipes.Count; i += groupSize)
-        {
-            result.Add(recipes.Skip(i).Take(groupSize).ToList());
-        }
+	private List<List<RecipeForListDto>> GroupRecipes(List<RecipeForListDto> recipes, int groupSize)
+	{
+		var result = new List<List<RecipeForListDto>>();
 
-        return result;
-    }
+		for (int i = 0; i < recipes.Count; i += groupSize)
+		{
+			result.Add(recipes.Skip(i).Take(groupSize).ToList());
+		}
 
-    public Guid Id => throw new NotImplementedException();
-    public Task NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
-    {
-        return Task.CompletedTask;
-    }
+		return result;
+	}
+
+	public Guid Id => throw new NotImplementedException();
+	public Task NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
+	{
+		return Task.CompletedTask;
+	}
 }
