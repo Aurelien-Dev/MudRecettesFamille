@@ -2,4 +2,31 @@
 
 <PageTitle>Access denied</PageTitle>
 
-<MudAlert Severity="Severity.Error">You do not have access to this resource.</MudAlert>
+<MudGrid Justify="Justify.Center" Spacing="2">
+	<MudItem xs="12" Class="pa-0 d-flex align-center justify-center mud-width-full">
+		<MudImage Src="logo.png" Style="width:100%" />
+	</MudItem>
+
+	<MudItem xs="12">
+		<MudText Typo="Typo.h4" >🍴 Accès refusé</MudText>
+	</MudItem>
+
+	<MudItem xs="12">
+		<MudAlert Severity="Severity.Error">
+			Votre recette est presque prête… mais il manque un ingrédient essentiel : le rôle nécessaire pour accéder à cette page.
+			<br />
+			<br />
+			Pas d’inquiétude, l’administrateur est en train de préparer le plat — revenez un peu plus tard, le temps qu’il ajoute l’ingrédient manquant.
+		</MudAlert>
+	</MudItem>
+	
+	<MudItem xs="12" Class="d-flex align-center justify-center">
+		
+		<MudButton Href="/" Class="ma-3" Color="Color.Primary" Variant="Variant.Filled" DropShadow="false" >
+			🔄 Voir si c’est prêt
+		</MudButton>
+		<MudButton Href="Account/Logout" Class="ma-3" Style="@($"background:{Colors.DeepOrange.Lighten4};")" Variant="Variant.Filled" DropShadow="false" EndIcon="@Icons.Material.Filled.Logout">
+			Quitter la cuisine
+		</MudButton>
+	</MudItem>
+</MudGrid>

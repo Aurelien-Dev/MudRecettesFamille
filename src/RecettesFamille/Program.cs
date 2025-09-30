@@ -43,6 +43,8 @@ builder.AddBlazorCookies();
 
 builder.Services.AddCropper();
 
+builder.Services.Configure<SecurityStampValidatorOptions>(o => o.ValidationInterval = TimeSpan.FromSeconds(5));
+
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents(
     options =>

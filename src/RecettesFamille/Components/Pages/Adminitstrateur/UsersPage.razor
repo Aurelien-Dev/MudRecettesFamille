@@ -16,146 +16,160 @@
 @inject IDialogService DialogService
 
 <MudPaper Elevation="1">
-    <MudTable Items="users" Hover="true" Dense="true" Height="calc(100vh - 200px)" Style="@($"background: #fbf6ef;")">
-        <HeaderContent>
-            <MudTh>User</MudTh>
-            <MudTh>Is Admin</MudTh>
-            <MudTh>Is Contributor</MudTh>
-            <MudTh>Is Reader</MudTh>
-            <MudTh>Actions</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd>@context.Name</MudTd>
-            <MudTd>
-                <MudCheckBox T="bool" Value="@context.IsAdmin" ValueChanged="@((e) => CheckAdminChanged(e, context))" />
-            </MudTd>
-            <MudTd>
-                <MudCheckBox T="bool" Value="@context.IsContributor" ValueChanged="@((e) => CheckContributorChanged(e, context))" />
-            </MudTd>
-            <MudTd>
-                <MudCheckBox T="bool" Value="@context.IsReader" ValueChanged="@((e) => CheckReaderChanged(e, context))" />
-            </MudTd>
-            <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
-                               Color="Color.Error" 
-                               Size="Size.Small" 
-                               OnClick="@(() => DeleteUserDialog(context))" />
-            </MudTd>
-        </RowTemplate>
+	<MudTable Items="users" Hover="true" Dense="true" Height="calc(100vh - 200px)" Style="@($"background: #fbf6ef;")">
+		<HeaderContent>
+			<MudTh>User</MudTh>
+			<MudTh>Is Admin</MudTh>
+			<MudTh>Is Contributor</MudTh>
+			<MudTh>Is Reader</MudTh>
+			<MudTh>Actions</MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			<MudTd>@context.Name</MudTd>
+			<MudTd>
+				<MudCheckBox T="bool" Value="@context.IsAdmin" ValueChanged="@((e) => CheckAdminChanged(e, context))" />
+			</MudTd>
+			<MudTd>
+				<MudCheckBox T="bool" Value="@context.IsContributor" ValueChanged="@((e) => CheckContributorChanged(e, context))" />
+			</MudTd>
+			<MudTd>
+				<MudCheckBox T="bool" Value="@context.IsReader" ValueChanged="@((e) => CheckReaderChanged(e, context))" />
+			</MudTd>
+			<MudTd>
+				<MudIconButton Icon="@Icons.Material.Filled.Delete"
+							   Color="Color.Error"
+							   Size="Size.Small"
+							   OnClick="@(() => DeleteUserDialog(context))" />
+			</MudTd>
+		</RowTemplate>
 
-        <PagerContent>
-            <MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
-                           RowsPerPageString="Elements par page :"
-                           AllItemsText="Tout"
-                           InfoFormat="{first_item}-{last_item} sur {all_items}" />
-        </PagerContent>
-    </MudTable>
+		<PagerContent>
+			<MudTablePager PageSizeOptions="new int[] { 25, 50, 100, int.MaxValue }"
+						   RowsPerPageString="Elements par page :"
+						   AllItemsText="Tout"
+						   InfoFormat="{first_item}-{last_item} sur {all_items}" />
+		</PagerContent>
+	</MudTable>
 </MudPaper>
 
 
 @code {
-    private List<UserViewModel> users { get; set; } = [];
-    private bool isDeleting = false;
+	private List<UserViewModel> users { get; set; } = [];
+	private bool isDeleting = false;
 
-    protected async override Task OnInitializedAsync()
-    {
-        var usersIdentity = await userRepository.GetAllUsersWithRolesAsync();
+	protected async override Task OnInitializedAsync()
+	{
+		var usersIdentity = await userRepository.GetAllUsersWithRolesAsync();
 
-        foreach (var item in usersIdentity.OrderBy(c => c.User.UserName))
-        {
-            bool IsAdmin = item.Roles.Contains("Admin");
-            bool IsContributor = item.Roles.Contains("Contributor");
-            bool isReader = item.Roles.Contains("Reader");
+		foreach (var item in usersIdentity.OrderBy(c => c.User.UserName))
+		{
+			bool IsAdmin = item.Roles.Contains("Admin");
+			bool IsContributor = item.Roles.Contains("Contributor");
+			bool isReader = item.Roles.Contains("Reader");
 
-            users.Add(new UserViewModel(item.User?.UserName ?? "Unknown", IsAdmin, IsContributor, isReader));
-        }
-    }
+			users.Add(new UserViewModel(item.User?.UserName ?? "Unknown", IsAdmin, IsContributor, isReader));
+		}
+	}
 
-    private async Task CheckAdminChanged(bool isCheck, UserViewModel userVm)
-    {
-        userVm.IsAdmin = isCheck;
-        if (isCheck)
-            await userRepository.AssignRoleAsync(userVm.Name, "Admin");
-        else
-            await userRepository.RemoveRoleAsync(userVm.Name, "Admin");
+	private async Task CheckAdminChanged(bool isCheck, UserViewModel userVm)
+	{
 
-        StateHasChanged();
-    }
-    private async Task CheckContributorChanged(bool isCheck, UserViewModel userVm)
-    {
-        userVm.IsContributor = isCheck;
-        if (isCheck)
-            await userRepository.AssignRoleAsync(userVm.Name, "Contributor");
-        else
-            await userRepository.RemoveRoleAsync(userVm.Name, "Contributor");
-    }
-    private async Task CheckReaderChanged(bool isCheck, UserViewModel userVm)
-    {
-        userVm.IsReader = isCheck;
-        if (isCheck)
-            await userRepository.AssignRoleAsync(userVm.Name, "Reader");
-        else
-            await userRepository.RemoveRoleAsync(userVm.Name, "Reader");
-    }
+		userVm.IsAdmin = isCheck;
 
-    private async Task DeleteUserDialog(UserViewModel userVm)
-    {
-        if (isDeleting)
-            return;
+		if (isCheck)
+			await userRepository.AssignRoleAsync(userVm.Name, "Admin");
+		else
+			await userRepository.RemoveRoleAsync(userVm.Name, "Admin");
 
-        bool? result = await DialogService.ShowMessageBox(
-            "Confirmation de suppression",
-            $"Êtes-vous sûr de vouloir supprimer l'utilisateur {userVm.Name}?",
-            yesText: "Supprimer", 
-            noText: "Annuler");
+		await RefreshUserRoles(userVm);
+	}
+	private async Task CheckContributorChanged(bool isCheck, UserViewModel userVm)
+	{
+		userVm.IsContributor = isCheck;
 
-        if (result == true)
-        {
-            await DeleteUser(userVm);
-        }
-    }
+		if (isCheck)
+			await userRepository.AssignRoleAsync(userVm.Name, "Contributor");
+		else
+			await userRepository.RemoveRoleAsync(userVm.Name, "Contributor");
 
-    private async Task DeleteUser(UserViewModel userVm)
-    {
-        try
-        {
-            isDeleting = true;
-            var result = await userRepository.DeleteUserAsync(userVm.Name);
-            
-            if (result.Succeeded)
-            {
-                users.Remove(userVm);
-                Snackbar.Add($"L'utilisateur {userVm.Name} a été supprimé avec succès", Severity.Success);
-            }
-            else
-            {
-                Snackbar.Add($"Erreur lors de la suppression: {string.Join(", ", result.Errors.Select(e => e.Description))}", Severity.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Une erreur est survenue: {ex.Message}", Severity.Error);
-        }
-        finally
-        {
-            isDeleting = false;
-            StateHasChanged();
-        }
-    }
+		await RefreshUserRoles(userVm);
+	}
+	private async Task CheckReaderChanged(bool isCheck, UserViewModel userVm)
+	{
+		userVm.IsReader = isCheck;
 
-    public class UserViewModel
-    {
-        public string Name { get; set; }
-        public bool IsAdmin { get; set; }
-        public bool IsContributor { get; set; }
-        public bool IsReader { get; set; }
+		if (isCheck)
+			await userRepository.AssignRoleAsync(userVm.Name, "Reader");
+		else
+			await userRepository.RemoveRoleAsync(userVm.Name, "Reader");
 
-        public UserViewModel(string name, bool isAdmin, bool isContributor, bool isReader)
-        {
-            Name = name;
-            IsAdmin = isAdmin;
-            IsContributor = isContributor;
-            IsReader = isReader;
-        }
-    }
+		await RefreshUserRoles(userVm);
+	}
+	private async Task DeleteUserDialog(UserViewModel userVm)
+	{
+		if (isDeleting)
+			return;
+
+		bool? result = await DialogService.ShowMessageBox(
+			"Confirmation de suppression",
+			$"Êtes-vous sûr de vouloir supprimer l'utilisateur {userVm.Name}?",
+			yesText: "Supprimer",
+			noText: "Annuler");
+
+		if (result == true)
+		{
+			await DeleteUser(userVm);
+		}
+	}
+	private async Task DeleteUser(UserViewModel userVm)
+	{
+		try
+		{
+			isDeleting = true;
+			var result = await userRepository.DeleteUserAsync(userVm.Name);
+
+			if (result.Succeeded)
+			{
+				users.Remove(userVm);
+				Snackbar.Add($"L'utilisateur {userVm.Name} a été supprimé avec succès", Severity.Success);
+			}
+			else
+			{
+				Snackbar.Add($"Erreur lors de la suppression: {string.Join(", ", result.Errors.Select(e => e.Description))}", Severity.Error);
+			}
+		}
+		catch (Exception ex)
+		{
+			Snackbar.Add($"Une erreur est survenue: {ex.Message}", Severity.Error);
+		}
+		finally
+		{
+			isDeleting = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task RefreshUserRoles(UserViewModel userVm)
+	{
+		var user = await userManager.FindByEmailAsync(userVm.Name);
+		if (user is null)
+			return;
+		await signInManager.RefreshSignInAsync(user);
+	}
+
+	public class UserViewModel
+	{
+		public string Name { get; set; }
+		public bool IsAdmin { get; set; }
+		public bool IsContributor { get; set; }
+		public bool IsReader { get; set; }
+
+		public UserViewModel(string name, bool isAdmin, bool isContributor, bool isReader)
+		{
+			Name = name;
+			IsAdmin = isAdmin;
+			IsContributor = isContributor;
+			IsReader = isReader;
+		}
+	}
 }
