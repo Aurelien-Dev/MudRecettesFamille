@@ -67,7 +67,7 @@
 
         if (_mudThemeProvider != null)
         {
-            _isDarkMode = userPreferenceDarkMode && await _mudThemeProvider.GetSystemPreference();
+            _isDarkMode = userPreferenceDarkMode && await _mudThemeProvider.GetSystemDarkModeAsync();
         }
     }
 
