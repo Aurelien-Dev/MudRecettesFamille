@@ -16,8 +16,8 @@ public class AssistantChatMessageModel(IList<AIContent> content) : ChatMessage(C
         if (string.IsNullOrEmpty(json))
             return Enumerable.Empty<RecipeAi>();
 
-        RecipeResultAi aiRecipe = JsonSerializer.Deserialize<RecipeResultAi>(json);
-        return aiRecipe.result;
+        var aiRecipe = JsonSerializer.Deserialize<RecipeResultAi>(json);
+        return aiRecipe?.result ?? Enumerable.Empty<RecipeAi>();
     }
 
     public string RetirerJson()
@@ -40,7 +40,7 @@ public class AssistantChatMessageModel(IList<AIContent> content) : ChatMessage(C
 
     public string ExtraireJson()
     {
-        if (Contents[0] is not TextContent { Text: { Length: > 0 } text })
+        if (Contents.Count == 0 || Contents[0] is not TextContent { Text: { Length: > 0 } text })
         {
             return string.Empty;
         }
@@ -54,7 +54,7 @@ public class AssistantChatMessageModel(IList<AIContent> content) : ChatMessage(C
         }
 
         // Aucun JSON trouvé
-        return null;
+        return string.Empty;
     }
 
 

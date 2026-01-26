@@ -9,7 +9,7 @@
     </TitleContent>
     <DialogContent>
         <MudPaper Height="200">
-            <CropperComponent @ref="_cropperComponent" Class="big-img" Src="@ImageSource.ToImageSrc()" OnCropEvent="OnCropEvent" Options="_options" />
+            <CropperComponent @ref="_cropperComponent" Class="big-img" Src="@(ImageSource is null ? string.Empty : ImageSource.ToImageSrc())" OnCropEvent="OnCropEvent" Options="_options" />
         </MudPaper>
     </DialogContent>
     <DialogActions>
@@ -31,7 +31,7 @@
     private IMudDialogInstance MudDialog { get; set; } = null!;
 
     [Parameter]
-    public byte[] ImageSource { get; set; }
+    public byte[]? ImageSource { get; set; }
 
     private CropperComponent? _cropperComponent;
     private CropperData _currentCropperData = null!;
@@ -60,6 +60,11 @@
             var getCroppedCanvasOptions = new GetCroppedCanvasOptions();
 
             if (_currentCropperData is null)
+            {
+                return;
+            }
+
+            if (ImageSource is null)
             {
                 return;
             }

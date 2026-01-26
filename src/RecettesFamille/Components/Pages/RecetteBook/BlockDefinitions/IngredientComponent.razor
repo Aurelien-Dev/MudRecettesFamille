@@ -132,7 +132,7 @@
         }
     }
 
-    private async Task MoveUp(IngredientDto ingredient)
+    private new async Task MoveUp(IngredientDto ingredient)
     {
         bool shouldRestabilize = IngredientService.ShouldRestabilize(Block.Ingredients);
 
@@ -144,7 +144,7 @@
             await RecipeRepository.UpdateIngredient(ingredient);
     }
 
-    private async Task MoveDown(IngredientDto ingredient)
+    private new async Task MoveDown(IngredientDto ingredient)
     {
         bool shouldRestabilize = IngredientService.ShouldRestabilize(Block.Ingredients);
 
