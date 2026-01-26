@@ -169,6 +169,16 @@
     {
         await RecipeRepository.UpdateBlock(block);
         StateHasChanged();
+
+        // Synchronous vector refresh (lenient failure policy).
+        try
+        {
+            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+        }
+        catch
+        {
+            // Intentionally lenient: do not fail UI update if vector refresh fails.
+        }
     }
 
     private async Task AddNewBlock(BlockBaseDto block)

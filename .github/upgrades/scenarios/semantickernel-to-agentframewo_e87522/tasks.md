@@ -4,13 +4,13 @@
 
 This document tracks the execution of the Semantic Kernel to Agent Framework migration scenario for the RecettesFamille.Ai project. The project's SK dependency will be aligned based on usage analysis, and ingestion improvements will be implemented to synchronously refresh recipe vectors on create/update operations.
 
-**Progress**: 0/1 tasks complete (0%) ![0%](https://progress-bar.xyz/0)
+**Progress**: 1/1 tasks complete (100%) ![0%](https://progress-bar.xyz/100)
 
 ---
 
 ## Tasks
 
-### [▶] TASK-001: Atomic dependency alignment and ingestion improvements
+### [✓] TASK-001: Atomic dependency alignment and ingestion improvements *(Completed: 2026-01-26 22:58)*
 **References**: Plan §2, §4.1, §5
 
 - [✓] (1) Determine SK Agent usage and adjust dependencies per Plan §4.1 (search RecettesFamille.Ai for SK Agent types; Gate A: add Agent Framework packages if found, Gate B: remove Microsoft.SemanticKernel.Core if not found)
@@ -21,9 +21,10 @@ This document tracks the execution of the Semantic Kernel to Agent Framework mig
 - [✓] (6) All dependencies restored successfully (**Verify**)
 - [✓] (7) Build solution and fix compilation errors per Plan §4.1 Expected Breaking Changes
 - [✓] (8) Solution builds with 0 errors (**Verify**)
-- [▶] (9) Commit changes with message: "TASK-001: SK dependency alignment and ingestion improvements"
+- [✓] (9) Commit changes with message: "TASK-001: SK dependency alignment and ingestion improvements"
 
 ---
+
 
 
 
