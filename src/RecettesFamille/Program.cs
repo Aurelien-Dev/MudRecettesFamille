@@ -133,6 +133,11 @@ app.MapPost("/api/youtube-summary", async (HttpRequest request, [FromServices] A
     using var reader = new StreamReader(request.Body);
     var body = await reader.ReadToEndAsync();
     var requestBody = JsonSerializer.Deserialize<YoutubeSummaryJson>(body);
+    if (requestBody is null)
+    {
+        return Results.BadRequest("Invalid request body.");
+    }
+
     var resume = await aiManager.GetYoutubeResume(requestBody, cancellationToken);
     return Results.Ok(new { result = resume });
 });
