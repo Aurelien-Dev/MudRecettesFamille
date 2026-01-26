@@ -10,8 +10,12 @@
 @using System.ComponentModel.DataAnnotations
 @using RecettesFamille.Managers.AiGenerators
 @using RecettesFamille.Managers.AiGenerators.Models
+@using RecettesFamille.Ai.Services.Ingestion
+@using RecettesFamille.Data
 
 @inject ILogger<RecipeGptImportPage> logger
+@inject IServiceProvider ServiceProvider
+@inject ApplicationDbContext DbContext
 
 <MudForm Spacing="2">
     <MudGrid>
@@ -64,6 +68,16 @@
             var recette = await gptRecipeConverterManager.ConvertRecipe(_recipeDescription, AiClientType.OpenAi, _cancellationTokenSource.Token);
 
             var recipeAdded = await RecipeRepository.AddRecipe(recette);
+
+            // Synchronous vector refresh (lenient failure policy).
+            try
+            {
+                await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), recipeAdded.Id);
+            }
+            catch
+            {
+            }
+
             navigationManager.NavigateTo($"/recette/{recipeAdded.Id}", true);
         }
         catch (OperationCanceledException)

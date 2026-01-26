@@ -29,13 +29,13 @@ public class SQLRecipeSource(ApplicationDbContext dbContext) : IIngestionSource
                 results.Add(new IngestedDocument
                 {
                     Id = recipe.Id,
-                    Version = recipe.UpdatedDate.ToString(),
+                    Version = FormatVersion(recipe.UpdatedDate),
                     SourceId = SourceId
                 });
             }
-            else if (existingDocument.Version != recipe.UpdatedDate.ToString())
+            else if (existingDocument.Version != FormatVersion(recipe.UpdatedDate))
             {
-                existingDocument.Version = recipe.UpdatedDate.ToString();
+                existingDocument.Version = FormatVersion(recipe.UpdatedDate);
                 results.Add(existingDocument);
             }
         }
@@ -103,5 +103,14 @@ public class SQLRecipeSource(ApplicationDbContext dbContext) : IIngestionSource
         }
 
         return paragraphs;
+    }
+
+    private static string FormatVersion(DateOnly? updatedDate)
+    {
+        // Stable, culture-invariant version string; DateOnly precision matches your domain model.
+        // If UpdatedDate is null, treat it as an empty version (will cause the first ingestion to create records).
+        return updatedDate is null
+            ? string.Empty
+            : updatedDate.Value.ToString("O", System.Globalization.CultureInfo.InvariantCulture);
     }
 }
