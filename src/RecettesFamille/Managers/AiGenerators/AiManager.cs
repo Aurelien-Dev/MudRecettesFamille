@@ -38,7 +38,7 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
                 rawRecipe = recipe.Name;
             }
 
-            GeneratedImage image = await client.GenerateImageAsync(string.Format(promptImageGenerator.Prompt, rawRecipe), new ImageGenerationOptions()
+            GeneratedImage image = await client.GenerateImageAsync(string.Format(promptImageGenerator.Prompt, rawRecipe), new OpenAI.Images.ImageGenerationOptions()
             {
                 //Quality = GeneratedImageQuality.Standard,
                 Size = new GeneratedImageSize(1536, 1024),
