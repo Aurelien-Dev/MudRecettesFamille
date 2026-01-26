@@ -5,6 +5,7 @@
 @using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
 @using RecettesFamille.Components.Pages.RecetteBook.Components
 @using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Ai.Services.Ingestion
 @using RecettesFamille.Dto.Models
 @using RecettesFamille.Dto.Models.Blocks
 @using RecettesFamille.Extensions
@@ -70,6 +71,8 @@
     [Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
     [Inject] IDialogService DialogService { get; set; } = null!;
     [Inject] NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] IServiceProvider ServiceProvider { get; set; } = null!;
+    [Inject] RecettesFamille.Data.ApplicationDbContext DbContext { get; set; } = null!;
 
     [Parameter] public int IdRecette { get; set; }
 
@@ -103,6 +106,16 @@
 
         await RecipeRepository.UpdateRecipe(Recipe);
 
+        // Synchronous vector refresh (lenient failure policy).
+        try
+        {
+            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+        }
+        catch
+        {
+            // Intentionally lenient: do not fail UI update if vector refresh fails.
+        }
+
         StateHasChanged();
     }
 
@@ -113,6 +126,14 @@
 
         Recipe.Tags = string.Join("|", tags.Where(c => c != tag));
         _ = await RecipeRepository.UpdateRecipe(Recipe);
+
+        try
+        {
+            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+        }
+        catch
+        {
+        }
     }
 
 
@@ -131,6 +152,15 @@
 
         Recipe!.BlocksInstructions.Remove(block);
         await RecipeRepository.UpdateRecipe(Recipe);
+
+        try
+        {
+            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+        }
+        catch
+        {
+        }
+
         Recipe.BlocksInstructions.Reorder();
         StateHasChanged();
     }
@@ -139,6 +169,16 @@
     {
         await RecipeRepository.UpdateBlock(block);
         StateHasChanged();
+
+        // Synchronous vector refresh (lenient failure policy).
+        try
+        {
+            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+        }
+        catch
+        {
+            // Intentionally lenient: do not fail UI update if vector refresh fails.
+        }
     }
 
     private async Task AddNewBlock(BlockBaseDto block)
@@ -164,6 +204,15 @@
         Recipe.BlocksInstructions.Reorder();
         Recipe.BlocksInstructions.MoveUp(block);
         await RecipeRepository.UpdateFullRecipe(Recipe);
+
+        try
+        {
+            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+        }
+        catch
+        {
+        }
+
         StateHasChanged();
     }
 
@@ -175,6 +224,15 @@
         Recipe.BlocksInstructions.Reorder();
         Recipe.BlocksInstructions.MoveDown(block);
         await RecipeRepository.UpdateFullRecipe(Recipe);
+
+        try
+        {
+            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+        }
+        catch
+        {
+        }
+
         StateHasChanged();
     }
     #endregion
