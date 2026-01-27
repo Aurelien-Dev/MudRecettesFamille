@@ -14,226 +14,230 @@
 
 @if (Recipe is not null)
 {
-    @if (EditorMode)
-    {
-        <MudTextField @bind-Value="Recipe.Name" Typo="Typo.h3" Style="font-weight: bold;" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
-        @if (!string.IsNullOrEmpty(Recipe.Tags))
-        {
-            <MudStack Row="true" Justify="Justify.Center">
-                <MudChipSet T="string" AllClosable="true" CheckMark="true" OnClose="@OnChipClosed">
-                    @foreach (var item in Recipe.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        <MudChip T="string" Variant="Variant.Text" Color="Color.Info" Value="@item">@item</MudChip>
-                    }
-                </MudChipSet>
-            </MudStack>
-        }
-    }
-    else
-    {
-        <RecipeHeader Recipe="Recipe" />
-    }
+	@if (EditorMode)
+	{
+		<MudTextField @bind-Value="Recipe.Name" Typo="Typo.h3" Style="font-weight: bold;" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
+		@if (!string.IsNullOrEmpty(Recipe.Tags))
+		{
+			<MudStack Row="true" Justify="Justify.Center">
+				<MudChipSet T="string" AllClosable="true" CheckMark="true" OnClose="@OnChipClosed">
+					@foreach (var item in Recipe.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries))
+					{
+						<MudChip T="string" Variant="Variant.Text" Color="Color.Info" Value="@item">@item</MudChip>
+					}
+				</MudChipSet>
+			</MudStack>
+		}
+	}
+	else
+	{
+		<RecipeHeader Recipe="Recipe" />
+	}
 
-    <AuthorizeView Roles="Admin, Contributor">
-        <MudToolBar Class="justify-center mt-0 mb-0">
-            <MudToggleIconButton @bind-Toggled="EditorMode" Icon="@Icons.Material.Outlined.Edit"
-                                 ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
-            <MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
-        </MudToolBar>
-    </AuthorizeView>
+	<AuthorizeView Roles="Admin, Contributor">
+		<MudToolBar Class="justify-center mt-0 mb-0">
+			<MudToggleIconButton @bind-Toggled="EditorMode" Icon="@Icons.Material.Outlined.Edit"
+								 ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
+			<MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
+		</MudToolBar>
+	</AuthorizeView>
 
-    @* Description recette *@
-    <MudGrid Spacing="5" Class="mt-0 mb-12">
-        @foreach (var block in Recipe.BlocksInstructions.OrderBy(c => c.Order).EmptyIfNull())
-        {
-            <BaseBlock EditMode="EditorMode" Block="block"
-                       OnBlockUpdated="OnBlockUpdated"
-                       OnBlockDeleted="OnBlockDeleted"
-                       OnBlockHasChanged="OnBlockHasChanged"
-                       MoveUp="MoveUp"
-                       MoveDown="MoveDown" />
-        }
+	@* Description recette *@
+	<MudGrid Spacing="5" Class="mt-0 mb-12">
+		@foreach (var block in Recipe.BlocksInstructions.OrderBy(c => c.Order).EmptyIfNull())
+		{
+			<BaseBlock EditMode="EditorMode" Block="block"
+					   OnBlockUpdated="OnBlockUpdated"
+					   OnBlockDeleted="OnBlockDeleted"
+					   OnBlockHasChanged="OnBlockHasChanged"
+					   MoveUp="MoveUp"
+					   MoveDown="MoveDown" />
+		}
 
-        @if (EditorMode)
-        {
-            <ToolsComponent PrecedentIndex="@(Recipe.BlocksInstructions.Count - 1)" AddBlockCallback="AddNewBlock" />
-        }
-    </MudGrid>
+		@if (EditorMode)
+		{
+			<ToolsComponent PrecedentIndex="@(Recipe.BlocksInstructions.Count - 1)" AddBlockCallback="AddNewBlock" />
+		}
+	</MudGrid>
+
+	<MudStack Spacing="0">
+		<MudText Typo="Typo.caption" Class="ma-0 pa-0" Align="Align.End" GutterBottom="true" Style="@($"color:{Colors.Gray.Default};")">Crée le : @Recipe.CreatedDate</MudText>
+	</MudStack>
 }
 
 <style>
-    .text-end input {
-        text-align: center !important;
-    }
+	.text-end input {
+		text-align: center !important;
+	}
 </style>
 
 @code {
-    [Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
-    [Inject] IDialogService DialogService { get; set; } = null!;
-    [Inject] NavigationManager NavigationManager { get; set; } = null!;
-    [Inject] IServiceProvider ServiceProvider { get; set; } = null!;
-    [Inject] RecettesFamille.Data.ApplicationDbContext DbContext { get; set; } = null!;
+	[Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
+	[Inject] IDialogService DialogService { get; set; } = null!;
+	[Inject] NavigationManager NavigationManager { get; set; } = null!;
+	[Inject] IServiceProvider ServiceProvider { get; set; } = null!;
+	[Inject] RecettesFamille.Data.ApplicationDbContext DbContext { get; set; } = null!;
 
-    [Parameter] public int IdRecette { get; set; }
+	[Parameter] public int IdRecette { get; set; }
 
-    RecipeDto? Recipe { get; set; }
-    bool EditorMode { get; set; }
+	RecipeDto? Recipe { get; set; }
+	bool EditorMode { get; set; }
 
-    protected override async Task OnParametersSetAsync()
-    {
-        Recipe = await RecipeRepository.GetWithInstructions(IdRecette);
-    }
+	protected override async Task OnParametersSetAsync()
+	{
+		Recipe = await RecipeRepository.GetWithInstructions(IdRecette);
+	}
 
-    public async Task DeleteRecipe()
-    {
-        var result = await DialogService.ShowMessageBox("Avertissement", "Supprimer cette recette, c'est comme jeter une pâte à pain levée… Impossible de revenir en arrière !", yesText: "Tout mettre à la poubelle !", cancelText: "Garder la recette");
+	public async Task DeleteRecipe()
+	{
+		var result = await DialogService.ShowMessageBox("Avertissement", "Supprimer cette recette, c'est comme jeter une pâte à pain levée… Impossible de revenir en arrière !", yesText: "Tout mettre à la poubelle !", cancelText: "Garder la recette");
 
-        if (result is null || !result.Value)
-            return;
+		if (result is null || !result.Value)
+			return;
 
-        if (Recipe is null)
-            return;
+		if (Recipe is null)
+			return;
 
-        await RecipeRepository.DeleteRecipe(IdRecette);
+		await RecipeRepository.DeleteRecipe(IdRecette);
 
-        NavigationManager.NavigateTo("/");
-    }
+		NavigationManager.NavigateTo("/");
+	}
 
-    private async Task UpdateGeneralRecipeInformation()
-    {
-        if (Recipe is null)
-            return;
+	private async Task UpdateGeneralRecipeInformation()
+	{
+		if (Recipe is null)
+			return;
 
-        await RecipeRepository.UpdateRecipe(Recipe);
+		await RecipeRepository.UpdateRecipe(Recipe);
 
-        // Synchronous vector refresh (lenient failure policy).
-        try
-        {
-            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
-        }
-        catch
-        {
-            // Intentionally lenient: do not fail UI update if vector refresh fails.
-        }
+		// Synchronous vector refresh (lenient failure policy).
+		try
+		{
+			await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+		}
+		catch
+		{
+			// Intentionally lenient: do not fail UI update if vector refresh fails.
+		}
 
-        StateHasChanged();
-    }
+		StateHasChanged();
+	}
 
-    private async Task OnChipClosed(MudChip<string> chip)
-    {
-        var tag = chip.Value;
-        var tags = Recipe!.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries);
+	private async Task OnChipClosed(MudChip<string> chip)
+	{
+		var tag = chip.Value;
+		var tags = Recipe!.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries);
 
-        Recipe.Tags = string.Join("|", tags.Where(c => c != tag));
-        _ = await RecipeRepository.UpdateRecipe(Recipe);
+		Recipe.Tags = string.Join("|", tags.Where(c => c != tag));
+		_ = await RecipeRepository.UpdateRecipe(Recipe);
 
-        try
-        {
-            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
-        }
-        catch
-        {
-        }
-    }
+		try
+		{
+			await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+		}
+		catch
+		{
+		}
+	}
 
 
-    #region Block edition
-    private Task OnBlockHasChanged()
-    {
-        StateHasChanged();
-        return Task.CompletedTask;
-    }
+	#region Block edition
+	private Task OnBlockHasChanged()
+	{
+		StateHasChanged();
+		return Task.CompletedTask;
+	}
 
-    private async Task OnBlockDeleted(BlockBaseDto block)
-    {
-        var success = await RecipeRepository.DeleteBlock(block.Id!.Value);
+	private async Task OnBlockDeleted(BlockBaseDto block)
+	{
+		var success = await RecipeRepository.DeleteBlock(block.Id!.Value);
 
-        if (!success) return;
+		if (!success) return;
 
-        Recipe!.BlocksInstructions.Remove(block);
-        await RecipeRepository.UpdateRecipe(Recipe);
+		Recipe!.BlocksInstructions.Remove(block);
+		await RecipeRepository.UpdateRecipe(Recipe);
 
-        try
-        {
-            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
-        }
-        catch
-        {
-        }
+		try
+		{
+			await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+		}
+		catch
+		{
+		}
 
-        Recipe.BlocksInstructions.Reorder();
-        StateHasChanged();
-    }
+		Recipe.BlocksInstructions.Reorder();
+		StateHasChanged();
+	}
 
-    private async Task OnBlockUpdated(BlockBaseDto? block)
-    {
-        await RecipeRepository.UpdateBlock(block);
-        StateHasChanged();
+	private async Task OnBlockUpdated(BlockBaseDto? block)
+	{
+		await RecipeRepository.UpdateBlock(block);
+		StateHasChanged();
 
-        // Synchronous vector refresh (lenient failure policy).
-        try
-        {
-            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
-        }
-        catch
-        {
-            // Intentionally lenient: do not fail UI update if vector refresh fails.
-        }
-    }
+		// Synchronous vector refresh (lenient failure policy).
+		try
+		{
+			await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+		}
+		catch
+		{
+			// Intentionally lenient: do not fail UI update if vector refresh fails.
+		}
+	}
 
-    private async Task AddNewBlock(BlockBaseDto block)
-    {
-        if (Recipe is null)
-            return;
+	private async Task AddNewBlock(BlockBaseDto block)
+	{
+		if (Recipe is null)
+			return;
 
-        block.RecipeId = Recipe.Id;
-        var blockDto = await RecipeRepository.AddBlock(block);
-        blockDto.Recipe = Recipe;
-        Recipe.BlocksInstructions.Add(blockDto);
-        Recipe.BlocksInstructions.Reorder();
-        StateHasChanged();
-    }
-    #endregion
+		block.RecipeId = Recipe.Id;
+		var blockDto = await RecipeRepository.AddBlock(block);
+		blockDto.Recipe = Recipe;
+		Recipe.BlocksInstructions.Add(blockDto);
+		Recipe.BlocksInstructions.Reorder();
+		StateHasChanged();
+	}
+	#endregion
 
-    #region Block move
-    private async Task MoveUp(BlockBaseDto block)
-    {
-        if (Recipe is null)
-            return;
+	#region Block move
+	private async Task MoveUp(BlockBaseDto block)
+	{
+		if (Recipe is null)
+			return;
 
-        Recipe.BlocksInstructions.Reorder();
-        Recipe.BlocksInstructions.MoveUp(block);
-        await RecipeRepository.UpdateFullRecipe(Recipe);
+		Recipe.BlocksInstructions.Reorder();
+		Recipe.BlocksInstructions.MoveUp(block);
+		await RecipeRepository.UpdateFullRecipe(Recipe);
 
-        try
-        {
-            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
-        }
-        catch
-        {
-        }
+		try
+		{
+			await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+		}
+		catch
+		{
+		}
 
-        StateHasChanged();
-    }
+		StateHasChanged();
+	}
 
-    private async Task MoveDown(BlockBaseDto block)
-    {
-        if (Recipe is null)
-            return;
+	private async Task MoveDown(BlockBaseDto block)
+	{
+		if (Recipe is null)
+			return;
 
-        Recipe.BlocksInstructions.Reorder();
-        Recipe.BlocksInstructions.MoveDown(block);
-        await RecipeRepository.UpdateFullRecipe(Recipe);
+		Recipe.BlocksInstructions.Reorder();
+		Recipe.BlocksInstructions.MoveDown(block);
+		await RecipeRepository.UpdateFullRecipe(Recipe);
 
-        try
-        {
-            await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
-        }
-        catch
-        {
-        }
+		try
+		{
+			await DataIngestor.RefreshRecipeAsync(ServiceProvider, new SQLRecipeSource(DbContext), Recipe.Id);
+		}
+		catch
+		{
+		}
 
-        StateHasChanged();
-    }
-    #endregion
+		StateHasChanged();
+	}
+	#endregion
 }

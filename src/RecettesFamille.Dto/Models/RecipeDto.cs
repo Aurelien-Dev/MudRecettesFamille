@@ -11,6 +11,8 @@ public class RecipeDto
     public int CookingTime { get; set; }
     public int RestTime { get; set; }
     public int Portion { get; set; }
+    public DateOnly CreatedDate { get; set; }
+    public DateOnly? UpdatedDate { get; set; }
     public string Tags { get; set; } = string.Empty;
 
     public List<BlockBaseDto> BlocksInstructions { get; set; } = [];
