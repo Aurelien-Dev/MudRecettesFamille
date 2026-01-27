@@ -13,13 +13,15 @@ public class SQLRecipeSource(ApplicationDbContext dbContext) : IIngestionSource
 
     public string SourceId => nameof(SQLRecipeSource);
 
-    public async Task<IEnumerable<IngestedDocument>> GetNewOrModifiedDocumentsAsync(IQueryable<IngestedDocument> existingDocuments)
+    public async Task<IEnumerable<IngestedDocument>> GetNewOrModifiedDocumentsAsync(IQueryable<IngestedDocument> existingDocuments, CancellationToken cancellationToken)
     {
         var results = new List<IngestedDocument>();
-        var recipes = await _dbContext.Recipes.AsNoTracking().ToListAsync();
+        var recipes = await _dbContext.Recipes.AsNoTracking().ToListAsync(cancellationToken);
 
         foreach (var recipe in recipes)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var existingDocument = await existingDocuments
                 .Where(d => d.SourceId == SourceId && d.Id == recipe.Id)
                 .FirstOrDefaultAsync();
@@ -43,12 +45,12 @@ public class SQLRecipeSource(ApplicationDbContext dbContext) : IIngestionSource
         return results;
     }
 
-    public async Task<IEnumerable<IngestedDocument>> GetDeletedDocumentsAsync(IQueryable<IngestedDocument> existingDocuments)
+    public async Task<IEnumerable<IngestedDocument>> GetDeletedDocumentsAsync(IQueryable<IngestedDocument> existingDocuments, CancellationToken cancellationToken)
     {
         var recipeIds = await _dbContext.Recipes.Select(r => r.Id).ToListAsync();
         return await existingDocuments
             .Where(d => d.SourceId == SourceId && !recipeIds.Contains(d.Id))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<SemanticSearchRecord>> CreateRecordsForDocumentAsync(IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator, int documentId)
@@ -59,7 +61,7 @@ public class SQLRecipeSource(ApplicationDbContext dbContext) : IIngestionSource
                                      .FirstOrDefaultAsync(s => s.Id == documentId);
         if (recipe == null) throw new FileNotFoundException($"Recipe with ID {documentId} not found.");
 
-        var paragraphs = SplitIntoParagraphs(recipe.BlocksInstructions);
+        var paragraphs = SplitIntoParagraphs(recipe.Name, recipe.BlocksInstructions);
         if (!paragraphs.Any())
             throw new EmptyRecipeException();
 
@@ -80,9 +82,12 @@ public class SQLRecipeSource(ApplicationDbContext dbContext) : IIngestionSource
         });
     }
 
-    private static IEnumerable<string> SplitIntoParagraphs(List<BlockBaseEntity> BlocksInstructions)
+    private static IEnumerable<string> SplitIntoParagraphs(string recipeName, List<BlockBaseEntity> BlocksInstructions)
     {
         var paragraphs = new List<string>();
+
+        paragraphs.Add($"---- Recipe name : {recipeName}");
+
         foreach (var item in BlocksInstructions.OfType<BlockIngredientListEntity>())
         {
             StringBuilder builder = new StringBuilder();
@@ -93,6 +98,8 @@ public class SQLRecipeSource(ApplicationDbContext dbContext) : IIngestionSource
             builder.AppendLine(string.Join(Environment.NewLine, ingredientList));
             paragraphs.Add(builder.ToString());
         }
+
+        paragraphs.Add("---- Instructions");
 
         foreach (var item in BlocksInstructions.OfType<BlockInstructionEntity>())
         {

@@ -46,6 +46,12 @@
     <script src="_content/MudBlazor.Markdown/MudBlazor.Markdown.min.js"></script>
     <script src="_content/Cropper.Blazor/cropper.min.js"></script>
 
+    <script type="module">
+        import { scrollIntoView } from './js/scroll.js';
+        window.RecettesFamille = window.RecettesFamille || {};
+        window.RecettesFamille.scrollIntoView = scrollIntoView;
+    </script>
+
     <script>
         window.downloadFileFromStream = async (fileName, contentStreamReference) => {
         const arrayBuffer = await contentStreamReference.arrayBuffer();

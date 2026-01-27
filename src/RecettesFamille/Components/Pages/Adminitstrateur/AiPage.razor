@@ -3,24 +3,180 @@
 @using RecettesFamille.Ai.Services.Ingestion
 @using RecettesFamille.Components.Layout
 @using RecettesFamille.Data
+@using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Dto.ModelByPage.RecetteBook
+@using Microsoft.JSInterop
+
 @inject ApplicationDbContext dbContext
 @inject IServiceProvider service
+@inject IRecipeRepository recipeRepository
+@inject IJSRuntime JS
 
 @attribute [Authorize(Roles = "Admin, Contributor")]
 @layout AdminLayout
 
 <MudStack Spacing="5">
 
-    <MudButton Variant="Variant.Filled" OnClick="IngestNewData">Ingest new data</MudButton>
+	<MudButton Variant="Variant.Filled" OnClick="IngestNewData">Ingest new data</MudButton>
+	<MudButton Variant="Variant.Filled" OnClick="UpdateRecipes">Update all recipes</MudButton>
+	<MudButton Variant="Variant.Outlined" Color="Color.Error" Disabled="@(!_isRunning)" OnClick="Stop">Stop</MudButton>
+
+	<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+		<MudText Typo="Typo.subtitle2">Execution logs</MudText>
+		<MudStack Row="true" Spacing="0">
+			<MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="ClearLogs">Clear</MudButton>
+			<MudButton Variant="Variant.Outlined" Size="Size.Small" Disabled="true">@(_isRunning ? "Running..." : "Idle")</MudButton>
+		</MudStack>
+	</MudStack>
+	<MudPaper Class="pa-3" Elevation="1" Style="height: 320px; overflow: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; background-color: var(--mud-palette-background-grey);">
+		<MudStack Spacing="2">
+
+			<MudDivider />
+
+			@if (_logs.Count == 0)
+			{
+				<MudText Typo="Typo.body2" Color="Color.Secondary">(no logs)</MudText>
+			}
+			else
+			{
+				<MudList Dense="true" T="string">
+					@foreach (var line in _logs)
+					{
+						<MudListItem Dense="true" DisableGutters="true">
+							<MudText Typo="Typo.body2" Style="white-space: pre-wrap;">@line</MudText>
+						</MudListItem>
+					}
+					<div @ref="_logBottom" />
+				</MudList>
+			}
+		</MudStack>
+	</MudPaper>
+
 
 </MudStack>
 
 
 @code {
+	private readonly List<string> _logs = new();
+	private ElementReference _logBottom;
+	private bool _isRunning;
+	private int _logMaxLines = 500;
+	private CancellationTokenSource? _cts;
+	private CancellationToken CancellationToken => _cts?.Token ?? CancellationToken.None;
+
+	private void Log(string message)
+	{
+		var ts = DateTime.Now.ToString("HH:mm:ss");
+		_logs.Add($"[{ts}] {message}");
+		if (_logs.Count > _logMaxLines)
+		{
+			_logs.RemoveRange(0, _logs.Count - _logMaxLines);
+		}
+		InvokeAsync(StateHasChanged);
+	}
+
+	private async Task ScrollToBottomAsync()
+	{
+		try
+		{
+			await JS.InvokeVoidAsync("RecettesFamille.scrollIntoView", _logBottom);
+		}
+		catch
+		{
+			// ignore
+		}
+	}
+
+	private void ClearLogs() => _logs.Clear();
+
+	private void Stop()
+	{
+		if (!_isRunning)
+			return;
+		Log("Stop requested...");
+		_cts?.Cancel();
+	}
 
 
-    public async Task IngestNewData()
-    {
-        await DataIngestor.IngestDataAsync(service, new SQLRecipeSource(dbContext));
-    }
+	public async Task IngestNewData()
+	{
+		if (_isRunning) return;
+		_isRunning = true;
+		_cts = new();
+		Log("Starting ingestion...");
+		try
+		{
+			CancellationToken.ThrowIfCancellationRequested();
+			await DataIngestor.IngestDataAsync(service, new SQLRecipeSource(dbContext), CancellationToken);
+			Log("Ingestion finished.");
+		}
+		catch (OperationCanceledException)
+		{
+			Log("Ingestion cancelled.");
+		}
+		catch (Exception ex)
+		{
+			Log($"ERROR during ingestion: {ex.Message}");
+		}
+		finally
+		{
+			_cts?.Dispose();
+			_cts = null;
+			_isRunning = false;
+			await ScrollToBottomAsync();
+		}
+	}
+
+	public async Task UpdateRecipes()
+	{
+		if (_isRunning) return;
+		_isRunning = true;
+		_cts = new();
+		try
+		{
+			Log("Loading recipes...");
+			List<RecipeForListDto> recipes = await recipeRepository.GetAllLightRecipe();
+			Log($"{recipes.Count} recipes to refresh.");
+
+			var source = new SQLRecipeSource(dbContext);
+			for (var i = 0; i < recipes.Count; i++)
+			{
+				CancellationToken.ThrowIfCancellationRequested();
+				var recipe = recipes[i];
+				Log($"Refreshing {i + 1}/{recipes.Count} - RecipeId={recipe.Id}");
+				try
+				{
+					await DataIngestor.RefreshRecipeAsync(service, source, recipe.Id, CancellationToken);
+					Log($"OK - RecipeId={recipe.Id}");
+				}
+				catch (OperationCanceledException)
+				{
+					Log("Refresh cancelled.");
+					break;
+				}
+				catch (Exception ex)
+				{
+					Log($"ERROR - RecipeId={recipe.Id}: {ex.Message}");
+				}
+
+				await ScrollToBottomAsync();
+
+				await Task.Delay(3000);
+			}
+
+			Log("Refresh finished.");
+		}
+		catch (OperationCanceledException)
+		{
+			Log("Refresh cancelled.");
+		}
+		finally
+		{
+			_cts?.Dispose();
+			_cts = null;
+			_isRunning = false;
+			await ScrollToBottomAsync();
+		}
+	}
+
 }

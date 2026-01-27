@@ -11,14 +11,14 @@ public class DataIngestor(
     IVectorStore vectorStore,
     IngestionCacheDbContext ingestionCacheDb)
 {
-    public static async Task IngestDataAsync(IServiceProvider services, IIngestionSource source)
+    public static async Task IngestDataAsync(IServiceProvider services, IIngestionSource source, CancellationToken cancellationToken)
     {
         using var scope = services.CreateScope();
         var ingestor = scope.ServiceProvider.GetRequiredService<DataIngestor>();
-        await ingestor.IngestDataAsync(source);
+        await ingestor.IngestDataAsync(source, cancellationToken);
     }
 
-    public async Task IngestDataAsync(IIngestionSource source)
+    public async Task IngestDataAsync(IIngestionSource source, CancellationToken cancellationToken)
     {
         _ = await ingestionCacheDb.Database.EnsureCreatedAsync();
 
@@ -29,23 +29,27 @@ public class DataIngestor(
             .Where(d => d.SourceId == source.SourceId)
             .Include(d => d.Records);
 
-        var deletedFiles = await source.GetDeletedDocumentsAsync(documentsForSource);
+        var deletedFiles = await source.GetDeletedDocumentsAsync(documentsForSource, cancellationToken);
         foreach (var deletedFile in deletedFiles)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             logger.LogInformation("Removing ingested data for {file}", deletedFile.Id);
-            await vectorCollection.DeleteBatchAsync(deletedFile.Records.Select(r => r.Id));
+            await vectorCollection.DeleteBatchAsync(deletedFile.Records.Select(r => r.Id), cancellationToken);
             ingestionCacheDb.Documents.Remove(deletedFile);
         }
-        await ingestionCacheDb.SaveChangesAsync();
+        await ingestionCacheDb.SaveChangesAsync(cancellationToken);
 
-        var modifiedDocs = await source.GetNewOrModifiedDocumentsAsync(documentsForSource);
+        var modifiedDocs = await source.GetNewOrModifiedDocumentsAsync(documentsForSource, cancellationToken);
         foreach (var modifiedDoc in modifiedDocs)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             logger.LogInformation("Processing {file}", modifiedDoc.Id);
 
             if (modifiedDoc.Records.Count > 0)
             {
-                await vectorCollection.DeleteBatchAsync(modifiedDoc.Records.Select(r => r.Id));
+                await vectorCollection.DeleteBatchAsync(modifiedDoc.Records.Select(r => r.Id), cancellationToken);
             }
 
             IEnumerable<SemanticSearchRecord> newRecords;
@@ -59,7 +63,7 @@ public class DataIngestor(
                 continue;
             }
 
-            await foreach (var id in vectorCollection.UpsertBatchAsync(newRecords)) { }
+            await foreach (var id in vectorCollection.UpsertBatchAsync(newRecords, cancellationToken)) { }
 
             modifiedDoc.Records.Clear();
             modifiedDoc.Records.AddRange(newRecords.Select(r => new IngestedRecord { Id = r.Key, DocumentId = modifiedDoc.Id }));
@@ -74,14 +78,14 @@ public class DataIngestor(
         logger.LogInformation("Ingestion is up-to-date");
     }
 
-    public static async Task RefreshRecipeAsync(IServiceProvider services, IIngestionSource source, int recipeId)
+    public static async Task RefreshRecipeAsync(IServiceProvider services, IIngestionSource source, int recipeId, CancellationToken cancellationToken = default)
     {
         using var scope = services.CreateScope();
         var ingestor = scope.ServiceProvider.GetRequiredService<DataIngestor>();
-        await ingestor.RefreshRecipeAsync(source, recipeId);
+        await ingestor.RefreshRecipeAsync(source, recipeId, cancellationToken);
     }
 
-    public async Task RefreshRecipeAsync(IIngestionSource source, int recipeId)
+    public async Task RefreshRecipeAsync(IIngestionSource source, int recipeId, CancellationToken cancellationToken)
     {
         _ = await ingestionCacheDb.Database.EnsureCreatedAsync();
 
@@ -95,7 +99,7 @@ public class DataIngestor(
 
         if (document is not null && document.Records.Count > 0)
         {
-            await vectorCollection.DeleteBatchAsync(document.Records.Select(r => r.Id));
+            await vectorCollection.DeleteBatchAsync(document.Records.Select(r => r.Id), cancellationToken);
             document.Records.Clear();
         }
 
@@ -118,7 +122,7 @@ public class DataIngestor(
             return;
         }
 
-        await foreach (var _ in vectorCollection.UpsertBatchAsync(newRecords)) { }
+        await foreach (var _ in vectorCollection.UpsertBatchAsync(newRecords, cancellationToken)) { }
 
         document ??= new IngestedDocument { Id = recipeId, SourceId = source.SourceId, Version = string.Empty };
         document.Records.AddRange(newRecords.Select(r => new IngestedRecord { Id = r.Key, DocumentId = document.Id }));
