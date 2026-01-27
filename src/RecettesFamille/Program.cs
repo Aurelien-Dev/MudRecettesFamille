@@ -76,7 +76,7 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     var serverUrl = builder.Configuration["DB_HOST_URL"];
     var serverPort = builder.Configuration["DB_HOST_PORT"];
 
-    var postgresCs = $"Host={serverUrl};Port={serverPort};Database=test;Username=pguser;Password=PGUserPwd;Pooling=true";
+    var postgresCs = $"Host={serverUrl};Port={serverPort};Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
     options.UseNpgsql(postgresCs);
 }, ServiceLifetime.Scoped);
 
