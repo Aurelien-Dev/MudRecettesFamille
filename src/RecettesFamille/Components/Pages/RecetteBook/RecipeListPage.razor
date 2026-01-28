@@ -9,7 +9,6 @@
 @using RecettesFamille.Extensions
 
 
-
 <MudGrid>
 	<MudItem md="3" xs="12"> <!-- Empty to take the space --> </MudItem>
 	<MudItem md="9" xs="12">
@@ -29,25 +28,50 @@
 	<MudItem md="3" xs="12">
 		<MudStack>
 
-			<MudPaper>
-				<MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true" SelectedValuesChanged="OnSelectedValuesChanged">
-					<MudListItem Icon="@Icons.Material.Filled.FilterList" Text="Filtre par catégories" Expanded="@(breakpoint > Breakpoint.Sm)">
-						<NestedList>
+			<MudExpansionPanels Dense="true" >
+				<MudExpansionPanel Expanded="@(breakpoint > Breakpoint.Sm)">
+					<TitleContent>
+						<div class="d-flex">
+							<MudIcon Icon="@Icons.Material.Filled.Sort" class="mr-3" Size="Size.Medium"></MudIcon>
+							<MudText Typo="Typo.subtitle2">Trie</MudText>
+						</div>
+					</TitleContent>
+					<ChildContent>
+						<MudRadioGroup T="Direction" Value="_selectedDirection" ValueChanged="OnSelectedSortChanged">
+							<MudRadio Value="Direction.Alphabetique" Color="Color.Primary">Alphabetique</MudRadio>
+							<MudRadio Value="Direction.DateAjout" Color="Color.Primary">Dernières recettes en haut</MudRadio>
+						</MudRadioGroup>
+					</ChildContent>
+				</MudExpansionPanel>
+			</MudExpansionPanels>
+
+			<MudExpansionPanels Dense="true">
+				<MudExpansionPanel Expanded="@(breakpoint > Breakpoint.Sm)">
+					<TitleContent>
+						<div class="d-flex">
+							<MudIcon Icon="@Icons.Material.Filled.FilterAlt" class="mr-3" Size="Size.Medium"></MudIcon>
+							<MudText Typo="Typo.subtitle2">Filtre par catégories</MudText>
+						</div>
+					</TitleContent>
+					<ChildContent>
+
+						<MudList T="string" SelectionMode="SelectionMode.MultiSelection" Dense="true" SelectedValuesChanged="OnSelectedTagChanged">
 							@foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
 							{
 								<MudListItem Dense="true" Text="@item.TagName" />
 							}
-						</NestedList>
-					</MudListItem>
-				</MudList>
-			</MudPaper>
+						</MudList>
+
+					</ChildContent>
+				</MudExpansionPanel>
+			</MudExpansionPanels>
 
 		</MudStack>
 	</MudItem>
 	<MudItem md="9" xs="12">
 		<MudPaper Elevation="1">
 			<MudTable Items="Recipes" Hover="true" Breakpoint="Breakpoint.None" LoadingProgressColor="Color.Info" Class="mud-table-extra-dense"
-					  Dense="true" Height="calc(100vh - 135px)">
+					  Dense="true" Height="calc(100vh - 145px)">
 				<RowTemplate>
 					<MudTd>
 						<MudText Typo="Typo.subtitle2">
@@ -78,33 +102,70 @@
 </MudGrid>
 
 @code {
-	[Inject] NavigationManager NavigationManager { get; set; } = null!;
+	public enum Direction
+	{
+		Alphabetique,
+		DateAjout
+	}
 	[Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
 	[Inject] ITagRepository TagRepository { get; set; } = null!;
 	[Inject] IBrowserViewportService BrowserViewportService { get; set; } = null!;
 
-	List<RecipeForListDto> Recipes { get; set; } = null!;
-	List<TagDto> Tags { get; set; } = null!;
+	List<RecipeForListDto> Recipes { get; set; } = new();
+	List<TagDto> Tags { get; set; } = new();
 	Breakpoint breakpoint { get; set; }
 
-	public Guid Id => throw new NotImplementedException();
+	public Guid Id { get; } = Guid.NewGuid();
 
+	Direction _selectedDirection = Direction.Alphabetique;
+	bool _sortDescending = false;
 	string _searchString = string.Empty;
 	bool _workInProgress = false;
+
 
 	protected override async Task OnParametersSetAsync()
 	{
 		var result = await RecipeRepository.GetAllLightRecipe();
 
-		Recipes = result.OrderBy(c => c.Name).ToList();
+		Recipes = ApplySort(result).ToList();
 		Tags = await TagRepository.GetAllVisible();
 
 		breakpoint = await BrowserViewportService.GetCurrentBreakpointAsync();
 	}
 
-	public async Task OnSelectedValuesChanged(IReadOnlyCollection<string>? strings)
+	public async Task OnSelectedSortChanged(Direction selectedDirection)
 	{
-		Recipes = (await RecipeRepository.GetAllLightRecipe(strings!.ToArray())).OrderBy(c => c.Name).ToList();
+		_selectedDirection = selectedDirection;
+		Recipes = ApplySort(Recipes).ToList();
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private async Task OnSortDirectionChanged(bool value)
+	{
+		_sortDescending = value;
+		Recipes = ApplySort(Recipes).ToList();
+		await InvokeAsync(StateHasChanged);
+	}
+
+	public Task OnSelectedTagChanged(IReadOnlyCollection<string>? strings)
+	{
+		return RefreshRecipeList(strings);
+	}
+
+	public async Task RefreshRecipeList(IReadOnlyCollection<string>? strings)
+	{
+		var result = await RecipeRepository.GetAllLightRecipe(strings?.ToArray() ?? Array.Empty<string>());
+		Recipes = ApplySort(result).ToList();
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private IEnumerable<RecipeForListDto> ApplySort(IEnumerable<RecipeForListDto> source)
+	{
+		return _selectedDirection switch
+		{
+			Direction.DateAjout => source.OrderByDescending(s => s.CreatedDate),
+			Direction.Alphabetique => source.OrderBy(s => s.Name)
+		};
 	}
 
 	// Handle the key down event to detect Enter key presses
@@ -116,23 +177,12 @@
 		}
 	}
 
-	private bool FilterFunc1(RecipeForListDto element)
-	{
-		return FilterFunc(element, _searchString);
-	}
 
 	public Task NotifyBrowserViewportChangeAsync(BrowserViewportEventArgs browserViewportEventArgs)
 	{
 		return Task.CompletedTask;
 	}
 
-	private static bool FilterFunc(RecipeForListDto element, string searchString)
-	{
-		if (string.IsNullOrWhiteSpace(searchString))
-			return true;
-		var comparer = $"{element.Name} - {element.Tags}";
-		return comparer.Contains(searchString, StringComparison.OrdinalIgnoreCase);
-	}
 
 
 
@@ -140,26 +190,25 @@
 
 	public async Task Ask()
 	{
+		_workInProgress = true;
+		await InvokeAsync(StateHasChanged);
 		try
 		{
-			_workInProgress = true;
-
-			if (string.IsNullOrEmpty(_searchString))
+			if (string.IsNullOrWhiteSpace(_searchString))
 			{
 				var result = await RecipeRepository.GetAllLightRecipe();
-				Recipes = result.OrderBy(c => c.Name).ToList();
+				Recipes = ApplySort(result).ToList();
 				return;
 			}
+
 			var resultFromSementicSearch = await SearchAsync(_searchString);
-			Recipes = await RecipeRepository.GetAllLightRecipe(resultFromSementicSearch.ToArray());
-		}
-		catch (Exception)
-		{
-			throw;
+			var recipes = await RecipeRepository.GetAllLightRecipe(resultFromSementicSearch.ToArray());
+			Recipes = ApplySort(recipes).ToList();
 		}
 		finally
 		{
 			_workInProgress = false;
+			await InvokeAsync(StateHasChanged);
 		}
 	}
 
@@ -176,4 +225,5 @@
 
 
 	#endregion
+
 }

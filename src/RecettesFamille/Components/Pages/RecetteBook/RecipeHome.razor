@@ -26,7 +26,7 @@
 	@if (RecipeGroups != null && RecipeGroups.Any())
 	{
 		<MudCarousel @ref="mudCarousel" TData="RecipeForListDto" Class="mud-width-full pa-0 ma-0 mb-0" Style="min-height:440px;" AutoCycle="false"
-					 ShowBullets="false" ShowArrows="false">
+					 ShowBullets="false" ShowArrows="false" EnableSwipeGesture="false">
 			@foreach (var group in RecipeGroups)
 			{
 				<MudCarouselItem Class="pa-0 ma-0">
@@ -47,42 +47,9 @@
 		<MudText Typo="Typo.h6">Aucune recette trouvée.</MudText>
 	}
 
-	@* <!-- Recette du jour -->
-    <MudPaper Class="mb-6 rounded-xl">
-        <MudGrid>
-            <MudItem xs="12" md="5" Class="d-flex py-0 my-0">
-                <MudImage Src="https://images.getrecipekit.com/20221202154358-pouletfrittomahawk.jpg?aspect_ratio=16:9&quality=90&"
-                          Alt="Ailes de poulet croustillantes" Class="rounded-l-xl" ObjectFit="ObjectFit.Cover" Fluid="true" />
-            </MudItem>
-            <MudItem xs="12" md="7" Class="align-content-center">
-
-                <MudText Typo="Typo.h6">Recette du jour</MudText>
-                <MudText Typo="Typo.h4" Style="font-weight:900;" Class="mb-4">Ailes de poulet croustillantes</MudText>
-
-                <MudButton Color="Color.Primary" Variant="Variant.Filled">Voir la recette</MudButton>
-            </MudItem>
-        </MudGrid>
-    </MudPaper> *@
-
 	<MudStack Class="mt-0 mb-6">
 		<RecipeListPage />
 	</MudStack>
-
-	@* <!-- Catégories -->
-    <MudText Typo="Typo.h5" Class="mt-6 mb-6" Style="font-weight:900;">Recettes par catégorie</MudText>
-    <MudGrid Class="justify-space-around">
-        @for (int i = 0; i < 8; i++)
-        {
-            <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="pa-5" Style="cursor: pointer;">
-                    <MudStack AlignItems="AlignItems.Center">
-                        <MudIcon Icon="fas fa-ice-cream" Size="Size.Large" Class="mb-2" />
-                        <MudText Typo="Typo.h6" Align="Align.Center">Salé</MudText>
-                    </MudStack>
-                </MudPaper>
-            </MudItem>
-        }
-    </MudGrid> *@
 
 </MudContainer>
 
