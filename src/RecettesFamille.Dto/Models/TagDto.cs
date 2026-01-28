@@ -5,4 +5,6 @@ public class TagDto
     public int Id { get; set; }
     public string TagName { get; set; } = null!;
     public bool IsVisible { get; set; }
+
+    public override string ToString() => TagName;
 }

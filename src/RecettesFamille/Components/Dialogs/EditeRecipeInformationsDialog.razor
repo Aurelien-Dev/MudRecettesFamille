@@ -1,0 +1,94 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
+@using RecettesFamille.Data.Repository.IRepositories
+@using RecettesFamille.Dto.Models
+@using RecettesFamille.Dto.Models.Blocks
+@using RecettesFamille.Services
+
+<MudDialog>
+	<TitleContent>
+		<MudText Typo="Typo.h6">
+			<MudIcon Icon="@Icons.Material.Filled.Assignment" Class="mr-3 mb-n1" />
+			Informations
+		</MudText>
+	</TitleContent>
+	<DialogContent>
+
+		<MudGrid Spacing="3" Justify="Justify.Center">
+			<MudItem xs="12">
+				<MudTextField @bind-Value="recipeName" Label="Nom de la recette" Variant="Variant.Text"></MudTextField>
+			</MudItem>
+
+			<MudItem xs="12">
+				<MudTextField @bind-Value="recipePrepTime" Label="Temps de préparation" Variant="Variant.Text" InputType="InputType.Number" />
+			</MudItem>
+			
+			<MudItem xs="12">
+				<MudTextField @bind-Value="recipeCookingTime" Label="Temps de cuisson" Variant="Variant.Text" InputType="InputType.Number" />
+			</MudItem>
+
+			<MudItem xs="12">
+				<MudTextField @bind-Value="recipePortion" Label="Portions" Variant="Variant.Text" InputType="InputType.Number" />
+			</MudItem>
+
+			<MudItem xs="12">
+				<MudSelect T="TagDto" Label="Catégories" MultiSelection="true" @bind-SelectedValues="selectedTags">
+					@foreach (var tag in tags)
+					{
+						<MudSelectItem T="TagDto" Value="@tag">@tag</MudSelectItem>
+					}
+				</MudSelect>
+			</MudItem>
+		</MudGrid>
+
+	</DialogContent>
+	<DialogActions>
+		<MudButton OnClick="Cancel">Annuler</MudButton>
+		<MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+	</DialogActions>
+</MudDialog>
+
+@code {
+	[Inject] private ITagRepository tagRepository { get; set; } = default!;
+	[CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+	[Parameter] public RecipeDto Recipe { get; set; } = default!;
+
+	private List<TagDto> tags = new();
+	private IEnumerable<TagDto> selectedTags { get; set; } = default!;
+	private string recipeName { get; set; } = default!;
+	private int recipePrepTime { get; set; } = default!;
+	private int recipeCookingTime { get; set; } = default!;
+	private int recipePortion { get; set; } = default!;
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		tags = await tagRepository.GetAllVisible();
+		recipeName = Recipe.Name;
+		recipePrepTime = Recipe.PrepTime;
+		recipeCookingTime = Recipe.CookingTime;
+		recipePortion = Recipe.Portion;
+
+		var recipeTags = Recipe.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries);
+		selectedTags = tags.Where(s => recipeTags.Contains(s.TagName)).ToList();
+	}
+
+	private void Submit()
+	{
+		try
+		{
+			Recipe.Tags = string.Join('|', selectedTags);
+			Recipe.Name = recipeName;
+			Recipe.PrepTime = recipePrepTime;
+			Recipe.CookingTime = recipeCookingTime;
+			Recipe.Portion = recipePortion;
+			MudDialog.Close();
+		}
+		catch (Exception)
+		{
+			throw;
+		}
+	}
+
+	private void Cancel() => MudDialog.Cancel();
+}

@@ -11,33 +11,17 @@
 @using RecettesFamille.Extensions
 @using RecettesFamille.Managers;
 @using RecettesFamille.Managers.AiGenerators
+@using RecettesFamille.Components.Dialogs
 
 @if (Recipe is not null)
 {
-	@if (EditorMode)
-	{
-		<MudTextField @bind-Value="Recipe.Name" Typo="Typo.h3" Style="font-weight: bold;" FullWidth="false" class="text-end" OnBlur="UpdateGeneralRecipeInformation" />
-		@if (!string.IsNullOrEmpty(Recipe.Tags))
-		{
-			<MudStack Row="true" Justify="Justify.Center">
-				<MudChipSet T="string" AllClosable="true" CheckMark="true" OnClose="@OnChipClosed">
-					@foreach (var item in Recipe.Tags.Split("|", StringSplitOptions.RemoveEmptyEntries))
-					{
-						<MudChip T="string" Variant="Variant.Text" Color="Color.Info" Value="@item">@item</MudChip>
-					}
-				</MudChipSet>
-			</MudStack>
-		}
-	}
-	else
-	{
-		<RecipeHeader Recipe="Recipe" />
-	}
+	<RecipeHeader Recipe="Recipe" />
 
 	<AuthorizeView Roles="Admin, Contributor">
 		<MudToolBar Class="justify-center mt-0 mb-0">
 			<MudToggleIconButton @bind-Toggled="EditorMode" Icon="@Icons.Material.Outlined.Edit"
 								 ToggledIcon="@Icons.Material.Filled.Edit" ToggledColor="@Color.Error" />
+			<MudIconButton Icon="@Icons.Material.Filled.Assignment" OnClick="UpdateGeneralRecipeInformationPopup" />
 			<MudIconButton Icon="@Icons.Material.Outlined.DeleteForever" OnClick="DeleteRecipe" />
 		</MudToolBar>
 	</AuthorizeView>
@@ -101,6 +85,21 @@
 		await RecipeRepository.DeleteRecipe(IdRecette);
 
 		NavigationManager.NavigateTo("/");
+	}
+
+	private async Task UpdateGeneralRecipeInformationPopup()
+	{
+		var options = new DialogOptions() { CloseButton = false, MaxWidth = MaxWidth.Small, FullWidth = true };
+		var parameters = new DialogParameters<EditeRecipeInformationsDialog>
+		{
+			{ v => v.Recipe, Recipe }
+		};
+		var dialog = await DialogService.ShowAsync<EditeRecipeInformationsDialog>("Delete", parameters, options);
+		var result = await dialog.Result;
+		if (result.Canceled)
+			return;
+
+		await RecipeRepository.UpdateRecipe(Recipe);
 	}
 
 	private async Task UpdateGeneralRecipeInformation()
