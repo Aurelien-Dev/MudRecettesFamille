@@ -9,7 +9,12 @@
 
 <MudStack Spacing="0">
 
-    <MudText Typo="Typo.h3" Class="mb-0" Style="font-weight: bold;" Align="Align.Center" GutterBottom="true">@Recipe.Name</MudText>
+    <MudHidden Breakpoint="Breakpoint.SmAndDown">
+        <MudText Typo="Typo.h3" Class="mb-0" Style="font-weight: bold;" Align="Align.Center" GutterBottom="true">@Recipe.Name</MudText>
+    </MudHidden>
+    <MudHidden Breakpoint="Breakpoint.MdAndUp">
+        <MudText Typo="Typo.h5" Class="mb-0" Style="font-weight: bold;" Align="Align.Center" GutterBottom="true">@Recipe.Name</MudText>
+    </MudHidden>
 
     <MudText Typo="Typo.subtitle1" Class="mb-0" Align="Align.Center" GutterBottom="true">
         @{

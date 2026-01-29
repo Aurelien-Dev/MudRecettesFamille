@@ -1,21 +1,37 @@
 ﻿@using RecettesFamille.Dto.ModelByPage.RecetteBook
 
+
 <MudCard>
-    <MudCardMedia Image="@(Image is null ? string.Empty : Image.ToImageSrc())" Height="200" Style="@ClassImage" />
-    <MudCardContent Class="pb-0" Style="min-height:140px;">
-        <MudText Typo="Typo.h6" Style="font-weight:600;">@Recipes.Name</MudText>
-        <MudChipSet T="string">
-            <MudChip Variant="Variant.Outlined" Size="Size.Small" Class="mx-0">@Recipes.Tags.Replace("|", " | ")</MudChip>
-        </MudChipSet>
-    </MudCardContent>
-    <MudCardActions>
-        <MudButton Variant="Variant.Text" Color="Color.Primary" Href="@($"/recette/{Recipes.Id}")">Voir la recette</MudButton>
-    </MudCardActions>
+	<MudCardMedia Image="@(Image is null ? string.Empty : Image.ToImageSrc())" Height="200" Style="@ClassImage" />
+
+	<MudHidden Breakpoint="Breakpoint.SmAndDown">
+		<MudCardContent Class="pb-0" Style="min-height:140px;">
+			<MudText Typo="Typo.h6" Style="font-weight:600;">@Recipes.Name</MudText>
+
+			<MudChipSet T="string">
+				<MudChip Variant="Variant.Outlined" Size="Size.Small" Class="mx-0">@Recipes.Tags.Replace("|", " | ")</MudChip>
+			</MudChipSet>
+		</MudCardContent>
+	</MudHidden>
+
+	<MudHidden Breakpoint="Breakpoint.MdAndUp">
+		<MudCardContent Class="pb-0" Style="min-height:120px;">
+			<MudText Typo="Typo.subtitle2" Style="font-weight:600;">@Recipes.Name</MudText>
+
+			<MudChipSet T="string">
+				<MudChip Variant="Variant.Outlined" Size="Size.Small" Class="mx-0">@Recipes.Tags.Replace("|", " | ")</MudChip>
+			</MudChipSet>
+		</MudCardContent>
+	</MudHidden>
+	
+	<MudCardActions>
+		<MudButton Variant="Variant.Text" Color="Color.Primary" Href="@($"/recette/{Recipes.Id}")">Voir la recette</MudButton>
+	</MudCardActions>
 </MudCard>
 
 @code {
-    [Parameter] public RecipeForListDto Recipes { get; set; } = default!;
+	[Parameter] public RecipeForListDto Recipes { get; set; } = default!;
 
-    byte[]? Image => Recipes.Image;
-    string ClassImage => Image is null ? "opacity: 0.23;" : string.Empty;
+	byte[]? Image => Recipes.Image;
+	string ClassImage => Image is null ? "opacity: 0.23;" : string.Empty;
 }

@@ -23,7 +23,12 @@
         }
         else
         {
-            <MudText Typo="Typo.h6">@Block.Name</MudText>
+            <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                <MudText Typo="Typo.h6">@Block.Name</MudText>
+            </MudHidden>
+            <MudHidden Breakpoint="Breakpoint.MdAndUp">
+                <MudText Typo="Typo.subtitle2">@Block.Name</MudText>
+            </MudHidden>
             @if (Block.Calories.HasValue)
             {
                 <MudChip T="string" Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small" Class="ml-3">
