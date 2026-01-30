@@ -15,6 +15,10 @@
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-3" Gutters="false">
 
+	<MudText Typo="Typo.h5" Class="mb-3" Style="font-weight:900;">
+		Mes recettes favorites 🍽️
+	</MudText>
+
 	@if (Recipes != null)
 	{
 		<MudGrid Class="" Justify="Justify.Center" Style="height:100%;">
@@ -36,7 +40,7 @@
 	protected override async Task OnParametersSetAsync()
 	{
 		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-		
+
 		Recipes = await RecipeRepository.GetAllFavoritesLightRecipe(authState.User.Identity.Name);
 	}
 }
