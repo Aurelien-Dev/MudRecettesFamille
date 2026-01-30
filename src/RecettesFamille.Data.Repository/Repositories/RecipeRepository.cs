@@ -68,6 +68,58 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         return result;
     }
 
+    public async Task<List<RecipeForListDto>> GetAllLightRecipe(string userEmail, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var user = await context.Users.SingleOrDefaultAsync(u => u.Email == userEmail);
+        if (user is null)
+            return [];
+
+        var result = await context.Recipes.Include(s => s.FavoritedByUsers)
+            .Select(c => new RecipeForListDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Tags = c.Tags,
+                CreatedDate = c.CreatedDate,
+                Image = c.BlocksInstructions
+                         .Where(c => c is BlockImageEntity)
+                         .Select(b => (b as BlockImageEntity).Image)
+                         .FirstOrDefault(),
+                IsFavorited = c.FavoritedByUsers.Any(u => u.Id == user.Id)
+            })
+            .ToListAsync(cancellationToken);
+
+        return result;
+    }
+
+    public async Task<List<RecipeForListDto>> GetAllFavoritesLightRecipe(string userEmail, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var user = await context.Users.SingleOrDefaultAsync(u => u.Email == userEmail);
+        if (user is null)
+            return [];
+
+        var result = await context.Recipes.Include(s => s.FavoritedByUsers)
+            .Select(c => new RecipeForListDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Tags = c.Tags,
+                CreatedDate = c.CreatedDate,
+                Image = c.BlocksInstructions
+                         .Where(c => c is BlockImageEntity)
+                         .Select(b => (b as BlockImageEntity).Image)
+                         .FirstOrDefault(),
+                IsFavorited = c.FavoritedByUsers.Any(u => u.Id == user.Id)
+            }).Where(r => r.IsFavorited)
+            .ToListAsync(cancellationToken);
+
+        return result;
+    }
+
     public async Task<List<RecipeForListDto>> GetAllLightRecipe(int[] ids, CancellationToken cancellationToken = default)
     {
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
@@ -238,8 +290,39 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    #endregion
+    public async Task<bool> AddUserToFavoriteds(int recipeId, string userEmail, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
+        var user = await context.Users.SingleAsync(s => s.UserName == userEmail);
+        if (user == null)
+            return false;
+
+        var recipe = await context.Recipes.Include(r => r.FavoritedByUsers).FirstOrDefaultAsync(r => r.Id == recipeId, cancellationToken);
+        if (recipe == null || recipe.FavoritedByUsers.Any(u => u.Id == user.Id))
+            return false;
+
+        recipe.FavoritedByUsers.Add(user);
+        await context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<bool> DeleteUserToFavoriteds(int recipeId, string userEmail, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var recipe = await context.Recipes.Include(r => r.FavoritedByUsers).FirstOrDefaultAsync(r => r.Id == recipeId, cancellationToken);
+        var user = recipe.FavoritedByUsers.SingleOrDefault(u => u.UserName == userEmail);
+        if (recipe == null || user == null)
+            return false;
+
+        recipe.FavoritedByUsers.Remove(user);
+        await context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+
+    #endregion
 
     #region Blocks
 

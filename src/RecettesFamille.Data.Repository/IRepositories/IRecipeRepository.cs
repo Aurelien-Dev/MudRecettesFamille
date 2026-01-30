@@ -16,7 +16,7 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Liste de toutes les recettes.</returns>
     Task<List<RecipeDto>> GetAll(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Récupère toutes les recettes ayant un tag spécifique.
     /// </summary>
@@ -24,7 +24,7 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Liste des recettes correspondant au tag.</returns>
     Task<List<RecipeDto>> GetAll(string tag, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Récupère toutes les recettes ayant les tags spécifiés.
     /// </summary>
@@ -32,14 +32,21 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Liste des recettes correspondant aux tags.</returns>
     Task<List<RecipeDto>> GetAll(string[] tags, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Récupère une version légère de toutes les recettes (sans instructions détaillées).
     /// </summary>
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Liste de recettes en format léger.</returns>
     Task<List<RecipeForListDto>> GetAllLightRecipe(CancellationToken cancellationToken = default);
-    
+
+    /// <summary>
+    /// Récupère une version légère de toutes les recettes (sans instructions détaillées).
+    /// </summary>
+    /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
+    /// <returns>Liste de recettes en format léger.</returns>
+    Task<List<RecipeForListDto>> GetAllLightRecipe(string userEmail, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Récupère une version légère des recettes ayant les tags spécifiés.
     /// </summary>
@@ -47,7 +54,7 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Liste de recettes en format léger correspondant aux tags.</returns>
     Task<List<RecipeForListDto>> GetAllLightRecipe(string[] tags, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Récupère une version légère des recettes spécifiées par leurs identifiants.
     /// </summary>
@@ -55,6 +62,14 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Liste de recettes en format léger correspondant aux identifiants.</returns>
     Task<List<RecipeForListDto>> GetAllLightRecipe(int[] ids, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Récupère une version légère des recettes favorites d'un utilisateur.
+    /// </summary>
+    /// <param name="userEmail">Adresse email de l'utilisateur dont on souhaite récupérer les recettes favorites.</param>
+    /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
+    /// <returns>Liste de recettes favorites en format léger.</returns>
+    Task<List<RecipeForListDto>> GetAllFavoritesLightRecipe(string userEmail, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Récupère une version légère d'une recette spécifique.
@@ -63,7 +78,7 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>La recette en format léger.</returns>
     Task<RecipeForListDto> GetLightRecipe(int recipeId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Récupère une recette complète avec ses instructions.
     /// </summary>
@@ -71,7 +86,7 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>La recette complète avec instructions.</returns>
     Task<RecipeDto> GetWithInstructions(int recipeId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Récupère le texte brut d'une recette.
     /// </summary>
@@ -87,7 +102,7 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>La recette ajoutée avec son identifiant.</returns>
     Task<RecipeDto> AddRecipe(RecipeDto recipe, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Supprime une recette.
     /// </summary>
@@ -95,7 +110,7 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Une tâche représentant l'opération asynchrone.</returns>
     Task DeleteRecipe(int recipeId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Met à jour les informations de base d'une recette.
     /// </summary>
@@ -103,7 +118,7 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>True si la mise à jour a réussi, sinon False.</returns>
     Task<bool> UpdateRecipe(RecipeDto? recipe, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Met à jour une recette complète avec tous ses composants.
     /// </summary>
@@ -119,7 +134,7 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Le bloc ajouté avec son identifiant.</returns>
     Task<BlockBaseDto> AddBlock(BlockBaseDto block, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Met à jour un bloc d'instructions.
     /// </summary>
@@ -127,7 +142,7 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Une tâche représentant l'opération asynchrone.</returns>
     Task UpdateBlock(BlockBaseDto? block, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Supprime un bloc d'instructions.
     /// </summary>
@@ -143,7 +158,7 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>L'ingrédient ajouté avec son identifiant.</returns>
     Task<IngredientDto> AddIngredient(IngredientDto ingredient, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Supprime un ingrédient d'une recette.
     /// </summary>
@@ -151,7 +166,7 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>True si la suppression a réussi, sinon False.</returns>
     Task<bool> DeleteIngredient(int ingredientId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Met à jour un ingrédient.
     /// </summary>
@@ -159,4 +174,22 @@ public interface IRecipeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Une tâche représentant l'opération asynchrone.</returns>
     Task UpdateIngredient(IngredientDto block, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Ajoute l'utilisateur (par email) à la liste des favoris d'une recette.
+    /// </summary>
+    /// <param name="recipeId">Identifiant de la recette à mettre en favori.</param>
+    /// <param name="userEmail">Adresse email de l'utilisateur.</param>
+    /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
+    /// <returns>Une tâche représentant l'opération asynchrone.</returns>
+    Task<bool> AddUserToFavoriteds(int recipeId, string userEmail, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retire l'utilisateur (par email) de la liste des favoris d'une recette.
+    /// </summary>
+    /// <param name="recipeId">Identifiant de la recette à retirer des favoris.</param>
+    /// <param name="userEmail">Adresse email de l'utilisateur.</param>
+    /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
+    /// <returns><see langword="true" /> si l'association a été supprimée, sinon <see langword="false" />.</returns>
+    Task<bool> DeleteUserToFavoriteds(int recipeId, string userEmail, CancellationToken cancellationToken = default);
 }

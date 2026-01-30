@@ -1,35 +1,46 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.Repository.IRepositories;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
 public class UserRepository(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager) : IUserRepository
 {
+    public async Task AddFavoriteRecipeAsync(string userEmail, RecipeEntity recipe)
+    {
+        var user = await userManager.FindByEmailAsync(userEmail);
+        if (user == null)
+            return;
+
+        user.Favorites.Add(recipe);
+        await userManager.UpdateAsync(user);
+    }
+
     public async Task AssignRoleAsync(string userEmail, string role)
     {
         var user = await userManager.FindByEmailAsync(userEmail);
-        if (user != null)
-        {
-            var roleExist = await roleManager.RoleExistsAsync(role);
-            if (!roleExist)
-            {
-                await roleManager.CreateAsync(new IdentityRole(role));
-            }
+        if (user == null)
+            return;
 
-            if (!await userManager.IsInRoleAsync(user, role))
-            {
-                await userManager.AddToRoleAsync(user, role);
-            }
+        var roleExist = await roleManager.RoleExistsAsync(role);
+        if (!roleExist)
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+
+        if (!await userManager.IsInRoleAsync(user, role))
+        {
+            await userManager.AddToRoleAsync(user, role);
         }
     }
 
     public async Task RemoveRoleAsync(string userEmail, string role)
     {
         var user = await userManager.FindByEmailAsync(userEmail);
-        if (user != null && await userManager.IsInRoleAsync(user, role))
-        {
-            await userManager.RemoveFromRoleAsync(user, role);
-        }
+        if (user == null || !await userManager.IsInRoleAsync(user, role))
+            return;
+
+        await userManager.RemoveFromRoleAsync(user, role);
     }
 
     public async Task<List<(ApplicationUser User, List<string> Roles)>> GetAllUsersWithRolesAsync()
@@ -49,10 +60,9 @@ public class UserRepository(UserManager<ApplicationUser> userManager, RoleManage
     public async Task<IdentityResult> DeleteUserAsync(string userEmail)
     {
         var user = await userManager.FindByEmailAsync(userEmail);
-        if (user != null)
-        {
-            return await userManager.DeleteAsync(user);
-        }
-        return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+        if (user == null)
+            return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+        return await userManager.DeleteAsync(user);
     }
 }

@@ -15,11 +15,12 @@
 		<!-- Recherche & Filtres -->
 		<MudStack Row="true" Spacing="3" StretchItems="StretchItems.Start">
 			<MudStack Spacing="0">
-				<MudTextField T="string" @bind-Value="_searchString" Label="Rechercher des recettes ..." Variant="Variant.Outlined" Class="ma-0"
+				<MudTextField T="string" @bind-Value="_searchString" Label="Chercher des recettes ..." Variant="Variant.Outlined" Class="ma-0" Margin="Margin.Dense"
 							  Immediate="true" OnKeyDown="OnKeyDown" Clearable="true" OnClearButtonClick="@Ask" />
 				<MudProgressLinear Color="Color.Primary" Indeterminate="_workInProgress" Rounded="true" Class="mx-2" Style="width: auto; height: 2px; " />
 			</MudStack>
 			<MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search" DropShadow="false" Color="Color.Primary" Class="py-0" OnClick="@Ask">Je suis curieux</MudButton>
+			<MudButton Variant="Variant.Filled" DropShadow="false" Color="Color.Primary" Class="py-0"  Href="@($"/favorites")">Mes favorites</MudButton>
 		</MudStack>
 	</MudItem>
 </MudGrid>
@@ -89,6 +90,10 @@
 					</MudHidden>
 
 					<MudTd>
+						<MudToggleIconButton Icon="@Icons.Material.Filled.FavoriteBorder" Toggled="context.IsFavorited" ToggledChanged="async (v) => await OnFavoritedChange(v, context)"
+											 Color="@Color.Error" Size="Size.Small"
+											 ToggledIcon="@Icons.Material.Filled.Favorite"
+											 ToggledColor="@Color.Primary" Style="@(!context.IsFavorited? "opacity: 0.2;":"opacity: 0.8;")" />
 						<MudIconButton Href="@($"/recette/{context.Id}")" Icon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Primary" Size="Size.Small" />
 					</MudTd>
 				</RowTemplate>
@@ -114,6 +119,7 @@
 	[Inject] IRecipeRepository RecipeRepository { get; set; } = null!;
 	[Inject] ITagRepository TagRepository { get; set; } = null!;
 	[Inject] IBrowserViewportService BrowserViewportService { get; set; } = null!;
+	[Inject] AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
 
 	List<RecipeForListDto> Recipes { get; set; } = new();
 	List<TagDto> Tags { get; set; } = new();
@@ -125,16 +131,34 @@
 	bool _sortDescending = false;
 	string _searchString = string.Empty;
 	bool _workInProgress = false;
+	string _userConnected = string.Empty;
 
 
 	protected override async Task OnParametersSetAsync()
 	{
-		var result = await RecipeRepository.GetAllLightRecipe();
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		_userConnected = authState.User.Identity?.Name ?? string.Empty;
+
+		var result = await RecipeRepository.GetAllLightRecipe(authState.User.Identity.Name);
 
 		Recipes = ApplySort(result).ToList();
 		Tags = await TagRepository.GetAllVisible();
 
 		breakpoint = await BrowserViewportService.GetCurrentBreakpointAsync();
+	}
+
+	public Task OnFavoritedChange(bool isFavorited, RecipeForListDto recipe) => isFavorited ? AddFavoriteAsync(recipe) : RemoveFavoriteAsync(recipe);
+
+	private async Task AddFavoriteAsync(RecipeForListDto recipe)
+	{
+		await RecipeRepository.AddUserToFavoriteds(recipe.Id, _userConnected);
+		recipe.IsFavorited = true;
+	}
+
+	private async Task RemoveFavoriteAsync(RecipeForListDto recipe)
+	{
+		await RecipeRepository.DeleteUserToFavoriteds(recipe.Id, _userConnected);
+		recipe.IsFavorited = false;
 	}
 
 	public async Task OnSelectedSortChanged(Direction selectedDirection)
@@ -200,7 +224,7 @@
 		{
 			if (string.IsNullOrWhiteSpace(_searchString))
 			{
-				var result = await RecipeRepository.GetAllLightRecipe();
+				var result = await RecipeRepository.GetAllLightRecipe(_userConnected);
 				Recipes = ApplySort(result).ToList();
 				return;
 			}

@@ -20,5 +20,7 @@ public class RecipeEntity
     [MaxLength(200)]
     public string Tags { get; set; } = string.Empty;
 
-    public List<BlockBaseEntity> BlocksInstructions { get; set; } = [];
+    public ICollection<BlockBaseEntity> BlocksInstructions { get; set; } = [];
+
+    public ICollection<ApplicationUser> FavoritedByUsers { get; set; } = [];
 }

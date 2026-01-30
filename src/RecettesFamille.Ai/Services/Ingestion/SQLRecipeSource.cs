@@ -82,7 +82,7 @@ public class SQLRecipeSource(ApplicationDbContext dbContext) : IIngestionSource
         });
     }
 
-    private static IEnumerable<string> SplitIntoParagraphs(string recipeName, List<BlockBaseEntity> BlocksInstructions)
+    private static IEnumerable<string> SplitIntoParagraphs(string recipeName, ICollection<BlockBaseEntity> BlocksInstructions)
     {
         var paragraphs = new List<string>();
 
