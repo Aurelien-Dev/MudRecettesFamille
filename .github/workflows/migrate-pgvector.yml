@@ -25,7 +25,8 @@ jobs:
         password: ${{ secrets.DEPLOY_PASSWORD }}
         source: "src/RecettesFamille.Docker/docker-compose.yml"
         target: /home/recettesfamille/
-        strip_components: 2
+        strip_components: 0
+        overwrite: true
 
     - name: Backup database (safety)
       uses: appleboy/ssh-action@v0.1.5
@@ -82,6 +83,16 @@ jobs:
         password: ${{ secrets.DEPLOY_PASSWORD }}
         script: |
           cd /home/recettesfamille/src/RecettesFamille.Docker
+
+          echo "🔍 Verifying docker-compose.yml content..."
+          if grep -q "pgvector/pgvector:pg17" docker-compose.yml; then
+            echo "✅ docker-compose.yml contains pgvector image"
+          else
+            echo "❌ ERROR: docker-compose.yml still uses old image!"
+            echo "Current image in docker-compose.yml:"
+            grep "image:" docker-compose.yml | grep postgres
+            exit 1
+          fi
 
           echo "🛑 Stopping PostgreSQL container..."
           docker compose stop recettesfamille.data
