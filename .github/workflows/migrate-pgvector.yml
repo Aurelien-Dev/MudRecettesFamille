@@ -17,12 +17,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Update docker-compose.yml
-      run: |
-        cd src/RecettesFamille.Docker
-        sed -i 's/image: postgres:17/image: pgvector\/pgvector:pg17/g' docker-compose.yml
-        cat docker-compose.yml | grep pgvector
-
     - name: Copy updated docker-compose.yml to VPS
       uses: appleboy/scp-action@v0.1.3
       with:
@@ -54,16 +48,16 @@ jobs:
           cd /home/recettesfamille/src/RecettesFamille.Docker
 
           echo "🛑 Stopping PostgreSQL container..."
-          docker-compose stop recettesfamille.data
+          docker compose stop recettesfamille.data
 
           echo "🗑️ Removing old container (data is safe in volume)..."
-          docker-compose rm -f recettesfamille.data
+          docker compose rm -f recettesfamille.data
 
           echo "🚀 Pulling pgvector/pgvector:pg17 image..."
           docker pull pgvector/pgvector:pg17
 
           echo "⚙️ Starting PostgreSQL with pgvector..."
-          docker-compose up -d recettesfamille.data
+          docker compose up -d recettesfamille.data
 
           echo "⏳ Waiting for PostgreSQL to be ready..."
           sleep 10
@@ -75,11 +69,3 @@ jobs:
           docker exec recettesfamille.data psql -U pguser -d recettesfamilledb -c "\dx vector"
 
           echo "🎉 Migration completed successfully!"
-
-    - name: Commit updated docker-compose.yml
-      run: |
-        git config --global user.name "GitHub Action"
-        git config --global user.email "action@github.com"
-        git add src/RecettesFamille.Docker/docker-compose.yml
-        git diff --cached --exit-code || git commit -m "chore: migrate PostgreSQL to pgvector/pgvector:pg17"
-        git push
