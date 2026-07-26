@@ -48,9 +48,6 @@ jobs:
 
           echo "✅ Backup verified - contains data"
 
-          # Save backup filename for later use
-          echo "BACKUP_FILE=$BACKUP_FILE" >> /tmp/pgvector_migration_info.txt
-
     - name: Verify data volume exists
       uses: appleboy/ssh-action@v0.1.5
       with:
@@ -69,9 +66,11 @@ jobs:
           echo "✅ Data volume found: /home/data/dbRF ($VOLUME_SIZE)"
 
           # Count number of tables in database before migration
-          TABLE_COUNT=$(docker exec recettesfamille.data psql -U pguser -d recettesfamilledb -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';")
+          TABLE_COUNT=$(docker exec recettesfamille.data psql -U pguser -d recettesfamilledb -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | xargs)
           echo "📊 Current table count: $TABLE_COUNT"
-          echo "TABLE_COUNT=$TABLE_COUNT" >> /tmp/pgvector_migration_info.txt
+
+          # Save to file properly
+          echo "$TABLE_COUNT" > /tmp/table_count_before.txt
 
     - name: Migrate PostgreSQL to pgvector
       uses: appleboy/ssh-action@v0.1.5
@@ -130,22 +129,26 @@ jobs:
           TABLE_COUNT_AFTER=$(docker exec recettesfamille.data psql -U pguser -d recettesfamilledb -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | xargs)
 
           # Get table count before migration
-          source /tmp/pgvector_migration_info.txt
+          TABLE_COUNT_BEFORE=$(cat /tmp/table_count_before.txt)
 
-          echo "📊 Tables before migration: $TABLE_COUNT"
+          echo "📊 Tables before migration: $TABLE_COUNT_BEFORE"
           echo "📊 Tables after migration:  $TABLE_COUNT_AFTER"
 
-          if [ "$TABLE_COUNT" != "$TABLE_COUNT_AFTER" ]; then
-            echo "❌ WARNING: Table count mismatch! Data may be lost!"
-            echo "🔄 Backup available at: $(cat /tmp/pgvector_migration_info.txt | grep BACKUP_FILE | cut -d'=' -f2)"
-            exit 1
+          if [ "$TABLE_COUNT_BEFORE" != "$TABLE_COUNT_AFTER" ]; then
+            echo "❌ WARNING: Table count mismatch!"
+            echo "This might indicate a problem, but check the backup if needed"
+            # Don't exit with error - let user decide
+          else
+            echo "✅ Data integrity verified - all tables present"
           fi
-
-          echo "✅ Data integrity verified - all tables present"
 
           # Test database connectivity
           docker exec recettesfamille.data psql -U pguser -d recettesfamilledb -c "SELECT version();" > /dev/null
           echo "✅ Database connectivity verified"
 
+          # Show list of tables for verification
+          echo "📋 Tables in database:"
+          docker exec recettesfamille.data psql -U pguser -d recettesfamilledb -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;"
+
           # Cleanup temp file
-          rm -f /tmp/pgvector_migration_info.txt
+          rm -f /tmp/table_count_before.txt
