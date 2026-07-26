@@ -35,8 +35,44 @@ jobs:
         password: ${{ secrets.DEPLOY_PASSWORD }}
         script: |
           echo "📦 Creating database backup..."
-          docker exec recettesfamille.data pg_dump -U pguser -d recettesfamilledb > /home/data/backup_pgvector_migration_$(date +%Y%m%d_%H%M%S).sql
-          echo "✅ Backup created in /home/data/"
+          BACKUP_FILE="/home/data/backup_pgvector_migration_$(date +%Y%m%d_%H%M%S).sql"
+          docker exec recettesfamille.data pg_dump -U pguser -d recettesfamilledb > "$BACKUP_FILE"
+
+          echo "✅ Backup created: $BACKUP_FILE"
+          echo "📊 Backup size: $(du -h "$BACKUP_FILE" | cut -f1)"
+
+          # Verify backup is not empty
+          if [ ! -s "$BACKUP_FILE" ]; then
+            echo "❌ ERROR: Backup file is empty!"
+            exit 1
+          fi
+
+          echo "✅ Backup verified - contains data"
+
+          # Save backup filename for later use
+          echo "BACKUP_FILE=$BACKUP_FILE" >> /tmp/pgvector_migration_info.txt
+
+    - name: Verify data volume exists
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        password: ${{ secrets.DEPLOY_PASSWORD }}
+        script: |
+          echo "🔍 Verifying data volume integrity..."
+
+          if [ ! -d "/home/data/dbRF" ]; then
+            echo "❌ ERROR: Data volume /home/data/dbRF not found!"
+            exit 1
+          fi
+
+          VOLUME_SIZE=$(du -sh /home/data/dbRF | cut -f1)
+          echo "✅ Data volume found: /home/data/dbRF ($VOLUME_SIZE)"
+
+          # Count number of tables in database before migration
+          TABLE_COUNT=$(docker exec recettesfamille.data psql -U pguser -d recettesfamilledb -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';")
+          echo "📊 Current table count: $TABLE_COUNT"
+          echo "TABLE_COUNT=$TABLE_COUNT" >> /tmp/pgvector_migration_info.txt
 
     - name: Migrate PostgreSQL to pgvector
       uses: appleboy/ssh-action@v0.1.5
@@ -53,14 +89,23 @@ jobs:
           echo "🗑️ Removing old container (data is safe in volume)..."
           docker compose rm -f recettesfamille.data
 
+          echo "🧹 Removing old postgres:17 image..."
+          docker rmi postgres:17 2>/dev/null || echo "Image already removed or not found"
+
           echo "🚀 Pulling pgvector/pgvector:pg17 image..."
           docker pull pgvector/pgvector:pg17
 
-          echo "⚙️ Starting PostgreSQL with pgvector..."
-          docker compose up -d recettesfamille.data
+          echo "⚙️ Starting PostgreSQL with pgvector (forced recreate)..."
+          docker compose up -d --force-recreate --pull always recettesfamille.data
+
+          echo "📊 Verifying image used..."
+          docker inspect recettesfamille.data --format='{{.Config.Image}}'
 
           echo "⏳ Waiting for PostgreSQL to be ready..."
-          sleep 10
+          sleep 15
+
+          echo "🔍 Checking if vector extension files exist in container..."
+          docker exec recettesfamille.data ls -la /usr/share/postgresql/17/extension/vector* || echo "⚠️ Vector files not found!"
 
           echo "🔌 Enabling pgvector extension..."
           docker exec recettesfamille.data psql -U pguser -d recettesfamilledb -c "CREATE EXTENSION IF NOT EXISTS vector;"
@@ -69,3 +114,39 @@ jobs:
           docker exec recettesfamille.data psql -U pguser -d recettesfamilledb -c "\dx vector"
 
           echo "🎉 Migration completed successfully!"
+
+    - name: Verify data integrity after migration
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        password: ${{ secrets.DEPLOY_PASSWORD }}
+        script: |
+          echo "🔍 Verifying data integrity after migration..."
+
+          # Wait for database to be fully ready
+          sleep 5
+
+          # Count tables after migration
+          TABLE_COUNT_AFTER=$(docker exec recettesfamille.data psql -U pguser -d recettesfamilledb -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | xargs)
+
+          # Get table count before migration
+          source /tmp/pgvector_migration_info.txt
+
+          echo "📊 Tables before migration: $TABLE_COUNT"
+          echo "📊 Tables after migration:  $TABLE_COUNT_AFTER"
+
+          if [ "$TABLE_COUNT" != "$TABLE_COUNT_AFTER" ]; then
+            echo "❌ WARNING: Table count mismatch! Data may be lost!"
+            echo "🔄 Backup available at: $(cat /tmp/pgvector_migration_info.txt | grep BACKUP_FILE | cut -d'=' -f2)"
+            exit 1
+          fi
+
+          echo "✅ Data integrity verified - all tables present"
+
+          # Test database connectivity
+          docker exec recettesfamille.data psql -U pguser -d recettesfamilledb -c "SELECT version();" > /dev/null
+          echo "✅ Database connectivity verified"
+
+          # Cleanup temp file
+          rm -f /tmp/pgvector_migration_info.txt
