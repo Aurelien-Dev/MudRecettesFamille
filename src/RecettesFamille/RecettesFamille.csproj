@@ -23,24 +23,24 @@
     <PackageReference Include="BitzArt.Blazor.Cookies.Server" Version="1.5.1" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="Cropper.Blazor" Version="1.5.0" />
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.10.2" />
-    <PackageReference Include="Magick.NET.Core" Version="14.10.2" />
-    <PackageReference Include="MailKit" Version="4.14.1" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.16.0" />
+    <PackageReference Include="Magick.NET.Core" Version="14.16.0" />
+    <PackageReference Include="MailKit" Version="4.17.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.AI" Version="10.2.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.2.0" />
-    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.5.0-preview.1.25265.7" />
-    <PackageReference Include="MimeKit" Version="4.14.0" />
+    <PackageReference Include="Microsoft.Extensions.AI" Version="10.8.3" />
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.8.3" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.8.3" />
+    <PackageReference Include="MimeKit" Version="4.17.0" />
     <PackageReference Include="MudBlazor" Version="8.15.0" />
     <PackageReference Include="Extensions.MudBlazor.StaticInput" Version="3.2.1" />
     <PackageReference Include="MudBlazor.Markdown" Version="8.11.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RecettesFamille.Ai\RecettesFamille.Ai.csproj" />
+    <ProjectReference Include="..\RecettesFamille.Rag\RecettesFamille.Rag.csproj" />
     <ProjectReference Include="..\RecettesFamille.Data.Repository\RecettesFamille.Data.Repository.csproj" />
   </ItemGroup>
 </Project>

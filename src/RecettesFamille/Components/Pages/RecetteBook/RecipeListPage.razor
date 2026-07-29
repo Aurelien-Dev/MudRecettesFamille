@@ -1,5 +1,5 @@
 ﻿@implements IBrowserViewportObserver
-@inject SemanticSearch Search
+@inject RecipeRagService RagService
 
 @using Microsoft.AspNetCore.Authorization
 @using System.ComponentModel
@@ -214,8 +214,13 @@
 
 
 
-	#region AI
+	#region RAG Semantic Search
 
+	/// <summary>
+	/// Recherche sémantique de recettes via RAG.
+	/// Si la recherche est vide, affiche toutes les recettes.
+	/// Sinon, utilise la recherche vectorielle pour trouver les recettes pertinentes.
+	/// </summary>
 	public async Task Ask()
 	{
 		_workInProgress = true;
@@ -224,14 +229,37 @@
 		{
 			if (string.IsNullOrWhiteSpace(_searchString))
 			{
+				// Pas de recherche : afficher toutes les recettes
 				var result = await RecipeRepository.GetAllLightRecipe(_userConnected);
 				Recipes = ApplySort(result).ToList();
 				return;
 			}
+			_searchString = _searchString.Trim();
+			// Recherche sémantique RAG
+			var searchResults = await RagService.SearchRecipesAsync(_searchString, maxResults: 100, scoreThreshold: 0.50);
+			var recipeIds = searchResults.Select(r => r.Id).ToArray();
 
-			var resultFromSementicSearch = await SearchAsync(_searchString);
-			var recipes = await RecipeRepository.GetAllLightRecipe(resultFromSementicSearch.ToArray());
-			Recipes = ApplySort(recipes).ToList();
+			// Récupérer les recettes légères avec leurs infos de favoris
+			var recipes = await RecipeRepository.GetAllLightRecipe(_userConnected);
+
+			// Filtrer pour ne garder que les résultats de la recherche RAG
+			var filteredRecipes = recipes
+				.Where(r => recipeIds.Contains(r.Id))
+				.ToList();
+
+			// Réordonner selon la pertinence de la recherche RAG
+			var orderedRecipes = recipeIds
+				.Select(id => filteredRecipes.FirstOrDefault(r => r.Id == id))
+				.Where(r => r != null)
+				.ToList();
+
+			Recipes = orderedRecipes!;
+		}
+		catch (Exception ex)
+		{
+			// En cas d'erreur RAG, fallback sur recherche classique
+			var result = await RecipeRepository.GetAllLightRecipe(_userConnected);
+			Recipes = ApplySort(result).ToList();
 		}
 		finally
 		{
@@ -239,18 +267,6 @@
 			await InvokeAsync(StateHasChanged);
 		}
 	}
-
-
-	[Description("Searches for information using a phrase or keyword")]
-	private async Task<IEnumerable<int>> SearchAsync(
-		[Description("The phrase to search for.")] string searchPhrase,
-		[Description("If possible, specify the recipe name to search that recipe only. If not provided or empty, the search includes all recipes.")] string? recipeName = null)
-	{
-		await InvokeAsync(StateHasChanged);
-		var results = await Search.SearchLightAsync(searchPhrase, maxResults: 100);
-		return results.Select(result => result.RecipeId);
-	}
-
 
 	#endregion
 

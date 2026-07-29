@@ -1,0 +1,216 @@
+@using RecettesFamille.Services
+@using Microsoft.Extensions.AI
+@inject RecipeRagService RagService
+
+<MudPaper Class="pa-4" Elevation="2">
+    <div class="d-flex align-center justify-space-between mb-3">
+        <MudText Typo="Typo.h6">💬 Assistant Culinaire</MudText>
+        @if (messages.Count > 0)
+        {
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Secondary"
+                       Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.Delete"
+                       OnClick="ClearChat">
+                Nouvelle conversation
+            </MudButton>
+        }
+    </div>
+
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+        Posez vos questions sur cette recette et obtenez des conseils personnalisés
+    </MudText>
+
+    <!-- Messages container -->
+    <div class="chat-messages mb-4" style="max-height: 400px; overflow-y: auto;">
+        @foreach (var message in displayMessages)
+        {
+            <div class="@GetMessageClass(message.Role)">
+                <MudPaper Class="@GetMessagePaperClass(message.Role)" Elevation="1">
+                    <div class="d-flex align-center gap-2 mb-1">
+                        <MudIcon Icon="@GetMessageIcon(message.Role)" Size="Size.Small" Color="@GetMessageColor(message.Role)" />
+                        <MudText Typo="Typo.caption" Color="@GetMessageColor(message.Role)">
+                            @GetRoleDisplayName(message.Role)
+                        </MudText>
+                    </div>
+                    @if (message.Role == ChatRole.Assistant)
+                    {
+                        <MudMarkdown Value="@message.Text" />
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2">@message.Text</MudText>
+                    }
+                </MudPaper>
+            </div>
+        }
+
+        @if (isLoading)
+        {
+            <div class="message-assistant mb-3">
+                <MudPaper Class="pa-3" Style="background-color: #f5f5f5;">
+                    <div class="d-flex align-center gap-2">
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">L'assistant réfléchit...</MudText>
+                    </div>
+                </MudPaper>
+            </div>
+        }
+    </div>
+
+    <!-- Input area -->
+    <div class="d-flex gap-2">
+        <MudTextField @bind-Value="userInput"
+                      Label="Votre question"
+                      Placeholder="Ex: Comment puis-je remplacer le beurre ? Peut-on préparer à l'avance ?"
+                      Variant="Variant.Outlined"
+                      FullWidth="true"
+                      OnKeyPress="@OnKeyPress"
+                      Disabled="@(isLoading || RecipeId <= 0)"
+                      Immediate="true" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Send"
+                   OnClick="SendMessage"
+                   Disabled="@(string.IsNullOrWhiteSpace(userInput) || isLoading || RecipeId <= 0)">
+            Envoyer
+        </MudButton>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-3" CloseIcon="@Icons.Material.Filled.Close" CloseIconClicked="@(() => errorMessage = string.Empty)">
+            @errorMessage
+        </MudAlert>
+    }
+
+    @if (RecipeId <= 0)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mt-3">
+            Aucune recette sélectionnée. Veuillez spécifier un ID de recette.
+        </MudAlert>
+    }
+</MudPaper>
+
+<style>
+    .chat-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .message-user {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .message-user .mud-paper {
+        max-width: 80%;
+        background-color: #e3f2fd;
+    }
+
+    .message-assistant {
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    .message-assistant .mud-paper {
+        max-width: 80%;
+        background-color: #f5f5f5;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public int RecipeId { get; set; }
+
+    private string userInput = string.Empty;
+    private bool isLoading = false;
+    private string errorMessage = string.Empty;
+
+    // Store full conversation history (including system prompt)
+    private List<ChatMessage> messages = new();
+
+    // Display messages (excluding system prompt)
+    private List<ChatMessage> displayMessages => messages.Where(m => m.Role != ChatRole.System).ToList();
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(userInput) || RecipeId <= 0)
+            return;
+
+        var question = userInput.Trim();
+        userInput = string.Empty;
+        errorMessage = string.Empty;
+
+        // Add user message to display
+        var userMessage = new ChatMessage(ChatRole.User, question);
+        messages.Add(userMessage);
+
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            // Get chat history (excluding the current user message for API call)
+            var historyForApi = messages.Take(messages.Count - 1).Where(m => m.Role != ChatRole.System).ToList();
+
+            var response = await RagService.ChatWithRecipeAsync(RecipeId, question, historyForApi);
+
+            // Add assistant response
+            var assistantMessage = new ChatMessage(ChatRole.Assistant, response);
+            messages.Add(assistantMessage);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur : {ex.Message}";
+            // Remove the user message if API call failed
+            messages.RemoveAt(messages.Count - 1);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(userInput) && !isLoading)
+        {
+            await SendMessage();
+        }
+    }
+
+    private void ClearChat()
+    {
+        messages.Clear();
+        errorMessage = string.Empty;
+    }
+
+    private string GetMessageClass(ChatRole role)
+    {
+        return role == ChatRole.User ? "message-user mb-3" : "message-assistant mb-3";
+    }
+
+    private string GetMessagePaperClass(ChatRole role)
+    {
+        return role == ChatRole.User ? "pa-3" : "pa-3";
+    }
+
+    private string GetMessageIcon(ChatRole role)
+    {
+        return role == ChatRole.User ? Icons.Material.Filled.Person : Icons.Material.Filled.SmartToy;
+    }
+
+    private Color GetMessageColor(ChatRole role)
+    {
+        return role == ChatRole.User ? Color.Primary : Color.Secondary;
+    }
+
+    private string GetRoleDisplayName(ChatRole role)
+    {
+        return role == ChatRole.User ? "Vous" : "Assistant";
+    }
+}

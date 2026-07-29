@@ -1,0 +1,628 @@
+@page "/Admin/rag-status"
+@using Microsoft.AspNetCore.Authorization
+@using RecettesFamille.Components.Layout
+@using RecettesFamille.Data
+@using RecettesFamille.Data.EntityModel
+@using RecettesFamille.Data.EntityModel.Blocks
+@using RecettesFamille.Rag.Services
+@using Microsoft.EntityFrameworkCore
+@using RecettesFamille.Rag.Ingestion
+@using Microsoft.JSInterop
+
+@inject IDbContextFactory<ApplicationDbContext> contextFactory
+@inject IngestionCacheDbContext ingestionCache
+@inject RagIngestionService ragIngestion
+@inject ILogger<RagStatusPage> logger
+@inject IJSRuntime JS
+
+@attribute [Authorize(Roles = "Admin")]
+@layout AdminLayout
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudText Typo="Typo.h4" Class="mb-6">
+        <MudIcon Icon="@Icons.Material.Filled.Analytics" Class="mr-2" />
+        État du Système RAG
+    </MudText>
+
+    @if (_isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+    }
+    else
+    {
+        <MudGrid Spacing="3">
+            <!-- Statistiques générales -->
+            <MudItem xs="12" md="4">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.FolderOpen" Color="Color.Primary" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Base de Données</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudStack Spacing="3">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Recettes totales</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Primary">@_totalRecipes</MudText>
+                            </div>
+                            <MudDivider />
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Documents ingérés</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Success">@_ingestedDocuments</MudText>
+                            </div>
+                            <MudDivider />
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Enregistrements vectoriels</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Info">@_vectorRecords</MudText>
+                            </div>
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Statut pgvector -->
+            <MudItem xs="12" md="4">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.Extension" Color="Color.Secondary" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Extension pgvector</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        @if (_pgvectorInstalled)
+                        {
+                            <MudAlert Severity="Severity.Success" Variant="Variant.Filled" Class="mb-3">
+                                <strong>✅ Installée et opérationnelle</strong>
+                            </MudAlert>
+                        }
+                        else
+                        {
+                            <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Class="mb-3">
+                                <strong>❌ Non installée</strong>
+                            </MudAlert>
+                            <MudAlert Severity="Severity.Info" Variant="Variant.Text">
+                                <MudText Typo="Typo.body2">
+                                    Exécutez dans PostgreSQL :
+                                </MudText>
+                                <MudPaper Class="pa-2 mt-2" Style="background-color: var(--mud-palette-background-grey);">
+                                    <code>CREATE EXTENSION vector;</code>
+                                </MudPaper>
+                            </MudAlert>
+                        }
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-3">
+                            Collection : <strong>RagRecipeEmbeddings</strong>
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Tables RAG -->
+            <MudItem xs="12" md="4">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.TableChart" Color="Color.Tertiary" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Tables RAG</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudList T="string" Dense="false">
+                            <MudListItem T="string" Class="px-0">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                    @if (_ingestionTableExists)
+                                    {
+                                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                                        <MudText>RagIngestionDocuments</MudText>
+                                    }
+                                    else
+                                    {
+                                        <MudIcon Icon="@Icons.Material.Filled.Cancel" Color="Color.Error" />
+                                        <MudText Color="Color.Error">RagIngestionDocuments</MudText>
+                                    }
+                                </MudStack>
+                            </MudListItem>
+                            <MudListItem T="string" Class="px-0">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                    @if (_recordsTableExists)
+                                    {
+                                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                                        <MudText>RagIngestionRecords</MudText>
+                                    }
+                                    else
+                                    {
+                                        <MudIcon Icon="@Icons.Material.Filled.Cancel" Color="Color.Error" />
+                                        <MudText Color="Color.Error">RagIngestionRecords</MudText>
+                                    }
+                                </MudStack>
+                            </MudListItem>
+                        </MudList>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Informations système -->
+            <MudItem xs="12">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.Info" Color="Color.Info" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Informations Système</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Text" Class="mb-3">
+                            <MudText Typo="Typo.subtitle1" Class="mb-2"><strong>Comment fonctionne le système RAG :</strong></MudText>
+                            <MudList T="string" Dense="true" DisablePadding="true">
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Circle" IconSize="Size.Small" DisableGutters="true">
+                                    Les tables <code>RagIngestionDocuments</code> et <code>RagIngestionRecords</code> sont un <strong>cache d'ingestion</strong>
+                                </MudListItem>
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Circle" IconSize="Size.Small" DisableGutters="true">
+                                    Elles permettent d'<strong>éviter la réindexation</strong> des recettes non modifiées (via hash SHA256)
+                                </MudListItem>
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Circle" IconSize="Size.Small" DisableGutters="true">
+                                    La collection pgvector <code>RagRecipeEmbeddings</code> stocke les <strong>vecteurs d'embeddings</strong>
+                                </MudListItem>
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Circle" IconSize="Size.Small" DisableGutters="true">
+                                    Chaque recette génère <strong>4 embeddings</strong> (Metadata, Description, Ingredients, Instructions)
+                                </MudListItem>
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Circle" IconSize="Size.Small" DisableGutters="true">
+                                    Les vecteurs sont stockés dans PostgreSQL via l'extension <strong>pgvector</strong>
+                                </MudListItem>
+                            </MudList>
+                        </MudAlert>
+
+                        @if (_needsResync)
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Filled">
+                                <MudText Typo="Typo.subtitle2" Class="mb-2">
+                                    <strong>⚠️ Le système RAG n'a pas encore été initialisé.</strong>
+                                </MudText>
+                                <MudText Typo="Typo.body2">
+                                    Utilisez le bouton "Resynchroniser" ci-dessous pour indexer toutes les recettes.
+                                </MudText>
+                            </MudAlert>
+                        }
+                        else if (_ingestedDocuments < _totalRecipes)
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Filled">
+                                <MudText Typo="Typo.subtitle2" Class="mb-2">
+                                    <strong>⚠️ Le système RAG n'est pas à jour.</strong>
+                                </MudText>
+                                <MudText Typo="Typo.body2">
+                                    @(_totalRecipes - _ingestedDocuments) recette(s) ne sont pas indexées. Lancez une resynchronisation.
+                                </MudText>
+                            </MudAlert>
+                        }
+                        else
+                        {
+                            <MudAlert Severity="Severity.Success" Variant="Variant.Filled">
+                                <MudText Typo="Typo.subtitle2">
+                                    <strong>✅ Le système RAG est opérationnel et à jour !</strong>
+                                </MudText>
+                            </MudAlert>
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Section Resynchronisation -->
+            <MudItem xs="12">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.Sync" Color="Color.Primary" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Resynchronisation RAG</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudStack Spacing="3">
+                            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                                <MudButton Variant="Variant.Filled" 
+                                           Color="Color.Primary" 
+                                           StartIcon="@Icons.Material.Filled.Sync"
+                                           Size="Size.Large"
+                                           OnClick="ResyncAllRecipes"
+                                           Disabled="@_isRunning">
+                                    @(_isRunning ? "Resynchronisation en cours..." : "Resynchroniser toutes les recettes")
+                                </MudButton>
+
+                                <MudButton Variant="Variant.Outlined" 
+                                           Color="Color.Secondary" 
+                                           StartIcon="@Icons.Material.Filled.Refresh"
+                                           OnClick="Refresh"
+                                           Disabled="@_isRunning">
+                                    Actualiser l'état
+                                </MudButton>
+
+                                @if (_isRunning)
+                                {
+                                    <MudButton Variant="Variant.Outlined" 
+                                               Color="Color.Error" 
+                                               StartIcon="@Icons.Material.Filled.Stop"
+                                               OnClick="Stop">
+                                        Arrêter
+                                    </MudButton>
+                                }
+                            </MudStack>
+
+                            @if (_isRunning || _logs.Count > 0)
+                            {
+                                <MudPaper Class="pa-3" Elevation="0" Style="background-color: var(--mud-palette-background-grey); max-height: 400px; overflow-y: auto;">
+                                    <MudStack Spacing="1">
+                                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
+                                            <MudText Typo="Typo.subtitle2">Logs d'exécution</MudText>
+                                            <MudStack Row="true" Spacing="1">
+                                                <MudChip T="string" Size="Size.Small" Color="@(_isRunning ? Color.Warning : Color.Success)" Variant="Variant.Filled">
+                                                    @(_isRunning ? "⏳ En cours" : "✓ Terminé")
+                                                </MudChip>
+                                                <MudIconButton Icon="@Icons.Material.Filled.Clear" 
+                                                               Size="Size.Small" 
+                                                               OnClick="ClearLogs"
+                                                               Title="Effacer les logs" />
+                                            </MudStack>
+                                        </MudStack>
+
+                                        <MudDivider />
+
+                                        @if (_logs.Count == 0)
+                                        {
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">(aucun log)</MudText>
+                                        }
+                                        else
+                                        {
+                                            <MudList T="string" Dense="true" DisablePadding="true">
+                                                @foreach (var line in _logs)
+                                                {
+                                                    <MudListItem T="string" DisableGutters="true">
+                                                        <MudText Typo="Typo.body2" Style="font-family: monospace; white-space: pre-wrap;">@line</MudText>
+                                                    </MudListItem>
+                                                }
+                                                <div @ref="_logBottom" />
+                                            </MudList>
+                                        }
+                                    </MudStack>
+                                </MudPaper>
+                            }
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Section Reconstruction du Cache -->
+            <MudItem xs="12">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.Build" Color="Color.Warning" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Reconstruction du Cache d'Ingestion</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudStack Spacing="3">
+                            <MudAlert Severity="Severity.Info" Variant="Variant.Text">
+                                <MudText Typo="Typo.body2">
+                                    Cette opération reconstruit les tables <code>RagIngestionDocuments</code> et <code>RagIngestionRecords</code> 
+                                    à partir des embeddings existants dans la collection pgvector.
+                                </MudText>
+                                <MudText Typo="Typo.body2" Class="mt-2">
+                                    <strong>Quand l'utiliser ?</strong> Lorsque les tables de cache ont été supprimées ou corrompues, 
+                                    mais que les embeddings vectoriels sont toujours présents.
+                                </MudText>
+                            </MudAlert>
+
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Warning" 
+                                       StartIcon="@Icons.Material.Filled.Build"
+                                       Size="Size.Large"
+                                       OnClick="RebuildCache"
+                                       Disabled="@_isRunning">
+                                @(_isRunning ? "Reconstruction en cours..." : "Reconstruire le cache d'ingestion")
+                            </MudButton>
+
+                            @if (_rebuildLogs.Count > 0)
+                            {
+                                <MudPaper Class="pa-3" Elevation="0" Style="background-color: var(--mud-palette-background-grey); max-height: 300px; overflow-y: auto;">
+                                    <MudStack Spacing="1">
+                                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
+                                            <MudText Typo="Typo.subtitle2">Logs de reconstruction</MudText>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Clear" 
+                                                           Size="Size.Small" 
+                                                           OnClick="ClearRebuildLogs"
+                                                           Title="Effacer les logs" />
+                                        </MudStack>
+
+                                        <MudDivider />
+
+                                        <MudList T="string" Dense="true" DisablePadding="true">
+                                            @foreach (var line in _rebuildLogs)
+                                            {
+                                                <MudListItem T="string" DisableGutters="true">
+                                                    <MudText Typo="Typo.body2" Style="font-family: monospace; white-space: pre-wrap;">@line</MudText>
+                                                </MudListItem>
+                                            }
+                                        </MudList>
+                                    </MudStack>
+                                </MudPaper>
+                            }
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    }
+</MudContainer>
+
+@code {
+    private bool _isLoading = true;
+    private bool _isRunning = false;
+    private int _totalRecipes = 0;
+    private int _ingestedDocuments = 0;
+    private int _vectorRecords = 0;
+    private bool _pgvectorInstalled = false;
+    private bool _ingestionTableExists = false;
+    private bool _recordsTableExists = false;
+    private bool _needsResync = false;
+    private readonly List<string> _logs = new();
+    private readonly List<string> _rebuildLogs = new();
+    private ElementReference _logBottom;
+    private CancellationTokenSource? _cts;
+    private CancellationToken CancellationToken => _cts?.Token ?? CancellationToken.None;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStatus();
+    }
+
+    private async Task LoadStatus()
+    {
+        _isLoading = true;
+        try
+        {
+            // Compter les recettes totales
+            using var context = await contextFactory.CreateDbContextAsync();
+            _totalRecipes = await context.Recipes.CountAsync();
+
+            // Vérifier les tables d'ingestion
+            try
+            {
+                _ingestedDocuments = await ingestionCache.Documents.CountAsync();
+                _vectorRecords = await ingestionCache.Records.CountAsync();
+                _ingestionTableExists = true;
+                _recordsTableExists = true;
+            }
+            catch
+            {
+                _ingestionTableExists = false;
+                _recordsTableExists = false;
+            }
+
+            // Vérifier pgvector
+            try
+            {
+                // Utiliser FromSqlRaw avec un record anonyme
+                var checkPgVector = await context.Database
+                    .SqlQuery<int>($"SELECT COUNT(*)::int FROM pg_extension WHERE extname = 'vector'")
+                    .ToListAsync();
+                _pgvectorInstalled = checkPgVector.FirstOrDefault() > 0;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Could not check pgvector extension");
+                _pgvectorInstalled = false;
+            }
+
+            // Déterminer si une resync est nécessaire
+            _needsResync = _ingestedDocuments == 0 && _totalRecipes > 0;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error loading RAG status");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task Refresh()
+    {
+        await LoadStatus();
+        StateHasChanged();
+    }
+
+    private void Log(string message)
+    {
+        var ts = DateTime.Now.ToString("HH:mm:ss");
+        _logs.Add($"[{ts}] {message}");
+        if (_logs.Count > 500)
+        {
+            _logs.RemoveRange(0, _logs.Count - 500);
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void RebuildLog(string message)
+    {
+        var ts = DateTime.Now.ToString("HH:mm:ss");
+        _rebuildLogs.Add($"[{ts}] {message}");
+        if (_rebuildLogs.Count > 500)
+        {
+            _rebuildLogs.RemoveRange(0, _rebuildLogs.Count - 500);
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ScrollToBottomAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("RecettesFamille.scrollIntoView", _logBottom);
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+
+    private void ClearLogs() => _logs.Clear();
+    private void ClearRebuildLogs() => _rebuildLogs.Clear();
+
+    private void Stop()
+    {
+        if (!_isRunning)
+            return;
+        Log("⏹️ Arrêt demandé...");
+        _cts?.Cancel();
+    }
+
+    /// <summary>
+    /// Reconstruit le cache d'ingestion à partir des embeddings existants.
+    /// </summary>
+    public async Task RebuildCache()
+    {
+        if (_isRunning) return;
+        _isRunning = true;
+        _cts = new();
+        _rebuildLogs.Clear();
+        RebuildLog("🔧 Démarrage de la reconstruction du cache...");
+
+        try
+        {
+            CancellationToken.ThrowIfCancellationRequested();
+
+            using var context = await contextFactory.CreateDbContextAsync(CancellationToken);
+
+            RebuildLog("📊 Analyse des recettes...");
+            var recipeCount = await context.Recipes.CountAsync(CancellationToken);
+            RebuildLog($"✅ {recipeCount} recettes trouvées");
+
+            if (recipeCount == 0)
+            {
+                RebuildLog("⚠️ Aucune recette à traiter");
+                return;
+            }
+
+            RebuildLog("🔄 Reconstruction en cours...");
+
+            // Load all recipes with their blocks and ingredients
+            var recipesQuery = context.Recipes
+                .Include(r => r.BlocksInstructions)
+                .ThenInclude(b => (b as BlockIngredientListEntity)!.Ingredients)
+                .AsQueryable();
+
+            var count = await ragIngestion.RebuildIngestionCacheAsync(recipesQuery, ingestionCache, "recipe");
+
+            RebuildLog($"✅ Reconstruction terminée : {count} recettes traitées");
+            RebuildLog($"💡 Le cache d'ingestion a été reconstruit avec succès !");
+
+            // Rafraîchir les statistiques
+            await LoadStatus();
+        }
+        catch (OperationCanceledException)
+        {
+            RebuildLog("⚠️ Reconstruction annulée par l'utilisateur");
+        }
+        catch (Exception ex)
+        {
+            RebuildLog($"❌ ERREUR lors de la reconstruction : {ex.Message}");
+            RebuildLog($"   Détails : {ex.GetType().Name}");
+            if (ex.InnerException != null)
+            {
+                RebuildLog($"   Cause : {ex.InnerException.Message}");
+            }
+            logger.LogError(ex, "Cache rebuild failed");
+        }
+        finally
+        {
+            _cts?.Dispose();
+            _cts = null;
+            _isRunning = false;
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// Resynchronise toutes les recettes dans le système RAG (pgvector).
+    /// Supprime l'ancien index et recrée tous les embeddings.
+    /// </summary>
+    public async Task ResyncAllRecipes()
+    {
+        if (_isRunning) return;
+        _isRunning = true;
+        _cts = new();
+        _logs.Clear();
+        Log("🚀 Démarrage de la resynchronisation RAG...");
+
+        try
+        {
+            CancellationToken.ThrowIfCancellationRequested();
+
+            using var context = await contextFactory.CreateDbContextAsync(CancellationToken);
+
+            Log("📊 Chargement des recettes depuis la base de données...");
+            var recipeCount = await context.Recipes.CountAsync(CancellationToken);
+            Log($"✅ {recipeCount} recettes trouvées");
+
+            if (recipeCount == 0)
+            {
+                Log("⚠️ Aucune recette à indexer");
+                return;
+            }
+
+            Log("🗑️ Suppression de l'ancien index vectoriel...");
+            Log("🔄 Resynchronisation en cours (cela peut prendre plusieurs minutes)...");
+            Log($"⏳ Création de {recipeCount * 4} embeddings (4 par recette)...");
+
+            // Load all recipes with their blocks and ingredients
+            var recipesQuery = context.Recipes
+                .Include(r => r.BlocksInstructions)
+                .ThenInclude(b => (b as BlockIngredientListEntity)!.Ingredients)
+                .AsQueryable();
+
+            var count = await ragIngestion.ResyncAllAsync(recipesQuery, "recipe");
+
+            Log($"✅ Resynchronisation terminée : {count} recettes indexées");
+            Log($"💡 Stratégie multi-chunks : {count * 4} embeddings créés");
+            Log("✨ Le système de recherche sémantique est maintenant à jour !");
+
+            // Rafraîchir les statistiques
+            await LoadStatus();
+        }
+        catch (OperationCanceledException)
+        {
+            Log("⚠️ Resynchronisation annulée par l'utilisateur");
+        }
+        catch (Exception ex)
+        {
+            Log($"❌ ERREUR lors de la resynchronisation : {ex.Message}");
+            Log($"   Détails : {ex.GetType().Name}");
+            if (ex.InnerException != null)
+            {
+                Log($"   Cause : {ex.InnerException.Message}");
+            }
+            logger.LogError(ex, "RAG resync failed");
+        }
+        finally
+        {
+            _cts?.Dispose();
+            _cts = null;
+            _isRunning = false;
+            await ScrollToBottomAsync();
+            StateHasChanged();
+        }
+    }
+}

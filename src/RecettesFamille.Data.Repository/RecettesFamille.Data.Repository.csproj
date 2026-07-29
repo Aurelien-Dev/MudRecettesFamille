@@ -7,12 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="15.0.1" />
+    <PackageReference Include="AutoMapper" Version="15.1.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RecettesFamille.Data\RecettesFamille.Data.csproj" />
     <ProjectReference Include="..\RecettesFamille.Dto\RecettesFamille.Dto.csproj" />
+    <ProjectReference Include="..\RecettesFamille.Rag\RecettesFamille.Rag.csproj" />
   </ItemGroup>
 
 </Project>

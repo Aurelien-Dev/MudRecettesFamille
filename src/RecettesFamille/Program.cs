@@ -9,13 +9,14 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
 using RecettesFamille;
-using RecettesFamille.Ai.Services;
 using RecettesFamille.Components;
 using RecettesFamille.Components.Account;
 using RecettesFamille.Data;
+using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.Repository;
 using RecettesFamille.Managers;
 using RecettesFamille.Managers.AiGenerators;
+using RecettesFamille.Rag.Extensions;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -59,7 +60,25 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 builder.Services.AddScoped<EmailManager>();
 
 builder.Services.AddRepository();
-builder.Services.AddAi(builder.Configuration);
+
+// Configure RAG services
+var serverUrl = builder.Configuration["DB_HOST_URL"];
+var serverPort = builder.Configuration["DB_HOST_PORT"];
+var postgresCs = $"Host={serverUrl};Port={serverPort};Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
+
+builder.Services.AddRecetteFamilleRag(options =>
+{
+    options.ConnectionString = postgresCs;
+    options.OpenAIKey = builder.Configuration["OPENAI_SECRET"] ?? throw new InvalidOperationException("Missing OPENAI_SECRET configuration");
+    options.EmbeddingModel = "text-embedding-3-small";
+    options.ChatModel = "gpt-4o-mini";
+});
+
+// Register RAG search service for RecipeEntity
+builder.Services.AddRagSearchService<RecipeEntity>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
+// Register RecipeRagService wrapper
+builder.Services.AddScoped<RecettesFamille.Services.RecipeRagService>();
 
 builder.Services.AddManagers(builder.Configuration);
 builder.Services.AddScoped<AiManager>();
@@ -97,7 +116,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role;
 });
 
-builder.Services.AddSingleton<IEmbeddingGenerator, OpenAiEmbeddingGenerator>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddServerSideBlazor()
     .AddHubOptions(options =>
@@ -108,6 +126,9 @@ builder.Services.AddServerSideBlazor()
 builder.Logging.AddConsole();
 
 var app = builder.Build();
+
+// Initialize RAG database (creates pgvector collection if needed)
+app.Services.InitializeRagDatabase();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

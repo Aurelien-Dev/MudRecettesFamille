@@ -1,16 +1,22 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.EntityModel.Blocks;
 using RecettesFamille.Data.Repository.IRepositories;
 using RecettesFamille.Dto.ModelByPage.RecetteBook;
 using RecettesFamille.Dto.Models;
 using RecettesFamille.Dto.Models.Blocks;
+using RecettesFamille.Rag.Services;
 using System.Text;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
-public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext> contextFactory) : IRecipeRepository
+public class RecipeRepository(
+    IMapper mapper,
+    IDbContextFactory<ApplicationDbContext> contextFactory,
+    RagIngestionService ragIngestion,
+    ILogger<RecipeRepository> logger) : IRecipeRepository
 {
     public async Task<List<RecipeDto>> GetAll(CancellationToken cancellationToken = default)
     {
@@ -249,6 +255,22 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         await context.Set<RecipeEntity>().AddAsync(recipeEntity, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
+        // RAG ingestion hook: ingest new recipe into vector store
+        try
+        {
+            await ragIngestion.IngestSingleAsync(
+                recipeEntity.Id,
+                recipeEntity.GetSearchableContent(),
+                recipeEntity.GetCategory(),
+                "recipe");
+            logger.LogInformation("RAG: Ingested recipe {RecipeId} '{RecipeName}'", recipeEntity.Id, recipeEntity.Name);
+        }
+        catch (Exception ex)
+        {
+            // Lenient failure policy: log error but don't fail the recipe creation
+            logger.LogError(ex, "RAG: Failed to ingest recipe {RecipeId} '{RecipeName}'", recipeEntity.Id, recipeEntity.Name);
+        }
+
         return mapper.Map<RecipeDto>(recipeEntity);
     }
 
@@ -260,6 +282,18 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         {
             context.Recipes.Remove(element);
             await context.SaveChangesAsync(cancellationToken);
+
+            // RAG ingestion hook: remove recipe from vector store
+            try
+            {
+                await ragIngestion.DeleteSingleAsync(recipeId, "recipe");
+                logger.LogInformation("RAG: Deleted recipe {RecipeId}", recipeId);
+            }
+            catch (Exception ex)
+            {
+                // Lenient failure policy: log error but don't fail the recipe deletion
+                logger.LogError(ex, "RAG: Failed to delete recipe {RecipeId}", recipeId);
+            }
         }
     }
 
@@ -274,6 +308,26 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         mapper.Map(recipe, element, opt => { opt.AfterMap((src, dest) => dest!.BlocksInstructions = null!); });
 
         var result = await context.SaveChangesAsync(cancellationToken);
+
+        // RAG ingestion hook: update recipe in vector store
+        if (result > 0 && element != null)
+        {
+            try
+            {
+                await ragIngestion.UpdateSingleAsync(
+                    element.Id,
+                    element.GetSearchableContent(),
+                    element.GetCategory(),
+                    "recipe");
+                logger.LogInformation("RAG: Updated recipe {RecipeId} '{RecipeName}'", element.Id, element.Name);
+            }
+            catch (Exception ex)
+            {
+                // Lenient failure policy: log error but don't fail the recipe update
+                logger.LogError(ex, "RAG: Failed to update recipe {RecipeId} '{RecipeName}'", element.Id, element.Name);
+            }
+        }
+
         return result > 0;
     }
 
@@ -288,6 +342,25 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         mapper.Map(recipe, element);
 
         await context.SaveChangesAsync(cancellationToken);
+
+        // RAG ingestion hook: update recipe in vector store
+        if (element != null)
+        {
+            try
+            {
+                await ragIngestion.UpdateSingleAsync(
+                    element.Id,
+                    element.GetSearchableContent(),
+                    element.GetCategory(),
+                    "recipe");
+                logger.LogInformation("RAG: Updated full recipe {RecipeId} '{RecipeName}'", element.Id, element.Name);
+            }
+            catch (Exception ex)
+            {
+                // Lenient failure policy: log error but don't fail the recipe update
+                logger.LogError(ex, "RAG: Failed to update full recipe {RecipeId} '{RecipeName}'", element.Id, element.Name);
+            }
+        }
     }
 
     public async Task<bool> AddUserToFavoriteds(int recipeId, string userEmail, CancellationToken cancellationToken = default)
@@ -333,8 +406,15 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         if (element is null)
             return false;
 
+        var recipeId = element.RecipeId;
         context.Set<BlockBaseEntity>().Remove(element);
         var result = await context.SaveChangesAsync(cancellationToken);
+
+        // RAG ingestion hook: update recipe after block deletion
+        if (result > 0)
+        {
+            await UpdateRecipeVectorAsync(context, recipeId);
+        }
 
         return result > 0;
     }
@@ -352,7 +432,14 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
             opts.AfterMap((src, dest) => dest!.Recipe = null!);
         });
 
+        var recipeId = element?.RecipeId ?? 0;
         await context.SaveChangesAsync(cancellationToken);
+
+        // RAG ingestion hook: update recipe after block update
+        if (recipeId > 0)
+        {
+            await UpdateRecipeVectorAsync(context, recipeId);
+        }
     }
 
     public async Task<BlockBaseDto> AddBlock(BlockBaseDto block, CancellationToken cancellationToken = default)
@@ -362,6 +449,9 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
         await context.Set<BlockBaseEntity>().AddAsync(blockEntity, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
+
+        // RAG ingestion hook: update recipe after block addition
+        await UpdateRecipeVectorAsync(context, blockEntity.RecipeId);
 
         return mapper.Map<BlockBaseDto>(blockEntity);
     }
@@ -373,12 +463,21 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
     public async Task<bool> DeleteIngredient(int ingredientId, CancellationToken cancellationToken = default)
     {
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var element = await context.Set<IngredientEntity>().FindAsync([ingredientId], cancellationToken);
+        var element = await context.Set<IngredientEntity>()
+            .Include(i => i.IngredientList)
+            .FirstOrDefaultAsync(i => i.Id == ingredientId, cancellationToken);
         if (element is null)
             return false;
 
+        var recipeId = element.IngredientList?.RecipeId ?? 0;
         context.Set<IngredientEntity>().Remove(element);
         var result = await context.SaveChangesAsync(cancellationToken);
+
+        // RAG ingestion hook: update recipe after ingredient deletion
+        if (result > 0 && recipeId > 0)
+        {
+            await UpdateRecipeVectorAsync(context, recipeId);
+        }
 
         return result > 0;
     }
@@ -389,14 +488,23 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
             return;
 
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var element = await context.Set<IngredientEntity>().FindAsync([block.Id], cancellationToken);
+        var element = await context.Set<IngredientEntity>()
+            .Include(i => i.IngredientList)
+            .FirstOrDefaultAsync(i => i.Id == block.Id, cancellationToken);
 
         mapper.Map(block, element, opts =>
         {
             opts.AfterMap((src, dest) => dest!.IngredientList = null!);
         });
 
+        var recipeId = element?.IngredientList?.RecipeId ?? 0;
         await context.SaveChangesAsync(cancellationToken);
+
+        // RAG ingestion hook: update recipe after ingredient update
+        if (recipeId > 0)
+        {
+            await UpdateRecipeVectorAsync(context, recipeId);
+        }
     }
 
     public async Task<IngredientDto> AddIngredient(IngredientDto ingredient, CancellationToken cancellationToken = default)
@@ -410,8 +518,48 @@ public class RecipeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
         context.Set<IngredientEntity>().Add(ingredientEntity);
         await context.SaveChangesAsync(cancellationToken);
 
+        // Load the ingredient list to get recipe ID
+        var ingredientWithList = await context.Set<IngredientEntity>()
+            .Include(i => i.IngredientList)
+            .FirstOrDefaultAsync(i => i.Id == ingredientEntity.Id, cancellationToken);
+
+        var recipeId = ingredientWithList?.IngredientList?.RecipeId ?? 0;
+        if (recipeId > 0)
+        {
+            await UpdateRecipeVectorAsync(context, recipeId);
+        }
+
         return mapper.Map<IngredientDto>(ingredientEntity);
     }
 
     #endregion
+
+    /// <summary>
+    /// Helper method to update recipe vectors after content changes (blocks, ingredients)
+    /// </summary>
+    private async Task UpdateRecipeVectorAsync(ApplicationDbContext context, int recipeId)
+    {
+        try
+        {
+            var recipe = await context.Recipes
+                .Include(r => r.BlocksInstructions)
+                .ThenInclude(b => (b as BlockIngredientListEntity)!.Ingredients)
+                .FirstOrDefaultAsync(r => r.Id == recipeId);
+
+            if (recipe != null)
+            {
+                await ragIngestion.UpdateSingleAsync(
+                    recipe.Id,
+                    recipe.GetSearchableContent(),
+                    recipe.GetCategory(),
+                    "recipe");
+                logger.LogInformation("RAG: Updated recipe {RecipeId} after content change", recipeId);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Lenient failure policy: log error but don't fail the operation
+            logger.LogError(ex, "RAG: Failed to update recipe {RecipeId} after content change", recipeId);
+        }
+    }
 }
