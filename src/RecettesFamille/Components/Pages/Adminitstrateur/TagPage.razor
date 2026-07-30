@@ -3,6 +3,7 @@
 
 @using Microsoft.AspNetCore.Authorization
 @using RecettesFamille.Components.Layout
+@using RecettesFamille.Components.Dialogs
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Dto.Models
 @using RecettesFamille.Extensions
@@ -57,9 +58,18 @@
 
     public async Task DeleteTagOnRecipe(TagDto tag)
     {
-        var result = await DialogService.ShowMessageBox("Avertissement", "La suppression supprimera le tag sur la recettes aussi et est irréversible !", yesText: "Supprimer !", cancelText: "Annuler");
+        var parameters = new DialogParameters
+        {
+            { "Title", "Avertissement" },
+            { "Message", "La suppression supprimera le tag sur la recettes aussi et est irréversible !" },
+            { "ConfirmText", "Supprimer !" },
+            { "CancelText", "Annuler" }
+        };
 
-        if (result is null)
+        var dialog = await DialogService.ShowAsync<ConfirmationDialog>("", parameters);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
             return;
 
         var success = await TagRepository.DeleteTagOnRecipe(tag);

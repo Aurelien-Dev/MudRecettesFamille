@@ -54,7 +54,7 @@
 	[Parameter] public RecipeDto Recipe { get; set; } = default!;
 
 	private List<TagDto> tags = new();
-	private IEnumerable<TagDto> selectedTags { get; set; } = default!;
+	private IReadOnlyCollection<TagDto> selectedTags { get; set; } = default!;
 	private string recipeName { get; set; } = default!;
 	private int recipePrepTime { get; set; } = default!;
 	private int recipeCookingTime { get; set; } = default!;

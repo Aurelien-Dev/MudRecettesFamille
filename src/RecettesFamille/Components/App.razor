@@ -62,6 +62,12 @@
         anchorElement.remove();
         URL.revokeObjectURL(url);
         }
+
+        window.scrollChatToBottom = (container) => {
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
     </script>
 </body>
 

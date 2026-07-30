@@ -9,14 +9,14 @@ namespace RecettesFamille.Managers
             LayoutProperties = new()
             {
                 DefaultBorderRadius = "10px",
-               
+
             },
-            PaletteLight = new()
+            PaletteLight = new PaletteLight()
             {
                 Primary = "#d18363",//Colors.LightBlue.Darken2,
                 AppbarBackground = "#84533e", //Colors.LightBlue.Darken2,
             },
-            PaletteDark = new()
+            PaletteDark = new PaletteDark()
             {
                 TextPrimary = "#1e1e1e",
                 AppbarText = "#ffffffdd",

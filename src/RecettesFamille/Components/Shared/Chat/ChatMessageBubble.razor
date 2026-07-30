@@ -1,0 +1,59 @@
+@using Microsoft.Extensions.AI
+
+<div class="@GetMessageClass()">
+    <MudPaper Class="@GetMessagePaperClass()" Elevation="1">
+        <div class="d-flex align-center gap-1 mb-1">
+            <MudIcon Icon="@GetMessageIcon()" Size="Size.Small" Color="@GetMessageColor()" />
+            <MudText Typo="Typo.caption" Color="@GetMessageColor()">
+                @GetRoleDisplayName()
+            </MudText>
+        </div>
+        @if (Message.Role == ChatRole.Assistant)
+        {
+            <MudMarkdown Value="@Message.Text"
+                         Styling="Styling" />
+        }
+        else
+        {
+            <MudText Typo="Typo.body2" Style="white-space: pre-wrap;">@Message.Text</MudText>
+        }
+    </MudPaper>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ChatMessage Message { get; set; } = default!;
+    private static readonly MudMarkdownStyling Styling = new()
+    {
+        Table =
+        {
+            Elevation = 16,
+            CellMinWidth = 100,
+        },
+    };
+
+    private string GetMessageClass()
+    {
+        return Message.Role == ChatRole.User ? "message-user mb-2" : "message-assistant mb-2";
+    }
+
+    private string GetMessagePaperClass()
+    {
+        return "pa-2";
+    }
+
+    private string GetMessageIcon()
+    {
+        return Message.Role == ChatRole.User ? Icons.Material.Filled.Person : Icons.Material.Filled.SmartToy;
+    }
+
+    private Color GetMessageColor()
+    {
+        return Message.Role == ChatRole.User ? Color.Primary : Color.Secondary;
+    }
+
+    private string GetRoleDisplayName()
+    {
+        return Message.Role == ChatRole.User ? "Vous" : "Assistant";
+    }
+}

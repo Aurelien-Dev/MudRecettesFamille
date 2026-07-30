@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using RecettesFamille.Components.Layout
+@using RecettesFamille.Components.Dialogs
 @using RecettesFamille.Data
 @using RecettesFamille.Data.Repository.IRepositories
 @using MudBlazor
@@ -110,13 +111,18 @@
 		if (isDeleting)
 			return;
 
-		bool? result = await DialogService.ShowMessageBox(
-			"Confirmation de suppression",
-			$"Êtes-vous sûr de vouloir supprimer l'utilisateur {userVm.Name}?",
-			yesText: "Supprimer",
-			noText: "Annuler");
+		var parameters = new DialogParameters
+		{
+			{ "Title", "Confirmation de suppression" },
+			{ "Message", $"Êtes-vous sûr de vouloir supprimer l'utilisateur {userVm.Name}?" },
+			{ "ConfirmText", "Supprimer" },
+			{ "CancelText", "Annuler" }
+		};
 
-		if (result == true)
+		var dialog = await DialogService.ShowAsync<ConfirmationDialog>("", parameters);
+		var result = await dialog.Result;
+
+		if (!result.Canceled)
 		{
 			await DeleteUser(userVm);
 		}

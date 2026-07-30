@@ -64,7 +64,7 @@ builder.Services.AddRepository();
 // Configure RAG services
 var serverUrl = builder.Configuration["DB_HOST_URL"];
 var serverPort = builder.Configuration["DB_HOST_PORT"];
-var postgresCs = $"Host={serverUrl};Port={serverPort};Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
+var postgresCs = $"Host={serverUrl};Port={serverPort};Database=test;Username=pguser;Password=PGUserPwd;Pooling=true";
 
 builder.Services.AddRecetteFamilleRag(options =>
 {

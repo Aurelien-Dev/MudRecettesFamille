@@ -1,0 +1,103 @@
+@using RecettesFamille.Services
+@using Microsoft.Extensions.AI
+@inject RecipeRagService RagService
+
+<MudPaper Class="pa-3" Elevation="2">
+    <div class="d-flex align-center justify-space-between mb-2">
+        <MudText Typo="Typo.h6">👨‍🍳 Chef Virtuel</MudText>
+        @if (displayMessages.Count > 0)
+        {
+            <MudButton Variant="Variant.Text"
+                       Color="Color.Secondary"
+                       Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.Delete"
+                       OnClick="ClearChat">
+                Nouvelle conversation
+            </MudButton>
+        }
+    </div>
+
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+        Discutez avec votre chef personnel ! Posez toutes vos questions sur cette recette 🍽️
+    </MudText>
+
+    <ChatMessageList Messages="@displayMessages" IsLoading="@isLoading" />
+
+    <ChatInput OnSendMessage="@HandleSendMessage"
+               IsDisabled="@(isLoading || RecipeId <= 0)"
+               Placeholder="Ex: Comment puis-je remplacer le beurre ? Peut-on préparer à l'avance ?"
+               Label="Votre question"
+               SendButtonText="Envoyer" />
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-2" CloseIcon="@Icons.Material.Filled.Close" CloseIconClicked="@(() => errorMessage = string.Empty)">
+            @errorMessage
+        </MudAlert>
+    }
+
+    @if (RecipeId <= 0)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mt-2">
+            Aucune recette sélectionnée. Veuillez spécifier un ID de recette.
+        </MudAlert>
+    }
+</MudPaper>
+
+@code {
+    [Parameter]
+    public int RecipeId { get; set; }
+
+    private bool isLoading = false;
+    private string errorMessage = string.Empty;
+
+    // Store full conversation history (including system prompt)
+    private List<ChatMessage> messages = new();
+
+    // Display messages (excluding system prompt)
+    private List<ChatMessage> displayMessages => messages.Where(m => m.Role != ChatRole.System).ToList();
+
+    private async Task HandleSendMessage(string question)
+    {
+        if (string.IsNullOrWhiteSpace(question) || RecipeId <= 0)
+            return;
+
+        errorMessage = string.Empty;
+
+        // Add user message to display
+        var userMessage = new ChatMessage(ChatRole.User, question);
+        messages.Add(userMessage);
+
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            // Get chat history (excluding the current user message for API call)
+            var historyForApi = messages.Take(messages.Count - 1).Where(m => m.Role != ChatRole.System).ToList();
+
+            var response = await RagService.ChatWithRecipeAsync(RecipeId, question, historyForApi);
+
+            // Add assistant response
+            var assistantMessage = new ChatMessage(ChatRole.Assistant, response);
+            messages.Add(assistantMessage);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur : {ex.Message}";
+            // Remove the user message if API call failed
+            messages.RemoveAt(messages.Count - 1);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ClearChat()
+    {
+        messages.Clear();
+        errorMessage = string.Empty;
+    }
+}

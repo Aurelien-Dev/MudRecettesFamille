@@ -3,7 +3,8 @@
 
 @if (EditMode)
 {
-    <MudTextField @bind-Value="@Block.Instruction" T="string" Variant="Variant.Outlined" FullWidth="true" AutoGrow OnBlur="LostFocus" />
+    <MudTextField @bind-Value="@Block.Instruction" T="string" Variant="Variant.Outlined" FullWidth="true"
+                  Sizing="InputSizing.Auto" OnBlur="LostFocus" />
 }
 else
 {

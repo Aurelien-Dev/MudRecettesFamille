@@ -24,7 +24,7 @@
 
                             <MudTextField @ref="multilineReference" T="string" Label="Recette" Variant="Variant.Outlined" Lines="40"
                             Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Delete" AdornmentColor="Color.Error"
-                            OnAdornmentClick="@(() => multilineReference.Clear())" @bind-Value="@_recipeDescription" />
+                            OnAdornmentClick="@(() => _recipeDescription = string.Empty)" @bind-Value="@_recipeDescription" />
                         </MudPaper>
                     </MudItem>
 

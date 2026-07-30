@@ -1,0 +1,81 @@
+@using Microsoft.Extensions.AI
+@inject IJSRuntime JSRuntime
+
+<div @ref="messagesContainer" class="chat-messages mb-3" style="height: 400px; overflow-y: auto;">
+    @foreach (var message in Messages)
+    {
+        <ChatMessageBubble Message="@message" />
+    }
+
+    @if (IsLoading)
+    {
+        <div class="message-assistant mb-2">
+            <MudPaper Class="pa-2" Style="background-color: #f5f5f5;">
+                <div class="d-flex align-center gap-2">
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">L'assistant réfléchit...</MudText>
+                </div>
+            </MudPaper>
+        </div>
+    }
+</div>
+
+<style>
+    .chat-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .message-user {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .message-user .mud-paper {
+        max-width: 80%;
+        background-color: #e3f2fd;
+    }
+
+    .message-assistant {
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    .message-assistant .mud-paper {
+        max-width: 80%;
+        background-color: #f5f5f5;
+    }
+
+    .mud-markdown-body p {
+        margin-bottom: unset !important;
+    }
+
+</style>
+
+@code {
+    [Parameter, EditorRequired]
+    public List<ChatMessage> Messages { get; set; } = new();
+
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    private ElementReference messagesContainer;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await ScrollToBottom();
+    }
+
+    private async Task ScrollToBottom()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("scrollChatToBottom", messagesContainer);
+        }
+        catch
+        {
+            // Ignore errors if JS interop fails
+        }
+    }
+}

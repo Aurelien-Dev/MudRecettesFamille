@@ -1,0 +1,84 @@
+@inject IJSRuntime JSRuntime
+
+<div class="d-flex gap-2 align-center">
+    <MudTextField @ref="textField"
+                  @bind-Value="inputText"
+                  Label="@Label"
+                  Placeholder="@Placeholder"
+                  Variant="Variant.Outlined"
+                  FullWidth="true"
+                  Lines="2"
+                  Margin="Margin.Dense"
+                  OnKeyDown="@OnKeyDown"
+                  Disabled="@IsDisabled"
+                  Immediate="true" />
+
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.Send"
+               Size="Size.Medium"
+               OnClick="HandleSendClick"
+               Disabled="@(string.IsNullOrWhiteSpace(inputText) || IsDisabled)">
+        @SendButtonText
+    </MudButton>
+</div>
+
+@code {
+    [Parameter]
+    public string Label { get; set; } = "Votre question";
+
+    [Parameter]
+    public string Placeholder { get; set; } = "Ex: Comment puis-je remplacer le beurre ? Peut-on préparer à l'avance ?";
+
+    [Parameter]
+    public string SendButtonText { get; set; } = "Envoyer";
+
+    [Parameter]
+    public bool IsDisabled { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnSendMessage { get; set; }
+
+    private MudTextField<string> textField = default!;
+    private string inputText = string.Empty;
+
+    private async Task HandleSendClick()
+    {
+        if (string.IsNullOrWhiteSpace(inputText))
+            return;
+
+        var message = inputText.Trim();
+        inputText = string.Empty;
+
+        await OnSendMessage.InvokeAsync(message);
+
+        // Remettre le focus dans le champ de saisie
+        await FocusInputAsync();
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        // Enter seul envoie le message, Shift+Enter fait un retour à la ligne
+        if (e.Key == "Enter" && !e.ShiftKey && !string.IsNullOrWhiteSpace(inputText) && !IsDisabled)
+        {
+            await HandleSendClick();
+        }
+    }
+
+    private async Task FocusInputAsync()
+    {
+        try
+        {
+            await textField.FocusAsync();
+        }
+        catch
+        {
+            // Ignore focus errors
+        }
+    }
+
+    public void Clear()
+    {
+        inputText = string.Empty;
+    }
+}

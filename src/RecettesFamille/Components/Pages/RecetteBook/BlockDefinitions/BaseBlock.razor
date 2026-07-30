@@ -1,4 +1,5 @@
-﻿@using RecettesFamille.Dto.Models.Blocks
+﻿@using RecettesFamille.Components.Dialogs
+@using RecettesFamille.Dto.Models.Blocks
 @inherits BaseBlockDefinition<BlockBaseDto>
 @{
     Md = Block.HalfPage ? 6 : 12;
@@ -56,9 +57,18 @@
 
     private async Task OnBlockDelete()
     {
-        var result = await DialogService.ShowMessageBox("Avertissement", "La suppression est irréversible !", yesText: "Supprimer !", cancelText: "Annuler");
+        var parameters = new DialogParameters
+        {
+            { "Title", "Avertissement" },
+            { "Message", "La suppression est irréversible !" },
+            { "ConfirmText", "Supprimer !" },
+            { "CancelText", "Annuler" }
+        };
 
-        if (result is null)
+        var dialog = await DialogService.ShowAsync<ConfirmationDialog>("", parameters);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
             return;
 
         OnBlockDeleted?.Invoke(Block);

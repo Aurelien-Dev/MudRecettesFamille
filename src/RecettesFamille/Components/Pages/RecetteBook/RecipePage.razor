@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
 @using RecettesFamille.Components.Pages.RecetteBook.Components
+@using RecettesFamille.Components.Shared
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Dto.Models
 @using RecettesFamille.Dto.Models.Blocks
@@ -43,6 +44,13 @@
 		}
 	</MudGrid>
 
+	@* Assistant Culinaire *@
+	<MudGrid Spacing="5" Class="mt-8 mb-12">
+		<MudItem xs="12">
+			<RecipeChat RecipeId="@IdRecette" />
+		</MudItem>
+	</MudGrid>
+
 	<MudStack Spacing="0">
 		<MudText Typo="Typo.caption" Class="ma-0 pa-0" Align="Align.End" GutterBottom="true" Style="@($"color:{Colors.Gray.Default};")">Crée le : @Recipe.CreatedDate</MudText>
 	</MudStack>
@@ -73,9 +81,18 @@
 
 	public async Task DeleteRecipe()
 	{
-		var result = await DialogService.ShowMessageBox("Avertissement", "Supprimer cette recette, c'est comme jeter une pâte à pain levée… Impossible de revenir en arrière !", yesText: "Tout mettre à la poubelle !", cancelText: "Garder la recette");
+		var parameters = new DialogParameters
+		{
+			{ "Title", "Avertissement" },
+			{ "Message", "Supprimer cette recette, c'est comme jeter une pâte à pain levée… Impossible de revenir en arrière !" },
+			{ "ConfirmText", "Tout mettre à la poubelle !" },
+			{ "CancelText", "Garder la recette" }
+		};
 
-		if (result is null || !result.Value)
+		var dialog = await DialogService.ShowAsync<ConfirmationDialog>("", parameters);
+		var result = await dialog.Result;
+
+		if (result.Canceled)
 			return;
 
 		if (Recipe is null)
@@ -146,7 +163,8 @@
 	private async Task OnBlockUpdated(BlockBaseDto? block)
 	{
 		await RecipeRepository.UpdateBlock(block);
-		StateHasChanged();}
+		StateHasChanged();
+	}
 
 	private async Task AddNewBlock(BlockBaseDto block)
 	{
