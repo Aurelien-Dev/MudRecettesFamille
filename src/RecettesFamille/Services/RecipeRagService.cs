@@ -80,34 +80,63 @@ Instructions :
     /// Manually ingests a single recipe into the RAG system.
     /// Typically called automatically by repository hooks, but exposed for manual operations.
     /// </summary>
-    public async Task IngestRecipeAsync(RecipeEntity recipe)
+    /// <param name="recipe">The recipe entity to ingest</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    public async Task IngestRecipeAsync(RecipeEntity recipe, CancellationToken cancellationToken = default)
     {
-        await _ragIngestion.IngestSingleAsync(
-            recipe.Id,
-            recipe.GetSearchableContent(),
-            recipe.GetCategory(),
-            "recipe");
+        await _ragIngestion.IngestSingleAsync(recipe, "recipe", cancellationToken);
     }
 
     /// <summary>
     /// Updates an existing recipe in the RAG system.
     /// Typically called automatically by repository hooks.
     /// </summary>
-    public async Task UpdateRecipeAsync(RecipeEntity recipe)
+    /// <param name="recipe">The recipe entity to update</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if the recipe was updated (content changed), false if skipped (no changes)</returns>
+    public async Task<bool> UpdateRecipeAsync(RecipeEntity recipe, CancellationToken cancellationToken = default)
     {
-        await _ragIngestion.UpdateSingleAsync(
-            recipe.Id,
-            recipe.GetSearchableContent(),
-            recipe.GetCategory(),
-            "recipe");
+        return await _ragIngestion.UpdateSingleAsync(recipe, "recipe", cancellationToken);
     }
 
     /// <summary>
     /// Deletes a recipe from the RAG system.
     /// Typically called automatically by repository hooks.
     /// </summary>
-    public async Task DeleteRecipeAsync(int recipeId)
+    /// <param name="recipeId">Recipe ID to delete</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    public async Task DeleteRecipeAsync(int recipeId, CancellationToken cancellationToken = default)
     {
-        await _ragIngestion.DeleteSingleAsync(recipeId, "recipe");
+        await _ragIngestion.DeleteSingleAsync(recipeId, "recipe", cancellationToken);
+    }
+
+    /// <summary>
+    /// Intelligent resync of all recipes (incremental update).
+    /// Only re-ingests recipes that have changed since last ingestion.
+    /// Use this for regular maintenance when most recipes are already up-to-date.
+    /// </summary>
+    /// <param name="recipes">Queryable of all recipes to process</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>ResyncResult with statistics</returns>
+    public async Task<ResyncResult> ResyncAllRecipesAsync(
+        IQueryable<RecipeEntity> recipes,
+        CancellationToken cancellationToken = default)
+    {
+        return await _ragIngestion.ResyncAllAsync(recipes, "recipe", cancellationToken);
+    }
+
+    /// <summary>
+    /// Force resync of all recipes (complete reset).
+    /// Deletes all existing data and re-ingests everything from scratch.
+    /// Use this only when the RAG system is completely out of sync or corrupted.
+    /// </summary>
+    /// <param name="recipes">Queryable of all recipes to process</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>ResyncResult with statistics</returns>
+    public async Task<ResyncResult> ForceResyncAllRecipesAsync(
+        IQueryable<RecipeEntity> recipes,
+        CancellationToken cancellationToken = default)
+    {
+        return await _ragIngestion.ForceResyncAllAsync(recipes, "recipe", cancellationToken);
     }
 }

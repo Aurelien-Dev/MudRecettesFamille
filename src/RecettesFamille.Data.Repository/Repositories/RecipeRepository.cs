@@ -258,11 +258,7 @@ public class RecipeRepository(
         // RAG ingestion hook: ingest new recipe into vector store
         try
         {
-            await ragIngestion.IngestSingleAsync(
-                recipeEntity.Id,
-                recipeEntity.GetSearchableContent(),
-                recipeEntity.GetCategory(),
-                "recipe");
+            await ragIngestion.IngestSingleAsync(recipeEntity, "recipe", cancellationToken);
             logger.LogInformation("RAG: Ingested recipe {RecipeId} '{RecipeName}'", recipeEntity.Id, recipeEntity.Name);
         }
         catch (Exception ex)
@@ -286,7 +282,7 @@ public class RecipeRepository(
             // RAG ingestion hook: remove recipe from vector store
             try
             {
-                await ragIngestion.DeleteSingleAsync(recipeId, "recipe");
+                await ragIngestion.DeleteSingleAsync(recipeId, "recipe", cancellationToken);
                 logger.LogInformation("RAG: Deleted recipe {RecipeId}", recipeId);
             }
             catch (Exception ex)
@@ -314,12 +310,15 @@ public class RecipeRepository(
         {
             try
             {
-                await ragIngestion.UpdateSingleAsync(
-                    element.Id,
-                    element.GetSearchableContent(),
-                    element.GetCategory(),
-                    "recipe");
-                logger.LogInformation("RAG: Updated recipe {RecipeId} '{RecipeName}'", element.Id, element.Name);
+                bool wasUpdated = await ragIngestion.UpdateSingleAsync(element, "recipe", cancellationToken);
+                if (wasUpdated)
+                {
+                    logger.LogInformation("RAG: Updated recipe {RecipeId} '{RecipeName}'", element.Id, element.Name);
+                }
+                else
+                {
+                    logger.LogDebug("RAG: Skipped update for recipe {RecipeId} - no content changes detected", element.Id);
+                }
             }
             catch (Exception ex)
             {
@@ -348,12 +347,15 @@ public class RecipeRepository(
         {
             try
             {
-                await ragIngestion.UpdateSingleAsync(
-                    element.Id,
-                    element.GetSearchableContent(),
-                    element.GetCategory(),
-                    "recipe");
-                logger.LogInformation("RAG: Updated full recipe {RecipeId} '{RecipeName}'", element.Id, element.Name);
+                bool wasUpdated = await ragIngestion.UpdateSingleAsync(element, "recipe", cancellationToken);
+                if (wasUpdated)
+                {
+                    logger.LogInformation("RAG: Updated full recipe {RecipeId} '{RecipeName}'", element.Id, element.Name);
+                }
+                else
+                {
+                    logger.LogDebug("RAG: Skipped update for full recipe {RecipeId} - no content changes detected", element.Id);
+                }
             }
             catch (Exception ex)
             {
@@ -548,12 +550,15 @@ public class RecipeRepository(
 
             if (recipe != null)
             {
-                await ragIngestion.UpdateSingleAsync(
-                    recipe.Id,
-                    recipe.GetSearchableContent(),
-                    recipe.GetCategory(),
-                    "recipe");
-                logger.LogInformation("RAG: Updated recipe {RecipeId} after content change", recipeId);
+                bool wasUpdated = await ragIngestion.UpdateSingleAsync(recipe, "recipe");
+                if (wasUpdated)
+                {
+                    logger.LogInformation("RAG: Updated recipe {RecipeId} after content change", recipeId);
+                }
+                else
+                {
+                    logger.LogDebug("RAG: Skipped update for recipe {RecipeId} - no content changes detected", recipeId);
+                }
             }
         }
         catch (Exception ex)

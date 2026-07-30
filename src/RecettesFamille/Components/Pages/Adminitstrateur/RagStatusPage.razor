@@ -11,6 +11,7 @@
 @inject IDbContextFactory<ApplicationDbContext> contextFactory
 @inject IngestionCacheDbContext ingestionCache
 @inject RagIngestionService ragIngestion
+@inject RecettesFamille.Services.RecipeRagService recipeRagService
 @inject ILogger<RagStatusPage> logger
 @inject IJSRuntime JS
 
@@ -227,14 +228,26 @@
                     </MudCardHeader>
                     <MudCardContent>
                         <MudStack Spacing="3">
-                            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                Choisissez le type de resynchronisation selon vos besoins :
+                            </MudText>
+                            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap">
                                 <MudButton Variant="Variant.Filled" 
                                            Color="Color.Primary" 
                                            StartIcon="@Icons.Material.Filled.Sync"
                                            Size="Size.Large"
-                                           OnClick="ResyncAllRecipes"
+                                           OnClick="IntelligentResyncAllRecipes"
                                            Disabled="@_isRunning">
-                                    @(_isRunning ? "Resynchronisation en cours..." : "Resynchroniser toutes les recettes")
+                                    @(_isRunning ? "Resynchronisation..." : "Resync Intelligent")
+                                </MudButton>
+
+                                <MudButton Variant="Variant.Filled" 
+                                           Color="Color.Warning" 
+                                           StartIcon="@Icons.Material.Filled.RestartAlt"
+                                           Size="Size.Large"
+                                           OnClick="ForceResyncAllRecipes"
+                                           Disabled="@_isRunning">
+                                    Force Resync Complet
                                 </MudButton>
 
                                 <MudButton Variant="Variant.Outlined" 
@@ -255,6 +268,13 @@
                                     </MudButton>
                                 }
                             </MudStack>
+
+                            <MudAlert Severity="Severity.Info" Dense="true" Variant="Variant.Outlined">
+                                <MudText Typo="Typo.body2">
+                                    <strong>Resync Intelligent :</strong> Vérifie chaque recette et n'ingère que celles qui ont changé (recommandé).<br/>
+                                    <strong>Force Resync Complet :</strong> Supprime tout et ré-ingère depuis zéro (à utiliser si le système est corrompu).
+                                </MudText>
+                            </MudAlert>
 
                             @if (_isRunning || _logs.Count > 0)
                             {
@@ -489,7 +509,8 @@
     }
 
     /// <summary>
-    /// Reconstruit le cache d'ingestion à partir des embeddings existants.
+    /// Reconstruit le cache d'ingestion en effectuant un Force Resync complet.
+    /// OBSOLÈTE: Utilise maintenant ForceResyncAllRecipes qui reconstruit tout (cache + vectors).
     /// </summary>
     public async Task RebuildCache()
     {
@@ -497,7 +518,8 @@
         _isRunning = true;
         _cts = new();
         _rebuildLogs.Clear();
-        RebuildLog("🔧 Démarrage de la reconstruction du cache...");
+        RebuildLog("🔧 Redirection vers Force Resync Complet (méthode recommandée)...");
+        RebuildLog("ℹ️ RebuildCache est obsolète, utilise maintenant ForceResyncAllRecipes");
 
         try
         {
@@ -505,7 +527,7 @@
 
             using var context = await contextFactory.CreateDbContextAsync(CancellationToken);
 
-            RebuildLog("📊 Analyse des recettes...");
+            RebuildLog("📊 Chargement des recettes...");
             var recipeCount = await context.Recipes.CountAsync(CancellationToken);
             RebuildLog($"✅ {recipeCount} recettes trouvées");
 
@@ -515,7 +537,7 @@
                 return;
             }
 
-            RebuildLog("🔄 Reconstruction en cours...");
+            RebuildLog("🔄 Resynchronisation forcée en cours...");
 
             // Load all recipes with their blocks and ingredients
             var recipesQuery = context.Recipes
@@ -523,10 +545,12 @@
                 .ThenInclude(b => (b as BlockIngredientListEntity)!.Ingredients)
                 .AsQueryable();
 
-            var count = await ragIngestion.RebuildIngestionCacheAsync(recipesQuery, ingestionCache, "recipe");
+            var result = await recipeRagService.ForceResyncAllRecipesAsync(recipesQuery, CancellationToken);
 
-            RebuildLog($"✅ Reconstruction terminée : {count} recettes traitées");
-            RebuildLog($"💡 Le cache d'ingestion a été reconstruit avec succès !");
+            RebuildLog($"✅ Reconstruction terminée !");
+            RebuildLog($"   📊 Total traité : {result.TotalEntities} recettes");
+            RebuildLog($"   ✅ Ingérées : {result.IngestedCount} recettes ({result.TotalChunks} chunks)");
+            RebuildLog($"💡 Le cache et les embeddings ont été complètement reconstruits !");
 
             // Rafraîchir les statistiques
             await LoadStatus();
@@ -555,16 +579,15 @@
     }
 
     /// <summary>
-    /// Resynchronise toutes les recettes dans le système RAG (pgvector).
-    /// Supprime l'ancien index et recrée tous les embeddings.
+    /// Intelligent resynchronization: only ingests recipes that have changed.
     /// </summary>
-    public async Task ResyncAllRecipes()
+    public async Task IntelligentResyncAllRecipes()
     {
         if (_isRunning) return;
         _isRunning = true;
         _cts = new();
         _logs.Clear();
-        Log("🚀 Démarrage de la resynchronisation RAG...");
+        Log("🚀 Démarrage de la resynchronisation intelligente RAG...");
 
         try
         {
@@ -582,9 +605,8 @@
                 return;
             }
 
-            Log("🗑️ Suppression de l'ancien index vectoriel...");
-            Log("🔄 Resynchronisation en cours (cela peut prendre plusieurs minutes)...");
-            Log($"⏳ Création de {recipeCount * 4} embeddings (4 par recette)...");
+            Log("🔄 Resynchronisation intelligente en cours (vérifie les changements via hash)...");
+            Log("⏳ Seules les recettes modifiées seront ré-ingérées...");
 
             // Load all recipes with their blocks and ingredients
             var recipesQuery = context.Recipes
@@ -592,10 +614,12 @@
                 .ThenInclude(b => (b as BlockIngredientListEntity)!.Ingredients)
                 .AsQueryable();
 
-            var count = await ragIngestion.ResyncAllAsync(recipesQuery, "recipe");
+            var result = await recipeRagService.ResyncAllRecipesAsync(recipesQuery, CancellationToken);
 
-            Log($"✅ Resynchronisation terminée : {count} recettes indexées");
-            Log($"💡 Stratégie multi-chunks : {count * 4} embeddings créés");
+            Log($"✅ Resynchronisation intelligente terminée !");
+            Log($"   📊 Total traité : {result.TotalEntities} recettes");
+            Log($"   ✅ Ingérées : {result.IngestedCount} recettes ({result.TotalChunks} chunks)");
+            Log($"   ⏭️  Skippées : {result.SkippedCount} recettes (déjà à jour)");
             Log("✨ Le système de recherche sémantique est maintenant à jour !");
 
             // Rafraîchir les statistiques
@@ -613,7 +637,79 @@
             {
                 Log($"   Cause : {ex.InnerException.Message}");
             }
-            logger.LogError(ex, "RAG resync failed");
+            logger.LogError(ex, "RAG intelligent resync failed");
+        }
+        finally
+        {
+            _cts?.Dispose();
+            _cts = null;
+            _isRunning = false;
+            await ScrollToBottomAsync();
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// Force resynchronization: deletes everything and re-ingests all recipes from scratch.
+    /// </summary>
+    public async Task ForceResyncAllRecipes()
+    {
+        if (_isRunning) return;
+        _isRunning = true;
+        _cts = new();
+        _logs.Clear();
+        Log("🚨 Démarrage de la resynchronisation FORCÉE (reset complet) RAG...");
+
+        try
+        {
+            CancellationToken.ThrowIfCancellationRequested();
+
+            using var context = await contextFactory.CreateDbContextAsync(CancellationToken);
+
+            Log("📊 Chargement des recettes depuis la base de données...");
+            var recipeCount = await context.Recipes.CountAsync(CancellationToken);
+            Log($"✅ {recipeCount} recettes trouvées");
+
+            if (recipeCount == 0)
+            {
+                Log("⚠️ Aucune recette à indexer");
+                return;
+            }
+
+            Log("🗑️ Suppression COMPLÈTE de l'ancien index vectoriel et du cache...");
+            Log("🔄 Resynchronisation forcée en cours (cela peut prendre plusieurs minutes)...");
+            Log($"⏳ Création de ~{recipeCount * 4} embeddings (4 par recette)...");
+
+            // Load all recipes with their blocks and ingredients
+            var recipesQuery = context.Recipes
+                .Include(r => r.BlocksInstructions)
+                .ThenInclude(b => (b as BlockIngredientListEntity)!.Ingredients)
+                .AsQueryable();
+
+            var result = await recipeRagService.ForceResyncAllRecipesAsync(recipesQuery, CancellationToken);
+
+            Log($"✅ Resynchronisation forcée terminée !");
+            Log($"   📊 Total traité : {result.TotalEntities} recettes");
+            Log($"   ✅ Ingérées : {result.IngestedCount} recettes ({result.TotalChunks} chunks)");
+            Log($"💡 Stratégie multi-chunks : ~{result.TotalChunks} embeddings créés");
+            Log("✨ Le système de recherche sémantique a été complètement reconstruit !");
+
+            // Rafraîchir les statistiques
+            await LoadStatus();
+        }
+        catch (OperationCanceledException)
+        {
+            Log("⚠️ Resynchronisation annulée par l'utilisateur");
+        }
+        catch (Exception ex)
+        {
+            Log($"❌ ERREUR lors de la resynchronisation forcée : {ex.Message}");
+            Log($"   Détails : {ex.GetType().Name}");
+            if (ex.InnerException != null)
+            {
+                Log($"   Cause : {ex.InnerException.Message}");
+            }
+            logger.LogError(ex, "RAG force resync failed");
         }
         finally
         {
