@@ -1,6 +1,7 @@
 ﻿@using BitzArt.Blazor.Cookies
 @using Blazored.LocalStorage
 @using RecettesFamille.Components.Pages.RecetteBook.Components
+@using RecettesFamille.Components.Shared
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Dto.Models
 @using RecettesFamille.Managers
@@ -38,7 +39,7 @@
             <MudIconButton Href="/Admin" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.Settings" />
         </AuthorizeView>
 
-        <MudIconButton Href="Account/Logout" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.Logout" />
+        <LogoutButton />
 
     </MudAppBar>
 

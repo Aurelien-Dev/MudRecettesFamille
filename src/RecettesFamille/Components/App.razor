@@ -1,9 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using RecettesFamille.Components.Account.Shared
 @using RecettesFamille.Components.Layout
 @using RecettesFamille.Data
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject NavigationManager NavigationManager
 <!DOCTYPE html>
 <html lang="en">
 
@@ -40,7 +37,6 @@
         });
     </script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-    <script src="_content/Extensions.MudBlazor.StaticInput/NavigationObserver.js"></script>
     <script src="_content/MudBlazor.Markdown/MudBlazor.Markdown.min.js"></script>
     <script src="_content/Cropper.Blazor/cropper.min.js"></script>
 
@@ -68,6 +64,14 @@
                 container.scrollTop = container.scrollHeight;
             }
         }
+
+        // Helper pour reconnexion après login/logout
+        // Utilise window.location.replace pour éviter l'historique de navigation
+        window.blazorForceReconnect = (redirectUrl) => {
+            // replace() remplace l'URL actuelle sans ajouter d'entrée dans l'historique
+            // et force un rechargement complet (nouveau circuit SignalR avec les cookies)
+            window.location.replace(redirectUrl || '/');
+        }
     </script>
 </body>
 
@@ -84,22 +88,15 @@
             if (HttpContext.Request.Path.StartsWithSegments("/Account"))
             {
                 BgBodyClass = "background-color:var(--mud-palette-primary)";
-                return null;
             }
             else
             {
                 BgBodyClass = string.Empty;
-                return InteractiveServer;
             }
+
+            return InteractiveServer;
         }
     }
 
-    protected async override Task OnInitializedAsync()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        bool IsAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
 
-        if (!IsAuthenticated && !HttpContext.Request.Path.StartsWithSegments("/Account"))
-            NavigationManager.NavigateTo($"Account/Login", forceLoad: true);
-    }
 }

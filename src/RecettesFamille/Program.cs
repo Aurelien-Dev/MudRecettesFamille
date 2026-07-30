@@ -1,6 +1,7 @@
 using BitzArt.Blazor.Cookies;
 using Blazored.LocalStorage;
 using Cropper.Blazor.Extensions;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Identity;
@@ -9,8 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
 using RecettesFamille;
+using RecettesFamille.Api;
 using RecettesFamille.Components;
-using RecettesFamille.Components.Account;
 using RecettesFamille.Data;
 using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.Repository;
@@ -53,10 +54,16 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents(
         options.DetailedErrors = builder.Environment.IsDevelopment();
     });
 
+builder.Services.AddHttpContextAccessor();
+
+// Ajouter HttpClient pour les appels API internes
+builder.Services.AddScoped(sp =>
+{
+    var navigationManager = sp.GetRequiredService<NavigationManager>();
+    return new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };
+});
+
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<IdentityUserAccessor>();
-builder.Services.AddScoped<IdentityRedirectManager>();
-builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddScoped<EmailManager>();
 
 builder.Services.AddRepository();
@@ -110,13 +117,36 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddApiEndpoints(); // Active les endpoints API Identity
+
+// Configuration des cookies Identity pour partage entre API et circuits Blazor
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = ".RecettesFamille.Identity";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+    options.ExpireTimeSpan = TimeSpan.FromDays(14);
+    options.SlidingExpiration = true;
+
+    // Important pour Blazor Server: ne pas rediriger automatiquement
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return Task.CompletedTask;
+    };
+});
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role;
 });
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddServerSideBlazor()
     .AddHubOptions(options =>
     {
@@ -143,10 +173,14 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+// IMPORTANT: Ajouter Authentication et Authorization AVANT MapRazorComponents
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
-// Add additional endpoints required by the Identity /Account Razor components.
-app.MapAdditionalIdentityEndpoints();
+// Enregistrer les endpoints d'authentification personnalisés
+app.MapAuthEndpoints();
 
 // Define a minimal API endpoint that calls the AskImage method of AiManager
 app.MapPost("/api/youtube-summary", async (HttpRequest request, [FromServices] AiManager aiManager, CancellationToken cancellationToken) =>
@@ -164,6 +198,8 @@ app.MapPost("/api/youtube-summary", async (HttpRequest request, [FromServices] A
 });
 
 await app.RunAsync();
+
+public record LoginRequest(string Email, string Password, bool RememberMe, string? ReturnUrl);
 
 public class YoutubeSummaryJson
 {

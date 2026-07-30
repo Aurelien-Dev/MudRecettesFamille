@@ -1,5 +1,6 @@
 ﻿@page "/"
-@attribute [Authorize(Roles = "Reader")]
+@* Temporairement: test sans rôle spécifique *@
+@attribute [Authorize]
 @implements IBrowserViewportObserver
 
 @using Microsoft.AspNetCore.Authorization
