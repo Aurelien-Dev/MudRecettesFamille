@@ -1,4 +1,5 @@
-﻿@using RecettesFamille.Managers
+﻿@using RecettesFamille.Components.Shared
+@using RecettesFamille.Managers
 @inherits LayoutComponentBase
 
 <MudThemeProvider IsDarkMode="true" Theme="CustomThemeManager.Customtheme" />
@@ -13,13 +14,16 @@
                    Color="Color.Inherit">
             Recettes famille
         </MudButton>
+        <MudSpacer />
+
+        <LogoutButton />
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <MudNavMenu>
             <AuthorizeView Roles="Admin">
                 <MudNavLink Href="/admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Accueil</MudNavLink>
-                <MudNavLink Href="/Admin/rag-status" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Analytics">Recherche IA</MudNavLink>
+                <MudNavLink Href="/admin/rag-status" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Analytics">Recherche IA</MudNavLink>
                 <MudNavLink Href="/admin/users" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Person">Utilisateurs</MudNavLink>
                 <MudNavLink Href="/admin/migrations" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Storage">Migrations & Backups</MudNavLink>
                 <MudNavLink Href="/admin/prompt" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.EditNote">Éditeur de prompts</MudNavLink>

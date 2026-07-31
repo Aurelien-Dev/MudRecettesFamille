@@ -43,6 +43,7 @@ namespace RecettesFamille.Api
         private static async Task<IResult> HandleLogin(
             HttpContext context,
             SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
             ILogger<Program> logger)
         {
             try
@@ -68,6 +69,24 @@ namespace RecettesFamille.Api
                 if (result.Succeeded)
                 {
                     logger.LogInformation("User {Email} logged in successfully", email);
+
+                    // Track last login date
+                    try
+                    {
+                        var user = await userManager.FindByEmailAsync(email);
+                        if (user != null)
+                        {
+                            user.LastLoginDate = DateTime.UtcNow;
+                            await userManager.UpdateAsync(user);
+                            logger.LogInformation("LastLoginDate updated for user {Email}", email);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to update LastLoginDate for user {Email}", email);
+                        // Ne pas bloquer la connexion si le tracking échoue
+                    }
+
                     var redirectTo = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
                     return Results.Redirect(redirectTo);
                 }
@@ -135,6 +154,11 @@ namespace RecettesFamille.Api
                 {
                     logger.LogInformation("User {Email} created successfully", email);
                     await userManager.AddToRoleAsync(user, "Reader");
+
+                    // Set initial LastLoginDate
+                    user.LastLoginDate = DateTime.UtcNow;
+                    await userManager.UpdateAsync(user);
+
                     await signInManager.SignInAsync(user, isPersistent: false);
                     logger.LogInformation("User {Email} signed in after registration", email);
 
