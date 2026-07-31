@@ -11,32 +11,152 @@
 @using RecettesFamille.Extensions
 @using RecettesFamille.Managers
 
-<MudGrid>
-    <MudItem xs="12" md="4">
-        <MudList T="string">
-            @foreach (var item in ytResume)
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudText Typo="Typo.h4" GutterBottom="true">Résumés de vidéos YouTube</MudText>
+
+    @* Formulaire de création de résumé *@
+    <MudPaper Elevation="2" Class="mb-6 pa-4" Style="background-color: white;">
+        <MudText Typo="Typo.h6" Class="mb-4">Créer un nouveau résumé</MudText>
+            <MudGrid>
+                <MudItem xs="12" md="9">
+                    <MudTextField @bind-Value="currentUrl" 
+                                  Label="URL de la vidéo YouTube" 
+                                  Variant="Variant.Outlined"
+                                  Placeholder="https://www.youtube.com/watch?v=..."
+                                  Disabled="@isProcessing"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Custom.Brands.YouTube"
+                                  AdornmentColor="Color.Error" />
+                </MudItem>
+                <MudItem xs="12" md="3" Class="d-flex align-center">
+                    <MudButton Variant="Variant.Filled" 
+                               Color="Color.Primary" 
+                               FullWidth="true"
+                               Disabled="@(isProcessing || string.IsNullOrWhiteSpace(currentUrl))"
+                               OnClick="ProcessYoutubeUrl"
+                               StartIcon="@Icons.Material.Filled.AutoAwesome">
+                        @if (isProcessing)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                            <span>Traitement...</span>
+                        }
+                        else
+                        {
+                            <span>Générer le résumé</span>
+                        }
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+    </MudPaper>
+
+    @* Liste des résumés existants *@
+    <MudText Typo="Typo.h6" Class="mb-3">Historique des résumés (@ytResume.Count)</MudText>
+
+    <MudGrid>
+        <MudItem xs="12" md="4">
+            @if (ytResume.Count == 0)
             {
-                <MudListItem Dense="true" Text="@item.Title" Icon="@Icons.Custom.Brands.YouTube" OnClick="@(() => ShowPrompt(item))" />
+                <MudPaper Elevation="1" Class="pa-4" Style="background-color: white;">
+                    <MudText Typo="Typo.body2" Align="Align.Center" Class="my-4">
+                        Aucun résumé disponible pour le moment.
+                    </MudText>
+                </MudPaper>
             }
-        </MudList>
-    </MudItem>
-    <MudItem xs="12" md="8">
-        @if (CurrentResume is not null)
-        {
-            <MudStack>
-                <MudText Typo="Typo.h3" GutterBottom="true">@CurrentResume.Title</MudText>
-                <MudMarkdown Value="@CurrentResume.Resume" />
-            </MudStack>
-        }
-    </MudItem>
-</MudGrid>
+            else
+            {
+                <div style="max-height: 70vh; overflow-y: auto; padding-right: 8px;">
+                    <MudStack Spacing="2">
+                    @foreach (var item in ytResume.OrderByDescending(x => x.Id))
+                    {
+                        <MudPaper Elevation="@(CurrentResume?.Id == item.Id ? 3 : 1)" 
+                                 Class="@(CurrentResume?.Id == item.Id ? "mud-theme-primary" : "")"
+                                 Style="transition: all 0.2s; background-color: white;">
+                            <MudCardContent>
+                                <MudStack Row="true" AlignItems="AlignItems.Start" Spacing="2">
+                                    <MudIcon Icon="@Icons.Custom.Brands.YouTube" Color="Color.Error" Size="Size.Large" />
+                                    <div style="flex: 1; min-width: 0; cursor: pointer;" @onclick="@(() => ShowPrompt(item))">
+                                        <MudText Typo="Typo.subtitle1" Style="font-weight: 600;">@item.Title</MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                                            @item.Url
+                                        </MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Tertiary" Style="font-size: 0.7rem; margin-top: 2px;">
+                                            <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Style="font-size: 0.8rem; vertical-align: middle;" />
+                                            @item.CreatedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                        </MudText>
+                                    </div>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                                   Color="Color.Error" 
+                                                   Size="Size.Small"
+                                                   OnClick="@(async (e) => await DeleteSummaryWithConfirmation(item))"
+                                                   Title="Supprimer ce résumé" />
+                                </MudStack>
+                            </MudCardContent>
+                        </MudPaper>
+                    }
+                </MudStack>
+                </div>
+            }
+        </MudItem>
+
+        <MudItem xs="12" md="8">
+            @if (CurrentResume is not null)
+            {
+                <MudPaper Elevation="2" Class="pa-4" Style="background-color: white;">
+                        <MudStack Spacing="3">
+                            <div>
+                                <MudText Typo="Typo.h5" GutterBottom="true">@CurrentResume.Title</MudText>
+                                <MudChip T="string" 
+                                         Icon="@Icons.Material.Filled.Link" 
+                                         Size="Size.Small" 
+                                         Color="Color.Primary" 
+                                         Variant="Variant.Text"
+                                         Href="@CurrentResume.Url" 
+                                         Target="_blank">
+                                    Voir la vidéo
+                                </MudChip>
+                            </div>
+                            <MudDivider />
+                            <MudMarkdown Value="@CurrentResume.Resume" />
+                        </MudStack>
+                </MudPaper>
+            }
+            else
+            {
+                <MudPaper Elevation="1" Class="pa-4" Style="background-color: white;">
+                        <MudText Typo="Typo.body1" Align="Align.Center" Class="my-8" Color="Color.Secondary">
+                            Sélectionnez un résumé dans la liste pour l'afficher ici.
+                        </MudText>
+                </MudPaper>
+            }
+        </MudItem>
+    </MudGrid>
+
+    @* Overlay de chargement *@
+    @if (isProcessing)
+    {
+        <MudOverlay Visible="true" DarkBackground="true" ZIndex="9999">
+            <MudPaper Elevation="8" Class="pa-8" Style="background-color: white; border-radius: 8px;">
+                <MudStack AlignItems="AlignItems.Center" Spacing="4">
+                    <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                    <MudText Typo="Typo.h6">@processingMessage</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Veuillez patienter...</MudText>
+                </MudStack>
+            </MudPaper>
+        </MudOverlay>
+    }
+</MudContainer>
 
 @code {
     [Inject] IYoutubeRepository youtubeRepository { get; set; } = null!;
+    [Inject] RecettesFamille.Services.IYoutubeService youtubeService { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
+    [Inject] IDialogService DialogService { get; set; } = null!;
 
     private List<YoutubeResumeDto> ytResume { get; set; } = [];
     private YoutubeResumeDto? CurrentResume { get; set; }
-
+    private bool isProcessing { get; set; } = false;
+    private string currentUrl { get; set; } = string.Empty;
+    private string processingMessage { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -46,5 +166,94 @@
     private void ShowPrompt(YoutubeResumeDto? promptEntity)
     {
         CurrentResume = promptEntity;
+    }
+
+    private async Task ProcessYoutubeUrl()
+    {
+        if (string.IsNullOrWhiteSpace(currentUrl))
+        {
+            Snackbar.Add("Veuillez saisir une URL YouTube valide.", Severity.Warning);
+            return;
+        }
+
+        isProcessing = true;
+        processingMessage = "Extraction du transcript YouTube...";
+        StateHasChanged();
+
+        try
+        {
+            // Étape 1 : Extraction et génération
+            var newResume = await youtubeService.GenerateSummaryFromUrl(currentUrl);
+
+            // Étape 2 : Succès
+            processingMessage = "Finalisation...";
+            StateHasChanged();
+
+            // Rafraîchir la liste et sélectionner le nouveau résumé
+            ytResume = await youtubeRepository.GetAllSummary();
+            CurrentResume = ytResume.FirstOrDefault(x => x.Url == newResume.Url && x.Title == newResume.Title);
+
+            // Réinitialiser le champ URL
+            currentUrl = string.Empty;
+
+            // Notification de succès
+            Snackbar.Add("✓ Résumé créé avec succès!", Severity.Success);
+        }
+        catch (ArgumentException ex)
+        {
+            Snackbar.Add($"URL invalide : {ex.Message}", Severity.Error);
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add($"Erreur lors de la récupération du transcript : {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Une erreur est survenue : {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeleteSummaryWithConfirmation(YoutubeResumeDto summary)
+    {
+        var parameters = new DialogParameters<RecettesFamille.Components.Dialogs.ConfirmationDialog>
+        {
+            { x => x.Title, "Confirmer la suppression" },
+            { x => x.Message, $"Voulez-vous vraiment supprimer le résumé de \"{summary.Title}\" ?" },
+            { x => x.ConfirmText, "Supprimer" },
+            { x => x.CancelText, "Annuler" }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<RecettesFamille.Components.Dialogs.ConfirmationDialog>("", parameters, options);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            var deleted = await youtubeRepository.DeleteSummary(summary.Id);
+
+            if (deleted)
+            {
+                // Retirer de la liste locale
+                ytResume.Remove(summary);
+
+                // Si c'était le résumé actuellement affiché, le désélectionner
+                if (CurrentResume?.Id == summary.Id)
+                {
+                    CurrentResume = null;
+                }
+
+                Snackbar.Add("Résumé supprimé avec succès", Severity.Success);
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Erreur lors de la suppression du résumé", Severity.Error);
+            }
+        }
     }
 }

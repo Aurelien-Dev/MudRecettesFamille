@@ -21,7 +21,11 @@ services:
       - EMAIL_BACKUP_DEST=${EMAIL_BACKUP_DEST}
       - DB_HOST_URL=${DB_HOST_URL}
       - DB_HOST_PORT=${DB_HOST_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SUPADATA_API_KEY=${SUPADATA_API_KEY}
     depends_on:
       - recettesfamille.data
     volumes:

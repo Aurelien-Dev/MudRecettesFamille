@@ -21,6 +21,9 @@ services:
       - EMAIL_BACKUP_DEST=${EMAIL_BACKUP_DEST}
       - DB_HOST_URL=${DB_HOST_URL}
       - DB_HOST_PORT=${DB_HOST_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
     volumes:
       - /home/data/client:/app/data  # Mapping du volume

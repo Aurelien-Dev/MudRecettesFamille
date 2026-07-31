@@ -63,16 +63,35 @@ builder.Services.AddScoped(sp =>
     return new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };
 });
 
+// Configurer HttpClient pour l'API Supadata (extraction de transcripts YouTube)
+builder.Services.AddHttpClient("Supadata", client =>
+{
+    client.BaseAddress = new Uri("https://api.supadata.ai");
+    client.Timeout = TimeSpan.FromSeconds(60);
+
+    var apiKey = builder.Configuration["SUPADATA_API_KEY"];
+    if (!string.IsNullOrWhiteSpace(apiKey))
+    {
+        client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
+    }
+});
+
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<EmailManager>();
+builder.Services.AddScoped<RecettesFamille.Services.IYoutubeService, RecettesFamille.Services.YoutubeService>();
 
 builder.Services.AddRepository();
 
-// Configure RAG services
+// Configure PostgreSQL connection string (centralisé)
 var serverUrl = builder.Configuration["DB_HOST_URL"];
 var serverPort = builder.Configuration["DB_HOST_PORT"];
-var postgresCs = $"Host={serverUrl};Port={serverPort};Database=test;Username=pguser;Password=PGUserPwd;Pooling=true";
+var dbName = builder.Configuration["DB_DATABASE"] ?? "recettesfamilledb";
+var dbUser = builder.Configuration["DB_USERNAME"] ?? "pguser";
+var dbPassword = builder.Configuration["DB_PASSWORD"] ?? "PGUserPwd";
 
+var postgresCs = $"Host={serverUrl};Port={serverPort};Database={dbName};Username={dbUser};Password={dbPassword};Pooling=true";
+
+// Configure RAG services
 builder.Services.AddRecetteFamilleRag(options =>
 {
     options.ConnectionString = postgresCs;
@@ -99,10 +118,6 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
-    var serverUrl = builder.Configuration["DB_HOST_URL"];
-    var serverPort = builder.Configuration["DB_HOST_PORT"];
-
-    var postgresCs = $"Host={serverUrl};Port={serverPort};Database=recettesfamilledb;Username=pguser;Password=PGUserPwd;Pooling=true";
     options.UseNpgsql(postgresCs);
 }, ServiceLifetime.Scoped);
 

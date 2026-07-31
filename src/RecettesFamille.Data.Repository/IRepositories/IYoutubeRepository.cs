@@ -23,4 +23,12 @@ public interface IYoutubeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Liste de tous les résumés de vidéos.</returns>
     Task<List<YoutubeResumeDto>> GetAllSummary(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Supprime un résumé de vidéo YouTube par son identifiant.
+    /// </summary>
+    /// <param name="id">L'identifiant du résumé à supprimer.</param>
+    /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
+    /// <returns>True si la suppression a réussi, false sinon.</returns>
+    Task<bool> DeleteSummary(int id, CancellationToken cancellationToken = default);
 }

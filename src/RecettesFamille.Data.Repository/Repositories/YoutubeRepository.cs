@@ -24,4 +24,20 @@ public class YoutubeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCo
 
         return youtubeSummary;
     }
+
+    public async Task<bool> DeleteSummary(int id, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var youtubeResumeEntity = await context.YoutubeSummarys.FindAsync([id], cancellationToken);
+
+        if (youtubeResumeEntity == null)
+        {
+            return false;
+        }
+
+        context.YoutubeSummarys.Remove(youtubeResumeEntity);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
 }
