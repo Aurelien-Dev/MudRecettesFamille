@@ -175,28 +175,9 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 // Enregistrer les endpoints d'authentification personnalisés
 app.MapAuthEndpoints();
 
-// Define a minimal API endpoint that calls the AskImage method of AiManager
-app.MapPost("/api/youtube-summary", async (HttpRequest request, [FromServices] AiManager aiManager, CancellationToken cancellationToken) =>
-{
-    using var reader = new StreamReader(request.Body);
-    var body = await reader.ReadToEndAsync();
-    var requestBody = JsonSerializer.Deserialize<YoutubeSummaryJson>(body);
-    if (requestBody is null)
-    {
-        return Results.BadRequest("Invalid request body.");
-    }
-
-    var resume = await aiManager.GetYoutubeResume(requestBody, cancellationToken);
-    return Results.Ok(new { result = resume });
-});
+// Enregistrer les endpoints utilitaires
+app.MapUtilityEndpoints();
 
 await app.RunAsync();
 
 public record LoginRequest(string Email, string Password, bool RememberMe, string? ReturnUrl);
-
-public class YoutubeSummaryJson
-{
-    public required string Transcript { get; set; }
-    public required string Url { get; set; }
-    public required string Title { get; set; }
-}

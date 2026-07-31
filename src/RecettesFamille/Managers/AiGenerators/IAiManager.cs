@@ -1,4 +1,5 @@
-﻿using RecettesFamille.Dto.Models;
+﻿using RecettesFamille.Api;
+using RecettesFamille.Dto.Models;
 using RecettesFamille.Dto.Models.Blocks;
 using RecettesFamille.Managers.AiGenerators.Models;
 

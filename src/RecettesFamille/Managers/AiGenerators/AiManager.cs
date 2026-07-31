@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.AI;
 using Newtonsoft.Json;
 using OpenAI.Images;
+using RecettesFamille.Api;
 using RecettesFamille.Data.Repository.IRepositories;
 using RecettesFamille.Dto.Models;
 using RecettesFamille.Dto.Models.Blocks;
