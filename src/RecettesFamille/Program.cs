@@ -98,6 +98,7 @@ builder.Services.AddRecetteFamilleRag(options =>
     options.OpenAIKey = builder.Configuration["OPENAI_SECRET"] ?? throw new InvalidOperationException("Missing OPENAI_SECRET configuration");
     options.EmbeddingModel = "text-embedding-3-small";
     options.ChatModel = "gpt-4o-mini";
+    //Test
 });
 
 // Register RAG search service for RecipeEntity
