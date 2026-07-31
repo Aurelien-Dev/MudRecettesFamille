@@ -98,7 +98,6 @@ builder.Services.AddRecetteFamilleRag(options =>
     options.OpenAIKey = builder.Configuration["OPENAI_SECRET"] ?? throw new InvalidOperationException("Missing OPENAI_SECRET configuration");
     options.EmbeddingModel = "text-embedding-3-small";
     options.ChatModel = "gpt-4o-mini";
-    //Test
 });
 
 // Register RAG search service for RecipeEntity
@@ -168,6 +167,14 @@ var app = builder.Build();
 
 // Initialize RAG database (creates pgvector collection if needed)
 app.Services.InitializeRagDatabase();
+
+// Apply pending EF Core migrations automatically
+using (var scope = app.Services.CreateScope())
+{
+    var contextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
+    await using var context = await contextFactory.CreateDbContextAsync();
+    await context.Database.MigrateAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
