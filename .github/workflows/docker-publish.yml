@@ -49,6 +49,7 @@ jobs:
             echo "DB_USERNAME=${{ vars.DB_USERNAME }}" >> .env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
             echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
+            echo "SUPADATA_API_KEY=${{ secrets.SUPADATA_API_KEY }}" >> .env
 
             docker compose -f RecettesFamille.Docker/docker-compose-light.yml down
             docker compose -f RecettesFamille.Docker/docker-compose-light.yml --env-file .env up --build -d
