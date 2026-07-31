@@ -18,15 +18,15 @@
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <MudNavMenu>
             <AuthorizeView Roles="Admin">
-                <MudNavLink Href="/admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-                <MudNavLink Href="/Admin/rag-status" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Analytics">État RAG</MudNavLink>
-                <MudNavLink Href="/admin/users" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Person">Users</MudNavLink>
-                <MudNavLink Href="/admin/migrations" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.TransferWithinAStation">Migration</MudNavLink>
-                <MudNavLink Href="/admin/prompt" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ImportExport">Prompt editor</MudNavLink>
-                <MudNavLink Href="/admin/youtube" Match="NavLinkMatch.All" Icon="@Icons.Custom.Brands.YouTube">Youtube</MudNavLink>
+                <MudNavLink Href="/admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Accueil</MudNavLink>
+                <MudNavLink Href="/Admin/rag-status" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Analytics">Recherche IA</MudNavLink>
+                <MudNavLink Href="/admin/users" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Person">Utilisateurs</MudNavLink>
+                <MudNavLink Href="/admin/migrations" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Storage">Migrations & Backups</MudNavLink>
+                <MudNavLink Href="/admin/prompt" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.EditNote">Éditeur de prompts</MudNavLink>
+                <MudNavLink Href="/admin/youtube" Match="NavLinkMatch.All" Icon="@Icons.Custom.Brands.YouTube">Résumés YouTube</MudNavLink>
             </AuthorizeView>
             <AuthorizeView Roles="Admin, Contributor">
-                <MudNavLink Href="/admin/tag" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Tag">Tags</MudNavLink>
+                <MudNavLink Href="/admin/tag" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Tag">Étiquettes</MudNavLink>
             </AuthorizeView>
             <MudNavLink Href="/" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ArrowBack">Retour au site</MudNavLink>
         </MudNavMenu>

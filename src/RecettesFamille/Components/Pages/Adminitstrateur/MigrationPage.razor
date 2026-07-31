@@ -5,39 +5,312 @@
 @using System.Text
 @using Microsoft.AspNetCore.Authorization
 @using RecettesFamille.Components.Layout
+@using RecettesFamille.Components.Dialogs
 @using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Extensions
 @using RecettesFamille.Managers
 
-<MudStack Spacing="5">
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudText Typo="Typo.h4" Class="mb-6">
+        <MudIcon Icon="@Icons.Material.Filled.Storage" Class="mr-2" />
+        Gestion Base de Données & Migrations
+    </MudText>
 
-    <MudDataGrid Items="FileInfos" Style="@($"background: #fbf6ef;")">
-        <Columns>
-            <PropertyColumn Property="x => x.Name" Title="FileName" />
-            <TemplateColumn Title="Actions">
-                <CellTemplate>
-                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Download" OnClick="@(async () => await DownloadFile(context.Item))" />
-                </CellTemplate>
-            </TemplateColumn>
-        </Columns>
-    </MudDataGrid>
+    @if (_isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+    }
+    else
+    {
+        <MudGrid Spacing="3">
+            <!-- Card 1: Total Migrations -->
+            <MudItem xs="12" md="4">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.Code" Color="Color.Primary" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Total Migrations</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudStack Spacing="3">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Migrations définies</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Primary">@_allMigrations.Count()</MudText>
+                            </div>
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
 
-    <MudButton Variant="Variant.Filled" OnClick="CreateBackup">Create a backup</MudButton>
+            <!-- Card 2: Migrations Appliquées -->
+            <MudItem xs="12" md="4">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Migrations Appliquées</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudStack Spacing="3">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">En base de données</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Success">@_appliedMigrations.Count()</MudText>
+                            </div>
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
 
-</MudStack>
+            <!-- Card 3: Migrations En Attente -->
+            <MudItem xs="12" md="4">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.Schedule" Color="@(_pendingMigrations.Any() ? Color.Warning : Color.Success)" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Migrations En Attente</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudStack Spacing="3">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">À appliquer</MudText>
+                                <MudText Typo="Typo.h5" Color="@(_pendingMigrations.Any() ? Color.Warning : Color.Success)">@_pendingMigrations.Count()</MudText>
+                            </div>
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Section: État des Migrations -->
+            <MudItem xs="12">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.List" Color="Color.Info" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">État des Migrations</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        @if (_pendingMigrations.Any())
+                        {
+                            <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mb-4">
+                                <MudText Typo="Typo.subtitle2" Class="mb-2">
+                                    <strong>⚠️ @_pendingMigrations.Count() migration(s) en attente d'application</strong>
+                                </MudText>
+                                <MudText Typo="Typo.body2">
+                                    Il est recommandé de créer une sauvegarde avant d'appliquer les migrations.
+                                </MudText>
+                            </MudAlert>
+
+                            <MudStack Row="true" Spacing="2" Class="mb-4">
+                                <MudButton Variant="Variant.Filled" 
+                                           Color="Color.Warning" 
+                                           StartIcon="@Icons.Material.Filled.PlayArrow"
+                                           OnClick="ShowApplyMigrationsDialog"
+                                           Disabled="_isApplyingMigrations">
+                                    Appliquer les migrations
+                                </MudButton>
+                                <MudButton Variant="Variant.Outlined" 
+                                           Color="Color.Primary" 
+                                           StartIcon="@Icons.Material.Filled.Backup"
+                                           OnClick="CreateBackup"
+                                           Disabled="_isApplyingMigrations">
+                                    Créer un backup d'abord
+                                </MudButton>
+                            </MudStack>
+                        }
+                        else
+                        {
+                            <MudAlert Severity="Severity.Success" Variant="Variant.Filled" Class="mb-4">
+                                <strong>✅ La base de données est à jour</strong>
+                            </MudAlert>
+                        }
+
+                        <MudText Typo="Typo.h6" Class="mt-4 mb-3">Migrations Appliquées</MudText>
+                        @if (_appliedMigrations.Any())
+                        {
+                            <MudDataGrid Items="_appliedMigrations" Dense="true" Hover="true" Style="background-color: #fbf6ef;">
+                                <Columns>
+                                    <TemplateColumn Title="Statut" CellStyle="width: 80px;">
+                                        <CellTemplate>
+                                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small" />
+                                        </CellTemplate>
+                                    </TemplateColumn>
+                                    <PropertyColumn Property="x => x" Title="Nom de la migration" />
+                                </Columns>
+                            </MudDataGrid>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Aucune migration appliquée</MudText>
+                        }
+
+                        @if (_pendingMigrations.Any())
+                        {
+                            <MudText Typo="Typo.h6" Class="mt-4 mb-3">Migrations En Attente</MudText>
+                            <MudDataGrid Items="_pendingMigrations" Dense="true" Hover="true" Style="background-color: #fbf6ef;">
+                                <Columns>
+                                    <TemplateColumn Title="Statut" CellStyle="width: 80px;">
+                                        <CellTemplate>
+                                            <MudIcon Icon="@Icons.Material.Filled.Schedule" Color="Color.Warning" Size="Size.Small" />
+                                        </CellTemplate>
+                                    </TemplateColumn>
+                                    <PropertyColumn Property="x => x" Title="Nom de la migration" />
+                                </Columns>
+                            </MudDataGrid>
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Section: Backups -->
+            <MudItem xs="12">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.Backup" Color="Color.Primary" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Sauvegardes de la Base de Données</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudButton Variant="Variant.Filled" 
+                                   Color="Color.Primary" 
+                                   StartIcon="@Icons.Material.Filled.Add"
+                                   OnClick="CreateBackup" 
+                                   Class="mb-4">
+                            Créer une nouvelle sauvegarde
+                        </MudButton>
+
+                        @if (FileInfos.Any())
+                        {
+                            <MudDataGrid Items="FileInfos" Dense="true" Hover="true" Style="background-color: #fbf6ef;">
+                                <Columns>
+                                    <PropertyColumn Property="x => x.Name" Title="Nom du fichier" />
+                                    <PropertyColumn Property="x => x.CreationTime" Title="Date de création" Format="dd/MM/yyyy HH:mm" />
+                                    <PropertyColumn Property="x => x.Length" Title="Taille">
+                                        <CellTemplate>
+                                            @FormatFileSize(context.Item.Length)
+                                        </CellTemplate>
+                                    </PropertyColumn>
+                                    <TemplateColumn Title="Actions" CellStyle="width: 100px;">
+                                        <CellTemplate>
+                                            <MudIconButton Size="Size.Small" 
+                                                           Icon="@Icons.Material.Outlined.Download" 
+                                                           Color="Color.Primary"
+                                                           OnClick="@(async () => await DownloadFile(context.Item))" />
+                                        </CellTemplate>
+                                    </TemplateColumn>
+                                </Columns>
+                            </MudDataGrid>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Aucune sauvegarde disponible</MudText>
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    }
+</MudContainer>
 
 @code {
     [Inject] ITechnicalDbRepository TechnicalDbRepository { get; set; } = null!;
     [Inject] IJSRuntime JsRuntime { get; set; } = null!;
     [Inject] ISnackbar Snackbar { get; set; } = null!;
     [Inject] EmailManager EmailManager { get; set; } = null!;
+    [Inject] IDialogService DialogService { get; set; } = null!;
 
+    private bool _isLoading = true;
+    private bool _isApplyingMigrations = false;
     private List<FileInfo> FileInfos { get; set; } = [];
+    private IEnumerable<string> _allMigrations = [];
+    private IEnumerable<string> _appliedMigrations = [];
+    private IEnumerable<string> _pendingMigrations = [];
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await LoadMigrationsData();
         ListFolder();
+        _isLoading = false;
+    }
+
+    private async Task LoadMigrationsData()
+    {
+        try
+        {
+            _allMigrations = await TechnicalDbRepository.GetAllMigrationsAsync();
+            _appliedMigrations = await TechnicalDbRepository.GetAppliedMigrationsAsync();
+            _pendingMigrations = await TechnicalDbRepository.GetPendingMigrationsAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erreur lors du chargement des migrations : {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task ShowApplyMigrationsDialog()
+    {
+        var parameters = new DialogParameters
+        {
+            { "Title", "Confirmer l'application des migrations" },
+            { "Message", $"⚠️ Vous êtes sur le point d'appliquer {_pendingMigrations.Count()} migration(s) à la base de données.\n\nCette opération modifie la structure de la base de données et ne peut pas être annulée facilement.\n\nIl est fortement recommandé de créer une sauvegarde avant de continuer.\n\nVoulez-vous continuer ?" },
+            { "ConfirmText", "Appliquer les migrations" },
+            { "CancelText", "Annuler" }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<ConfirmationDialog>("", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await ApplyMigrationsAsync();
+        }
+    }
+
+    private async Task ApplyMigrationsAsync()
+    {
+        _isApplyingMigrations = true;
+        StateHasChanged();
+
+        try
+        {
+            Snackbar.Add("Application des migrations en cours...", Severity.Info);
+
+            var (success, message) = await TechnicalDbRepository.ApplyMigrationsAsync();
+
+            Snackbar.Clear();
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomEnd;
+            Snackbar.Add(message, success ? Severity.Success : Severity.Error);
+
+            if (success)
+            {
+                await LoadMigrationsData();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erreur lors de l'application des migrations : {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isApplyingMigrations = false;
+            StateHasChanged();
+        }
     }
 
     public async Task CreateBackup()
@@ -65,7 +338,7 @@
 
     private void ListFolder()
     {
-        var folderPath = "wwwroot/backups/"; // Replace with the actual folder path
+        var folderPath = "wwwroot/backups/";
 
         if (!Directory.Exists(folderPath))
             Directory.CreateDirectory(folderPath);
@@ -77,5 +350,18 @@
         {
             FileInfos.Add(new FileInfo(file));
         }
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
     }
 }
