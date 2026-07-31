@@ -1,21 +1,404 @@
 ﻿@page "/Admin"
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
 @using RecettesFamille.Components.Layout
+@using RecettesFamille.Data
+@using RecettesFamille.Data.EntityModel
 @attribute [Authorize(Roles = "Admin, Contributor")]
+
+@inject IDbContextFactory<ApplicationDbContext> contextFactory
+@inject UserManager<ApplicationUser> userManager
 
 @layout AdminLayout
 
-<AuthorizeView Roles="Admin">
-    <p>Bienvenue, Administrateur !</p>
-</AuthorizeView>
-<AuthorizeView Roles="Contributor">
-    <p>Bienvenue, Contributor !</p>
-</AuthorizeView>
-<AuthorizeView Roles="Reader">
-    <p>Bienvenue, Reader !</p>
-</AuthorizeView>
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudText Typo="Typo.h4" Class="mb-6">
+        <MudIcon Icon="@Icons.Material.Filled.Dashboard" Class="mr-2" />
+        Tableau de Bord
+    </MudText>
 
+    @if (_isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+    }
+    else
+    {
+        <MudGrid Spacing="3">
+            <!-- Card 1: Total Recettes -->
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.MenuBook" Color="Color.Primary" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Total Recettes</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudStack Spacing="3">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Recettes enregistrées</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Primary">@_totalRecipes</MudText>
+                            </div>
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
 
+            <!-- Card 2: Recettes Ce Mois -->
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Success" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Ce Mois</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudStack Spacing="3">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Recettes ajoutées</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Success">@_recipesThisMonth</MudText>
+                            </div>
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Card 3: Temps Moyen -->
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.Schedule" Color="Color.Info" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Temps Moyen</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudStack Spacing="3">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Préparation + Cuisson</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Info">@_averagePrepTime min</MudText>
+                            </div>
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Card 4: Catégories -->
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.Category" Color="Color.Warning" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Catégories</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudStack Spacing="3">
+                            <div>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Catégories différentes</MudText>
+                                <MudText Typo="Typo.h5" Color="Color.Warning">@_categoriesCount</MudText>
+                            </div>
+                        </MudStack>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Section: Répartition par Catégorie -->
+            <MudItem xs="12">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Justify="Justify.SpaceBetween">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudIcon Icon="@Icons.Material.Filled.PieChart" Color="Color.Tertiary" Size="Size.Large" />
+                                    <MudText Typo="Typo.h6">Top 10 Catégories</MudText>
+                                </MudStack>
+                                @if (_recipesByCategory.Count > 10)
+                                {
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        (@_recipesByCategory.Count) catégories au total
+                                    </MudText>
+                                }
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        @if (_recipesByCategory.Any())
+                        {
+                            <MudStack Row="true" Spacing="2" Wrap="Wrap.Wrap">
+                                @foreach (var category in _recipesByCategory.Take(10))
+                                {
+                                    <MudChip T="string" 
+                                             Color="Color.Primary" 
+                                             Variant="Variant.Filled"
+                                             Size="Size.Medium">
+                                        @category.Key (@category.Value)
+                                    </MudChip>
+                                }
+                            </MudStack>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Aucune catégorie disponible</MudText>
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Section: Activité Récente - Recettes -->
+            <MudItem xs="12" md="6">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.NewReleases" Color="Color.Success" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Dernières Recettes</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        @if (_recentRecipes.Any())
+                        {
+                            <MudList T="string" Dense="true" Style="background-color: #fbf6ef;">
+                                @foreach (var recipe in _recentRecipes)
+                                {
+                                    <MudListItem T="string" Class="px-2 py-2">
+                                        <MudStack Spacing="1">
+                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Justify="Justify.SpaceBetween">
+                                                <MudText Typo="Typo.body1" Style="font-weight: 500;">@recipe.Name</MudText>
+                                                <MudChip T="string" 
+                                                         Size="Size.Small" 
+                                                         Color="Color.Primary" 
+                                                         Variant="Variant.Text">
+                                                    @recipe.Category
+                                                </MudChip>
+                                            </MudStack>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-1" />
+                                                @recipe.CreatedDate.ToString("dd/MM/yyyy")
+                                            </MudText>
+                                        </MudStack>
+                                    </MudListItem>
+                                }
+                            </MudList>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Aucune recette récente</MudText>
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Section: Activité Récente - Connexions -->
+            <MudItem xs="12" md="6">
+                <MudCard Elevation="3" Style="background-color: white;">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@Icons.Material.Filled.Login" Color="Color.Info" Size="Size.Large" />
+                                <MudText Typo="Typo.h6">Dernières Connexions</MudText>
+                            </MudStack>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        @if (_recentConnections.Any())
+                        {
+                            <MudList T="string" Dense="true" Style="background-color: #fbf6ef;">
+                                @foreach (var connection in _recentConnections)
+                                {
+                                    <MudListItem T="string" Class="px-2 py-2">
+                                        <MudStack Spacing="1">
+                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Justify="Justify.SpaceBetween">
+                                                <MudText Typo="Typo.body1" Style="font-weight: 500;">@connection.UserName</MudText>
+                                                <MudChip T="string" 
+                                                         Size="Size.Small" 
+                                                         Color="@(connection.MainRole == "Admin" ? Color.Error : connection.MainRole == "Contributeur" ? Color.Warning : Color.Default)" 
+                                                         Variant="Variant.Text">
+                                                    @connection.MainRole
+                                                </MudChip>
+                                            </MudStack>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                <MudIcon Icon="@Icons.Material.Filled.AccessTime" Size="Size.Small" Class="mr-1" />
+                                                @(connection.LastLogin.HasValue ? connection.LastLogin.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm") : "Jamais connecté")
+                                            </MudText>
+                                        </MudStack>
+                                    </MudListItem>
+                                }
+                            </MudList>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Aucune connexion récente</MudText>
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    }
+</MudContainer>
 
 @code {
+    private bool _isLoading = true;
+    private int _totalRecipes = 0;
+    private int _recipesThisMonth = 0;
+    private int _averagePrepTime = 0;
+    private int _categoriesCount = 0;
+    private Dictionary<string, int> _recipesByCategory = new();
+    private List<RecentRecipeVm> _recentRecipes = new();
+    private List<RecentConnectionVm> _recentConnections = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+
+        await Task.WhenAll(
+            LoadDashboardData(),
+            LoadRecipesByCategory(),
+            LoadRecentRecipes(),
+            LoadRecentConnections()
+        );
+
+        _isLoading = false;
+    }
+
+    private async Task LoadDashboardData()
+    {
+        try
+        {
+            using var context = await contextFactory.CreateDbContextAsync();
+
+            // Total recipes
+            _totalRecipes = await context.Recipes.CountAsync();
+
+            // Recipes this month
+            var now = DateOnly.FromDateTime(DateTime.Now);
+            _recipesThisMonth = await context.Recipes
+                .CountAsync(r => r.CreatedDate.Year == now.Year && r.CreatedDate.Month == now.Month);
+
+            // Average preparation + cooking time
+            if (_totalRecipes > 0)
+            {
+                var totalTime = await context.Recipes
+                    .SumAsync(r => r.PrepTime + r.CookingTime);
+                _averagePrepTime = totalTime / _totalRecipes;
+            }
+
+            // Categories count - split tags by pipe
+            var allTags = await context.Recipes
+                .Where(r => !string.IsNullOrEmpty(r.Tags))
+                .Select(r => r.Tags)
+                .ToListAsync();
+
+            _categoriesCount = allTags
+                .SelectMany(tags => tags.Split('|', StringSplitOptions.RemoveEmptyEntries))
+                .Select(tag => tag.Trim())
+                .Distinct()
+                .Count();
+        }
+        catch (Exception)
+        {
+            // Silent fail - dashboard will show zeros
+        }
+    }
+
+    private async Task LoadRecipesByCategory()
+    {
+        try
+        {
+            using var context = await contextFactory.CreateDbContextAsync();
+
+            // Get all recipes with tags
+            var recipes = await context.Recipes
+                .Where(r => !string.IsNullOrEmpty(r.Tags))
+                .Select(r => r.Tags)
+                .ToListAsync();
+
+            // Split tags and count occurrences
+            _recipesByCategory = recipes
+                .SelectMany(tags => tags.Split('|', StringSplitOptions.RemoveEmptyEntries))
+                .Select(tag => tag.Trim())
+                .GroupBy(tag => tag)
+                .OrderByDescending(g => g.Count())
+                .ToDictionary(g => g.Key, g => g.Count());
+        }
+        catch (Exception)
+        {
+            _recipesByCategory = new();
+        }
+    }
+
+    private async Task LoadRecentRecipes()
+    {
+        try
+        {
+            using var context = await contextFactory.CreateDbContextAsync();
+
+            var recipes = await context.Recipes
+                .OrderByDescending(r => r.CreatedDate)
+                .Take(5)
+                .Select(r => new RecentRecipeVm(
+                    r.Name,
+                    r.CreatedDate,
+                    string.IsNullOrEmpty(r.Tags) ? "Sans catégorie" : r.Tags
+                ))
+                .ToListAsync();
+
+            _recentRecipes = recipes;
+        }
+        catch (Exception)
+        {
+            _recentRecipes = new();
+        }
+    }
+
+    private async Task LoadRecentConnections()
+    {
+        try
+        {
+            using var context = await contextFactory.CreateDbContextAsync();
+
+            var users = await context.Users
+                .Where(u => u.LastLoginDate.HasValue)
+                .OrderByDescending(u => u.LastLoginDate)
+                .Take(5)
+                .ToListAsync();
+
+            var connections = new List<RecentConnectionVm>();
+
+            foreach (var user in users)
+            {
+                var roles = await userManager.GetRolesAsync(user);
+                var mainRole = roles.Contains("Admin") ? "Admin" 
+                             : roles.Contains("Contributor") ? "Contributeur" 
+                             : roles.Contains("Reader") ? "Lecteur" 
+                             : "Utilisateur";
+
+                connections.Add(new RecentConnectionVm(
+                    user.UserName ?? "Inconnu",
+                    user.LastLoginDate,
+                    mainRole
+                ));
+            }
+
+            _recentConnections = connections;
+        }
+        catch (Exception)
+        {
+            _recentConnections = new();
+        }
+    }
+
+    private record RecentRecipeVm(string Name, DateOnly CreatedDate, string Category);
+    private record RecentConnectionVm(string UserName, DateTime? LastLogin, string MainRole);
 }
