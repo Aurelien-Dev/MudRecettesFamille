@@ -142,4 +142,67 @@ public class RagChatService
 
         return response.Text ?? "Désolé, je n'ai pas pu générer une réponse.";
     }
+
+    /// <summary>
+    /// Generate suggested questions that a user might ask about a specific entity.
+    /// Uses the complete entity context to generate relevant, contextual questions.
+    /// </summary>
+    /// <param name="entityId">The entity to generate questions for</param>
+    /// <param name="count">Number of questions to generate (default: 5)</param>
+    /// <returns>List of suggested questions</returns>
+    public async Task<List<string>> GenerateQuestionSuggestionsAsync(int entityId, int count = 5)
+    {
+        // Load the complete entity context
+        var context = await GetEntityContextAsync(entityId);
+
+        if (string.IsNullOrEmpty(context))
+        {
+            return new List<string>();
+        }
+
+        // Build the prompt for generating question suggestions
+        var systemPrompt = $@"Tu es un assistant culinaire expert. 
+Analyse le contexte de cette recette et génère exactement {count} questions pertinentes que l'utilisateur pourrait poser.
+
+Contexte de la recette :
+{context}
+
+Instructions :
+- Génère exactement {count} questions variées et pertinentes
+- LA PREMIÈRE QUESTION DOIT OBLIGATOIREMENT permettre de modifier les proportions/portions de la recette (ex: ""Comment adapter cette recette pour 6 personnes ?"")
+- Les autres questions doivent couvrir différents aspects : substitutions d'ingrédients, temps de préparation, techniques, conservation, variantes, allergies, etc.
+- Les questions doivent être naturelles et pratiques
+- Sois concis et direct
+- Réponds UNIQUEMENT avec les questions, une par ligne, sans numérotation ni tirets
+- Chaque question doit tenir sur une seule ligne";
+
+        var messages = new List<ChatMessage>
+        {
+            new ChatMessage(ChatRole.System, systemPrompt),
+            new ChatMessage(ChatRole.User, "Génère les questions suggérées.")
+        };
+
+        try
+        {
+            // Get response from LLM
+            var response = await _chatClient.GetResponseAsync(messages);
+            var responseText = response.Text ?? string.Empty;
+
+            // Parse the response into individual questions
+            var questions = responseText
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(q => !string.IsNullOrWhiteSpace(q))
+                .Select(q => q.Trim().TrimStart('-', '*', '•').Trim()) // Remove any bullet points
+                .Where(q => q.EndsWith('?')) // Only keep actual questions
+                .Take(count)
+                .ToList();
+
+            return questions.Any() ? questions : new List<string>();
+        }
+        catch
+        {
+            // Return empty list on error (fail gracefully)
+            return new List<string>();
+        }
+    }
 }

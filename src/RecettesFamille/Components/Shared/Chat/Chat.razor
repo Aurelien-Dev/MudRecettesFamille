@@ -23,9 +23,42 @@
 
     <ChatMessageList Messages="@displayMessages" IsLoading="@isLoading" />
 
-    <ChatInput OnSendMessage="@HandleSendMessage"
+    @* Question suggestions as chips *@
+    @if (questionSuggestions.Any() && displayMessages.Count == 0)
+    {
+        <div class="mb-3">
+            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
+                💡 Suggestions de questions :
+            </MudText>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var suggestion in questionSuggestions)
+                {
+                    <MudChip T="string"
+                             Color="Color.Primary"
+                             Variant="Variant.Outlined"
+                             Size="Size.Small"
+                             Icon="@Icons.Material.Filled.QuestionAnswer"
+                             OnClick="@(() => HandleSuggestionClick(suggestion))">
+                        @suggestion
+                    </MudChip>
+                }
+            </div>
+        </div>
+    }
+    else if (isLoadingSuggestions && displayMessages.Count == 0)
+    {
+        <div class="mb-3 d-flex align-center gap-2">
+            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                Génération de suggestions...
+            </MudText>
+        </div>
+    }
+
+    <ChatInput @ref="chatInputRef"
+               OnSendMessage="@HandleSendMessage"
                IsDisabled="@(isLoading || RecipeId <= 0)"
-               Placeholder="Ex: Comment puis-je remplacer le beurre ? Peut-on préparer à l'avance ?"
+               Placeholder="Posez votre question sur cette recette..."
                Label="Votre question"
                SendButtonText="Envoyer" />
 
@@ -56,6 +89,58 @@
 
     // Display messages (excluding system prompt)
     private List<ChatMessage> displayMessages => messages.Where(m => m.Role != ChatRole.System).ToList();
+
+    // Question suggestions management
+    private ChatInput? chatInputRef;
+    private List<string> questionSuggestions = new();
+    private bool isLoadingSuggestions = false;
+    private int previousRecipeId = 0;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Only regenerate suggestions if RecipeId has changed
+        if (RecipeId > 0 && RecipeId != previousRecipeId)
+        {
+            previousRecipeId = RecipeId;
+            await LoadQuestionSuggestionsAsync();
+        }
+        else if (RecipeId <= 0)
+        {
+            // Reset when no recipe
+            questionSuggestions.Clear();
+            previousRecipeId = 0;
+        }
+    }
+
+    private async Task LoadQuestionSuggestionsAsync()
+    {
+        isLoadingSuggestions = true;
+        StateHasChanged();
+
+        try
+        {
+            // Generate 5 suggestions
+            questionSuggestions = await RagService.GetSuggestedQuestionsAsync(RecipeId, 5);
+        }
+        catch
+        {
+            // Fail silently
+            questionSuggestions.Clear();
+        }
+        finally
+        {
+            isLoadingSuggestions = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleSuggestionClick(string question)
+    {
+        if (chatInputRef != null)
+        {
+            await chatInputRef.SetSuggestionAsync(question);
+        }
+    }
 
     private async Task HandleSendMessage(string question)
     {

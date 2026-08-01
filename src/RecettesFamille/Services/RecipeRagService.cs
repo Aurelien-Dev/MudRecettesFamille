@@ -77,6 +77,18 @@ Instructions :
     }
 
     /// <summary>
+    /// Generate suggested questions that a user might ask about a specific recipe.
+    /// Uses AI to analyze the recipe context and generate relevant, practical questions.
+    /// </summary>
+    /// <param name="recipeId">The recipe ID to generate questions for</param>
+    /// <param name="count">Number of questions to generate (3-5 recommended)</param>
+    /// <returns>List of suggested questions</returns>
+    public async Task<List<string>> GetSuggestedQuestionsAsync(int recipeId, int count = 5)
+    {
+        return await _ragChat.GenerateQuestionSuggestionsAsync(recipeId, count);
+    }
+
+    /// <summary>
     /// Manually ingests a single recipe into the RAG system.
     /// Typically called automatically by repository hooks, but exposed for manual operations.
     /// </summary>

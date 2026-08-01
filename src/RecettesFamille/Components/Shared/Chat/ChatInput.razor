@@ -28,7 +28,7 @@
     public string Label { get; set; } = "Votre question";
 
     [Parameter]
-    public string Placeholder { get; set; } = "Ex: Comment puis-je remplacer le beurre ? Peut-on préparer à l'avance ?";
+    public string Placeholder { get; set; } = string.Empty;
 
     [Parameter]
     public string SendButtonText { get; set; } = "Envoyer";
@@ -63,6 +63,13 @@
         {
             await HandleSendClick();
         }
+    }
+
+    public async Task SetSuggestionAsync(string text)
+    {
+        inputText = text;
+        await InvokeAsync(StateHasChanged);
+        await FocusInputAsync();
     }
 
     private async Task FocusInputAsync()
