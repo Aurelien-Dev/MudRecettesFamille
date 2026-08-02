@@ -35,9 +35,12 @@
                         <MudTextField @bind-Value="passwordValue"
                                       Label="Mot de passe"
                                       Variant="Variant.Outlined"
-                                      InputType="InputType.Password"
+                                      InputType="@(isPasswordVisible ? InputType.Text : InputType.Password)"
                                       AutoComplete="current-password"
-                                      Required="true" />
+                                      Required="true"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(isPasswordVisible ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff)"
+                                      OnAdornmentClick="TogglePasswordVisibility" />
                         <input type="hidden" name="password" value="@passwordValue" />
 
                         <MudCheckBox @bind-Value="rememberMeValue"
@@ -79,6 +82,7 @@
     private string emailValue = "";
     private string passwordValue = "";
     private bool rememberMeValue = false;
+    private bool isPasswordVisible = false;
 
     [SupplyParameterFromQuery(Name = "returnUrl")]
     private string? ReturnUrl { get; set; }
@@ -99,5 +103,10 @@
             "server" => "❌ Une erreur serveur s'est produite. Veuillez réessayer.",
             _ => null
         };
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        isPasswordVisible = !isPasswordVisible;
     }
 }
