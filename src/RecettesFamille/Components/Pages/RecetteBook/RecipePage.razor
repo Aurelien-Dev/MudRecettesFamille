@@ -2,6 +2,7 @@
 @attribute [Authorize]
 
 @using Microsoft.AspNetCore.Authorization
+@using RecettesFamille.Components.Dialogs
 @using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
 @using RecettesFamille.Components.Pages.RecetteBook.Components
 @using RecettesFamille.Components.Shared
@@ -9,9 +10,8 @@
 @using RecettesFamille.Dto.Models
 @using RecettesFamille.Dto.Models.Blocks
 @using RecettesFamille.Extensions
-@using RecettesFamille.Managers;
-@using RecettesFamille.Managers.AiGenerators
-@using RecettesFamille.Components.Dialogs
+
+<PageTitle>@(Recipe?.Name ?? "Recette") | Recettes famille</PageTitle>
 
 @if (Recipe is not null)
 {
