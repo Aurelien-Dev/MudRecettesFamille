@@ -1,10 +1,11 @@
 ﻿@page "/"
-@attribute [Authorize(Roles = "Reader")]
+@attribute [Authorize]
 @implements IBrowserViewportObserver
 
 <PageTitle>Accueil | Recettes famille</PageTitle>
 
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using MudBlazor
 @using RecettesFamille.Components.Pages.RecetteBook.Components
 @using RecettesFamille.Data.Repository.IRepositories
@@ -13,52 +14,77 @@
 
 @inject IRecipeRepository RecipeRepository
 @inject IBrowserViewportService BrowserViewportService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-3" Gutters="false">
 
-	<!-- Dernières recettes -->
-	<MudStack Row="true" Class="mt-0 mb-0">
-
-		<MudHidden Breakpoint="Breakpoint.SmAndDown">
-			<MudText Typo="Typo.h5" Style="font-weight:900;">@carouselTitle</MudText>
-		</MudHidden>
-		<MudHidden Breakpoint="Breakpoint.MdAndUp">
-			<MudText Typo="Typo.h6" Style="font-weight:900;">@carouselTitle</MudText>
-		</MudHidden>
-
-		<MudSpacer />
-		<MudIconButton Icon="@Icons.Material.Filled.ArrowBackIosNew" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" OnClick="@(() => mudCarousel.Previous())" />
-		<MudIconButton Icon="@Icons.Material.Filled.ArrowForwardIos" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" OnClick="@(() => mudCarousel.Next())" />
-	</MudStack>
-
-	@if (RecipeGroups != null && RecipeGroups.Any())
-	{
-		<MudCarousel @ref="mudCarousel" TData="RecipeForListDto" Class="mud-width-full pa-0 ma-0 mb-0" Style="min-height:440px;" AutoCycle="false"
-					 ShowBullets="false" ShowArrows="false" EnableSwipeGesture="false">
-			@foreach (var group in RecipeGroups)
+	<AuthorizeView>
+		<Authorized>
+			@if (!context.User.IsInRole("Admin") && !context.User.IsInRole("Contributor") && !context.User.IsInRole("Reader"))
 			{
-				<MudCarouselItem Class="pa-0 ma-0">
-					<MudGrid Class="" Justify="Justify.Center" Style="height:100%;">
-						@foreach (var recipe in group)
-						{
-							<MudItem xs="@xsItemSize">
-								<RecipeCard Recipes="@recipe" />
-							</MudItem>
-						}
-					</MudGrid>
-				</MudCarouselItem>
+				<!-- Message pour les utilisateurs sans rôle (en attente d'approbation) -->
+				<MudAlert Severity="Severity.Info" Variant="Variant.Filled" Class="mb-6">
+					<MudText Typo="Typo.h6" Class="mb-2">🔒 Compte en attente d'approbation</MudText>
+					<MudText>
+						Votre compte a été créé avec succès, mais vous devez attendre l'approbation d'un administrateur pour accéder aux recettes.
+					</MudText>
+					<MudText Class="mt-2">
+						Vous recevrez un accès dès que votre compte sera validé. Merci de votre patience ! 😊
+					</MudText>
+				</MudAlert>
 			}
-		</MudCarousel>
-	}
-	else
-	{
-		<MudText Typo="Typo.h6">Aucune recette trouvée.</MudText>
-	}
+			else
+			{
+				<!-- Contenu normal pour les utilisateurs avec rôle -->
+				<!-- Dernières recettes -->
+				<MudStack Row="true" Class="mt-0 mb-0">
 
-	<MudStack Class="mt-0 mb-6">
-		<RecipeListPage />
-	</MudStack>
+					<MudHidden Breakpoint="Breakpoint.SmAndDown">
+						<MudText Typo="Typo.h5" Style="font-weight:900;">@carouselTitle</MudText>
+					</MudHidden>
+					<MudHidden Breakpoint="Breakpoint.MdAndUp">
+						<MudText Typo="Typo.h6" Style="font-weight:900;">@carouselTitle</MudText>
+					</MudHidden>
+
+					<MudSpacer />
+					<MudIconButton Icon="@Icons.Material.Filled.ArrowBackIosNew" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" OnClick="@(() => mudCarousel.Previous())" />
+					<MudIconButton Icon="@Icons.Material.Filled.ArrowForwardIos" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" OnClick="@(() => mudCarousel.Next())" />
+				</MudStack>
+
+				@if (RecipeGroups != null && RecipeGroups.Any())
+				{
+					<MudCarousel @ref="mudCarousel" TData="RecipeForListDto" Class="mud-width-full pa-0 ma-0 mb-0" Style="min-height:440px;" AutoCycle="false"
+								 ShowBullets="false" ShowArrows="false" EnableSwipeGesture="false">
+						@foreach (var group in RecipeGroups)
+						{
+							<MudCarouselItem Class="pa-0 ma-0">
+								<MudGrid Class="" Justify="Justify.Center" Style="height:100%;">
+									@foreach (var recipe in group)
+									{
+										<MudItem xs="@xsItemSize">
+											<RecipeCard Recipes="@recipe" />
+										</MudItem>
+									}
+								</MudGrid>
+							</MudCarouselItem>
+						}
+					</MudCarousel>
+				}
+				else
+				{
+					<MudText Typo="Typo.h6">Aucune recette trouvée.</MudText>
+				}
+
+				<MudStack Class="mt-0 mb-6">
+					<RecipeListPage />
+				</MudStack>
+			}
+		</Authorized>
+		<NotAuthorized>
+			<MudText Typo="Typo.h6">Veuillez vous connecter pour accéder aux recettes.</MudText>
+		</NotAuthorized>
+	</AuthorizeView>
 
 </MudContainer>
 

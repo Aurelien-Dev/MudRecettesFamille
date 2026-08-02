@@ -78,6 +78,8 @@ builder.Services.AddHttpClient("Supadata", client =>
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<EmailManager>();
+builder.Services.AddScoped<RecettesFamille.Services.ApprovalTokenService>();
+builder.Services.AddScoped<RecettesFamille.Services.UserApprovalEmailService>();
 builder.Services.AddScoped<RecettesFamille.Services.IYoutubeService, RecettesFamille.Services.YoutubeService>();
 
 builder.Services.AddRepository();
@@ -197,6 +199,9 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 // Enregistrer les endpoints d'authentification personnalisés
 app.MapAuthEndpoints();
+
+// Enregistrer les endpoints d'approbation utilisateur
+app.MapUserApprovalEndpoints();
 
 // Enregistrer les endpoints utilitaires
 app.MapUtilityEndpoints();

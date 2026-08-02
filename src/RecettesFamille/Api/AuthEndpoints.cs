@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using RecettesFamille.Data;
+using RecettesFamille.Services;
 
 namespace RecettesFamille.Api
 {
@@ -120,6 +121,8 @@ namespace RecettesFamille.Api
             HttpContext context,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
+            ApprovalTokenService tokenService,
+            UserApprovalEmailService emailService,
             ILogger<Program> logger)
         {
             try
@@ -155,11 +158,27 @@ namespace RecettesFamille.Api
                 if (result.Succeeded)
                 {
                     logger.LogInformation("User {Email} created successfully", email);
-                    await userManager.AddToRoleAsync(user, "Reader");
 
                     // Set initial LastLoginDate
                     user.LastLoginDate = DateTime.UtcNow;
+
+                    // Générer le token d'approbation
+                    var expiresAt = tokenService.GetDefaultExpiration();
+                    var token = tokenService.GenerateToken(user.Id, user.Email ?? string.Empty, expiresAt);
+
+                    // Stocker le token dans l'utilisateur
+                    user.PendingApprovalToken = token;
+                    user.PendingApprovalTokenExpires = expiresAt;
                     await userManager.UpdateAsync(user);
+
+                    // Envoyer l'email de notification à l'admin
+                    var baseUrl = $"{context.Request.Scheme}://{context.Request.Host}";
+                    var emailSent = await emailService.SendApprovalNotificationAsync(user, token, expiresAt, baseUrl);
+
+                    if (!emailSent)
+                    {
+                        logger.LogWarning("Failed to send approval notification email for user {Email}, but registration succeeded", user.Email);
+                    }
 
                     await signInManager.SignInAsync(user, isPersistent: false);
                     logger.LogInformation("User {Email} signed in after registration", email);

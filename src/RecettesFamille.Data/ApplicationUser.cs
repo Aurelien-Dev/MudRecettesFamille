@@ -16,4 +16,14 @@ public class ApplicationUser : IdentityUser
     /// Date et heure de la dernière connexion de l'utilisateur
     /// </summary>
     public DateTime? LastLoginDate { get; set; }
+
+    /// <summary>
+    /// Token d'approbation en attente pour les nouveaux utilisateurs
+    /// </summary>
+    public string? PendingApprovalToken { get; set; }
+
+    /// <summary>
+    /// Date d'expiration du token d'approbation
+    /// </summary>
+    public DateTime? PendingApprovalTokenExpires { get; set; }
 }
