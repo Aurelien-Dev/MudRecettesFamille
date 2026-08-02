@@ -53,6 +53,10 @@
 
 	<MudStack Spacing="0">
 		<MudText Typo="Typo.caption" Class="ma-0 pa-0" Align="Align.End" GutterBottom="true" Style="@($"color:{Colors.Gray.Default};")">Crée le : @Recipe.CreatedDate</MudText>
+		@if (!string.IsNullOrWhiteSpace(Recipe.CreatedByUserName))
+		{
+			<MudText Typo="Typo.caption" Class="ma-0 pa-0" Align="Align.End" GutterBottom="true" Style="@($"color:{Colors.Gray.Default};")">Par : @Recipe.CreatedByUserName</MudText>
+		}
 	</MudStack>
 }
 

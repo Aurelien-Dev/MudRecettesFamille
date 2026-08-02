@@ -24,6 +24,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         builder.Entity<ApplicationUser>(entity =>
         {
+            entity.HasMany(u => u.CreatedRecipes)
+                  .WithOne(r => r.CreatedByUser)
+                  .HasForeignKey(r => r.CreatedByUserId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
             entity.HasMany(u => u.Favorites)
                   .WithMany(r => r.FavoritedByUsers)
                   .UsingEntity<Dictionary<string, object>>(

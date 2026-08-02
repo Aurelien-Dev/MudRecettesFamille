@@ -12,6 +12,7 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IRecipeRepository RecipeRepository
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <MudThemeProvider @ref="_mudThemeProvider" IsDarkMode="_isDarkMode" Theme="CustomThemeManager.Customtheme" />
 <MudDialogProvider />
@@ -39,8 +40,15 @@
             <MudIconButton Href="/Admin" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.Settings" />
         </AuthorizeView>
 
-        <MudIconButton Href="/profile" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.AccountCircle" Title="Mon profil" />
-        <LogoutButton />
+        <AuthorizeView>
+            <Authorized>
+                <MudIconButton Href="/profile" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.AccountCircle" Title="Mon profil" />
+                <LogoutButton />
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text">Se connecter</MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
 
     </MudAppBar>
 
@@ -83,7 +91,10 @@
             return;
         }
 
-        var recipe = await RecipeRepository.AddRecipe(new RecipeDto() { Name = result.Data?.ToString() ?? string.Empty });
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        var recipe = await RecipeRepository.AddRecipe(new RecipeDto() { Name = result.Data?.ToString() ?? string.Empty }, userId);
 
         if (recipe != null)
         {

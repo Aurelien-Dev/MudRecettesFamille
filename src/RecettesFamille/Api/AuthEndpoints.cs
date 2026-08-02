@@ -125,6 +125,7 @@ namespace RecettesFamille.Api
             try
             {
                 var form = await context.Request.ReadFormAsync();
+                var accountName = form["accountName"].ToString();
                 var email = form["email"].ToString();
                 var password = form["password"].ToString();
                 var confirmPassword = form["confirmPassword"].ToString();
@@ -145,7 +146,8 @@ namespace RecettesFamille.Api
                 var user = new ApplicationUser 
                 { 
                     UserName = email, 
-                    Email = email 
+                    Email = email,
+                    AccountName = string.IsNullOrWhiteSpace(accountName) ? email : accountName
                 };
 
                 var result = await userManager.CreateAsync(user, password);
@@ -221,8 +223,25 @@ namespace RecettesFamille.Api
                 }
 
                 var form = await context.Request.ReadFormAsync();
+                var accountName = form["accountName"].ToString();
                 var phoneNumber = form["phoneNumber"].ToString();
 
+                bool profileUpdated = false;
+
+                // Mise à jour du nom d'affichage
+                if (!string.IsNullOrWhiteSpace(accountName) && accountName != user.AccountName)
+                {
+                    user.AccountName = accountName;
+                    var updateResult = await userManager.UpdateAsync(user);
+                    if (!updateResult.Succeeded)
+                    {
+                        logger.LogWarning("Failed to update AccountName for user {UserId}", user.Id);
+                        return Results.Redirect("/profile?error=update");
+                    }
+                    profileUpdated = true;
+                }
+
+                // Mise à jour du numéro de téléphone
                 var currentPhone = await userManager.GetPhoneNumberAsync(user);
                 if (phoneNumber != currentPhone)
                 {
@@ -232,10 +251,15 @@ namespace RecettesFamille.Api
                         logger.LogWarning("Failed to set phone number for user {UserId}", user.Id);
                         return Results.Redirect("/profile?error=update");
                     }
+                    profileUpdated = true;
                 }
 
-                await signInManager.RefreshSignInAsync(user);
-                logger.LogInformation("User {UserId} updated their profile", user.Id);
+                if (profileUpdated)
+                {
+                    await signInManager.RefreshSignInAsync(user);
+                    logger.LogInformation("User {UserId} updated their profile", user.Id);
+                }
+
                 return Results.Redirect("/profile?success=true");
             }
             catch (Exception ex)

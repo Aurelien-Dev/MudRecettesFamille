@@ -23,6 +23,9 @@ public class RecipeEntity : IIngestionEntity
     [MaxLength(200)]
     public string Tags { get; set; } = string.Empty;
 
+    public string? CreatedByUserId { get; set; }
+    public ApplicationUser? CreatedByUser { get; set; }
+
     public ICollection<BlockBaseEntity> BlocksInstructions { get; set; } = [];
 
     public ICollection<ApplicationUser> FavoritedByUsers { get; set; } = [];

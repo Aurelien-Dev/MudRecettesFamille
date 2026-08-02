@@ -11,7 +11,9 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         // Mapping des entités principales
-        CreateMap<RecipeEntity, RecipeDto>().ReverseMap();
+        CreateMap<RecipeEntity, RecipeDto>()
+            .ForMember(dest => dest.CreatedByUserName, opt => opt.MapFrom(src => src.CreatedByUser != null ? src.CreatedByUser.AccountName : null))
+            .ReverseMap();
 
         // Gestion du polymorphisme
         CreateMap<BlockBaseEntity, BlockBaseDto>()

@@ -1,5 +1,6 @@
 @page "/gpt/import/"
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Authorization
 @using Newtonsoft.Json
 @using RecettesFamille.Data
 @using RecettesFamille.Data.Repository.IRepositories
@@ -46,6 +47,7 @@
     [Inject] NavigationManager navigationManager { get; set; } = null!;
     [Inject] ErrorManager ErrorManager { get; set; } = null!;
     [Inject] IAiManager gptRecipeConverterManager { get; set; } = null!;
+    [Inject] AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
     private MudTextField<string> multilineReference = null!;
 
@@ -59,9 +61,12 @@
         _cancellationTokenSource = new();
         try
         {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
             var recette = await gptRecipeConverterManager.ConvertRecipe(_recipeDescription, AiClientType.OpenAi, _cancellationTokenSource.Token);
 
-            var recipeAdded = await RecipeRepository.AddRecipe(recette);
+            var recipeAdded = await RecipeRepository.AddRecipe(recette, userId);
 
             // RAG ingestion is now handled automatically by RecipeRepository hooks
 

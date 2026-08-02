@@ -15,5 +15,8 @@ public class RecipeDto
     public DateOnly? UpdatedDate { get; set; }
     public string Tags { get; set; } = string.Empty;
 
+    public string? CreatedByUserId { get; set; }
+    public string? CreatedByUserName { get; set; }
+
     public List<BlockBaseDto> BlocksInstructions { get; set; } = [];
 }

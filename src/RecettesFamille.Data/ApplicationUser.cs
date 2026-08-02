@@ -10,6 +10,8 @@ public class ApplicationUser : IdentityUser
 
     public ICollection<RecipeEntity> Favorites { get; set; } = null!;
 
+    public ICollection<RecipeEntity> CreatedRecipes { get; set; } = [];
+
     /// <summary>
     /// Date et heure de la dernière connexion de l'utilisateur
     /// </summary>

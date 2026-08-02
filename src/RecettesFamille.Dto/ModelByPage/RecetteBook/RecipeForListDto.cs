@@ -8,5 +8,6 @@
         public DateOnly CreatedDate { get; set; }
         public byte[]? Image { get; set; }
         public bool IsFavorited { get; set; }
+        public string? CreatedByUserName { get; set; }
     }
 }

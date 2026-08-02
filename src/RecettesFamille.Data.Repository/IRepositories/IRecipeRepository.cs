@@ -99,9 +99,10 @@ public interface IRecipeRepository
     /// Ajoute une nouvelle recette.
     /// </summary>
     /// <param name="recipe">La recette à ajouter.</param>
+    /// <param name="userId">L'identifiant de l'utilisateur créateur de la recette (optionnel).</param>
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>La recette ajoutée avec son identifiant.</returns>
-    Task<RecipeDto> AddRecipe(RecipeDto recipe, CancellationToken cancellationToken = default);
+    Task<RecipeDto> AddRecipe(RecipeDto recipe, string? userId = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Supprime une recette.

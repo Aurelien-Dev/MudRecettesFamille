@@ -32,6 +32,12 @@
                 @* Formulaire HTML pour la mise à jour du profil *@
                 <form method="post" action="/auth/update-profile">
                     <MudStack Spacing="3">
+                        <MudTextField @bind-Value="accountNameValue" 
+                                      Label="Nom d'affichage" 
+                                      Variant="Variant.Outlined"
+                                      HelperText="Ce nom sera visible sur vos recettes" />
+                        <input type="hidden" name="accountName" value="@accountNameValue" />
+
                         <MudTextField Value="@username" 
                                       Label="Nom d'utilisateur" 
                                       Variant="Variant.Outlined"
@@ -84,6 +90,7 @@
     private ApplicationUser? user;
     private string? username;
     private string? email;
+    private string accountNameValue = "";
     private string phoneNumberValue = "";
     private string? successMessage;
     private string? errorMessage;
@@ -106,6 +113,7 @@
         {
             username = await UserManager.GetUserNameAsync(user);
             email = await UserManager.GetEmailAsync(user);
+            accountNameValue = user.AccountName ?? "";
             phoneNumberValue = await UserManager.GetPhoneNumberAsync(user) ?? "";
         }
 

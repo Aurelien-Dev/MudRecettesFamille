@@ -1,4 +1,5 @@
 ﻿@using RecettesFamille.Dto.ModelByPage.RecetteBook
+@using MudBlazor
 
 
 <MudCard>
@@ -11,6 +12,11 @@
 			<MudChipSet T="string">
 				<MudChip Variant="Variant.Outlined" Size="Size.Small" Class="mx-0">@Recipes.Tags.Replace("|", " | ")</MudChip>
 			</MudChipSet>
+
+			@if (!string.IsNullOrWhiteSpace(Recipes.CreatedByUserName))
+			{
+				<MudText Typo="Typo.caption" Style="@($"color:{Colors.Gray.Default};")">Par : @Recipes.CreatedByUserName</MudText>
+			}
 		</MudCardContent>
 	</MudHidden>
 
@@ -21,6 +27,11 @@
 			<MudChipSet T="string">
 				<MudChip Variant="Variant.Outlined" Size="Size.Small" Class="mx-0">@Recipes.Tags.Replace("|", " | ")</MudChip>
 			</MudChipSet>
+
+			@if (!string.IsNullOrWhiteSpace(Recipes.CreatedByUserName))
+			{
+				<MudText Typo="Typo.caption" Style="@($"color:{Colors.Gray.Default};")">Par : @Recipes.CreatedByUserName</MudText>
+			}
 		</MudCardContent>
 	</MudHidden>
 	

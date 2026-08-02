@@ -64,6 +64,7 @@ public class RecipeRepository(
                 Name = c.Name,
                 Tags = c.Tags,
                 CreatedDate = c.CreatedDate,
+                CreatedByUserName = c.CreatedByUser != null ? c.CreatedByUser.AccountName : null,
                 Image = c.BlocksInstructions
                          .Where(c => c is BlockImageEntity)
                          .Select(b => (b as BlockImageEntity).Image)
@@ -89,6 +90,7 @@ public class RecipeRepository(
                 Name = c.Name,
                 Tags = c.Tags,
                 CreatedDate = c.CreatedDate,
+                CreatedByUserName = c.CreatedByUser != null ? c.CreatedByUser.AccountName : null,
                 Image = c.BlocksInstructions
                          .Where(c => c is BlockImageEntity)
                          .Select(b => (b as BlockImageEntity).Image)
@@ -115,6 +117,7 @@ public class RecipeRepository(
                 Name = c.Name,
                 Tags = c.Tags,
                 CreatedDate = c.CreatedDate,
+                CreatedByUserName = c.CreatedByUser != null ? c.CreatedByUser.AccountName : null,
                 Image = c.BlocksInstructions
                          .Where(c => c is BlockImageEntity)
                          .Select(b => (b as BlockImageEntity).Image)
@@ -137,6 +140,7 @@ public class RecipeRepository(
                 Name = c.Name,
                 Tags = c.Tags,
                 CreatedDate = c.CreatedDate,
+                CreatedByUserName = c.CreatedByUser != null ? c.CreatedByUser.AccountName : null,
                 Image = c.BlocksInstructions
                          .Where(c => c is BlockImageEntity)
                          .Select(b => (b as BlockImageEntity).Image)
@@ -162,7 +166,8 @@ public class RecipeRepository(
             Id = c.Id,
             Name = c.Name,
             Tags = c.Tags,
-            CreatedDate = c.CreatedDate
+            CreatedDate = c.CreatedDate,
+            CreatedByUserName = c.CreatedByUser != null ? c.CreatedByUser.AccountName : null
         }).ToListAsync(cancellationToken);
 
         return result;
@@ -173,8 +178,10 @@ public class RecipeRepository(
     {
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
-        var result = await context.Recipes.Include(s => s.BlocksInstructions)
+        var result = await context.Recipes
+            .Include(s => s.BlocksInstructions)
             .ThenInclude(b => ((BlockIngredientListEntity)b).Ingredients)
+            .Include(r => r.CreatedByUser)
             .Where(r => r.Id == recipeId)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -193,6 +200,7 @@ public class RecipeRepository(
                 Name = c.Name,
                 Tags = c.Tags,
                 CreatedDate = c.CreatedDate,
+                CreatedByUserName = c.CreatedByUser != null ? c.CreatedByUser.AccountName : null,
                 Image = c.BlocksInstructions
                          .Where(c => c is BlockImageEntity)
                          .Select(b => (b as BlockImageEntity).Image)
@@ -247,10 +255,12 @@ public class RecipeRepository(
 
     #region Recipe
 
-    public async Task<RecipeDto> AddRecipe(RecipeDto recipe, CancellationToken cancellationToken = default)
+    public async Task<RecipeDto> AddRecipe(RecipeDto recipe, string? userId = null, CancellationToken cancellationToken = default)
     {
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var recipeEntity = mapper.Map<RecipeEntity>(recipe);
+
+        recipeEntity.CreatedByUserId = userId;
 
         await context.Set<RecipeEntity>().AddAsync(recipeEntity, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);

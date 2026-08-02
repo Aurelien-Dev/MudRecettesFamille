@@ -23,6 +23,13 @@
                 @* Formulaire HTML pur qui POST vers l'endpoint /auth/register *@
                 <form method="post" action="/auth/register">
                     <MudStack Spacing="3">
+                        <MudTextField @bind-Value="accountNameValue"
+                                      Label="Nom d'affichage"
+                                      Variant="Variant.Outlined"
+                                      Required="true"
+                                      HelperText="Ce nom sera visible sur vos recettes" />
+                        <input type="hidden" name="accountName" value="@accountNameValue" />
+
                         <MudTextField @bind-Value="emailValue"
                                       Label="Email"
                                       Variant="Variant.Outlined"
@@ -80,6 +87,7 @@
 
 @code {
     private string? errorMessage;
+    private string accountNameValue = "";
     private string emailValue = "";
     private string passwordValue = "";
     private string confirmPasswordValue = "";
