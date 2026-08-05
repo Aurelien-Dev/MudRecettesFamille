@@ -41,11 +41,7 @@ namespace RecettesFamille.Api
         /// <summary>
         /// Gère la connexion de l'utilisateur
         /// </summary>
-        private static async Task<IResult> HandleLogin(
-            HttpContext context,
-            SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager,
-            ILogger<Program> logger)
+        private static async Task<IResult> HandleLogin(HttpContext context, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ILogger<Program> logger)
         {
             try
             {
@@ -61,8 +57,8 @@ namespace RecettesFamille.Api
                     return Results.Redirect($"/login?error=empty");
                 }
 
-                bool rememberMe = !string.IsNullOrEmpty(rememberMeStr) && 
-                                  (rememberMeStr.Equals("true", StringComparison.OrdinalIgnoreCase) || 
+                bool rememberMe = !string.IsNullOrEmpty(rememberMeStr) &&
+                                  (rememberMeStr.Equals("true", StringComparison.OrdinalIgnoreCase) ||
                                    rememberMeStr.Equals("on", StringComparison.OrdinalIgnoreCase));
 
                 var result = await signInManager.PasswordSignInAsync(email, password, isPersistent: rememberMe, lockoutOnFailure: false);
@@ -146,9 +142,9 @@ namespace RecettesFamille.Api
                     return Results.Redirect($"/register?error=mismatch");
                 }
 
-                var user = new ApplicationUser 
-                { 
-                    UserName = email, 
+                var user = new ApplicationUser
+                {
+                    UserName = email,
                     Email = email,
                     AccountName = string.IsNullOrWhiteSpace(accountName) ? email : accountName
                 };

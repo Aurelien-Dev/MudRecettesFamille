@@ -25,13 +25,8 @@ public static class UserApprovalEndpoints
     /// <summary>
     /// Gère l'approbation d'un utilisateur via token sécurisé
     /// </summary>
-    private static async Task<IResult> HandleUserApproval(
-        string userId,
-        HttpContext context,
-        UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager,
-        ApprovalTokenService tokenService,
-        ILogger<Program> logger)
+    private static async Task<IResult> HandleUserApproval(string userId, HttpContext context, UserManager<ApplicationUser> userManager, 
+        RoleManager<IdentityRole> roleManager, ApprovalTokenService tokenService, ILogger<Program> logger)
     {
         try
         {
