@@ -84,6 +84,14 @@ namespace RecettesFamille.Api
                         // Ne pas bloquer la connexion si le tracking échoue
                     }
 
+                    // WORKAROUND: Pour Blazor Server avec cookies non-persistants
+                    // Petit délai pour s'assurer que le cookie est écrit avant la redirection
+                    // Cela évite une race condition où le circuit SignalR démarre avant que le cookie soit disponible
+                    if (!rememberMe)
+                    {
+                        await Task.Delay(100); // 100ms de délai pour les cookies de session
+                    }
+
                     var redirectTo = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
                     return Results.Redirect(redirectTo);
                 }

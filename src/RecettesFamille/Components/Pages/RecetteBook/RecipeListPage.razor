@@ -134,7 +134,7 @@
 	string _userConnected = string.Empty;
 
 
-	protected override async Task OnParametersSetAsync()
+	protected override async Task OnInitializedAsync()
 	{
 		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 		_userConnected = authState.User.Identity?.Name ?? string.Empty;

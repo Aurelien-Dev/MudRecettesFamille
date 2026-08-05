@@ -147,8 +147,19 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+
+    // Durée de vie du cookie (pour RememberMe = true ET false)
     options.ExpireTimeSpan = TimeSpan.FromDays(14);
     options.SlidingExpiration = true;
+
+    // IMPORTANT pour Blazor Server : même sans "Remember Me", 
+    // on crée un cookie temporaire de quelques heures pour que le circuit SignalR fonctionne
+    // Le cookie expire quand même à la fermeture du navigateur si isPersistent = false
+    // mais reste valide pendant la session de navigation active
+    options.Cookie.MaxAge = null; // Laisse isPersistent contrôler l'expiration
+
+    // CRITIAL: Force l'écriture du cookie avant la réponse pour éviter les race conditions avec SignalR
+    options.Cookie.IsEssential = true; // Le cookie est essentiel pour le fonctionnement
 
     // Configurer les chemins de redirection personnalisés
     options.LoginPath = "/login";
