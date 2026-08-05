@@ -2,10 +2,9 @@ using BitzArt.Blazor.Cookies;
 using Blazored.LocalStorage;
 using Cropper.Blazor.Extensions;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
@@ -19,7 +18,6 @@ using RecettesFamille.Managers;
 using RecettesFamille.Managers.AiGenerators;
 using RecettesFamille.Rag.Extensions;
 using System.Security.Claims;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -122,6 +120,11 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(postgresCs);
 }, ServiceLifetime.Scoped);
+
+// Configure Data Protection to persist keys in PostgreSQL
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<ApplicationDbContext>()
+    .SetApplicationName("RecettesFamille"); // Important pour que toutes les instances partagent les mêmes clés
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
 {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using RecettesFamille.Data.EntityModel;
@@ -7,7 +8,7 @@ using System.Diagnostics;
 
 namespace RecettesFamille.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options), IDataProtectionKeyContext
 {
     public DbSet<RecipeEntity> Recipes { get; set; }
     public DbSet<AiConsumptionEntity> AiConsumptions { get; set; }
@@ -15,6 +16,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TagEntity> Tags { get; set; }
 
     public DbSet<YoutubeResumeEntity> YoutubeSummarys { get; set; }
+
+    // Data Protection keys table
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
