@@ -27,7 +27,7 @@ public class YoutubeService : IYoutubeService
     }
 
     /// <inheritdoc/>
-    public async Task<YoutubeResumeDto> GenerateSummaryFromUrl(string youtubeUrl, CancellationToken cancellationToken = default)
+    public async Task<YoutubeResumeDto> GenerateSummaryFromUrl(string youtubeUrl, int? travelId = null, CancellationToken cancellationToken = default)
     {
         // 1. Valider et extraire le videoId depuis l'URL
         var videoId = ExtractVideoId(youtubeUrl);
@@ -50,7 +50,7 @@ public class YoutubeService : IYoutubeService
         };
 
         // 6. Générer le résumé via l'AI Manager (qui gère aussi la sauvegarde en base)
-        var resumeText = await _aiManager.GetYoutubeResume(youtubeSummaryRequest, cancellationToken);
+        var resumeText = await _aiManager.GetYoutubeResume(youtubeSummaryRequest, travelId, cancellationToken);
 
         // 7. Retourner le résumé complet
         return new YoutubeResumeDto
@@ -58,7 +58,8 @@ public class YoutubeService : IYoutubeService
             Resume = resumeText,
             Url = standardYoutubeUrl,
             Title = youtubeSummaryRequest.Title,
-            CreatedDate = DateTime.UtcNow
+            CreatedDate = DateTime.UtcNow,
+            TravelId = travelId
         };
     }
 

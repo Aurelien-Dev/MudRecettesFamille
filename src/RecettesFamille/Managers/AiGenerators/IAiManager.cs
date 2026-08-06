@@ -42,7 +42,8 @@ public interface IAiManager
     /// Génère un résumé d'une vidéo YouTube à partir des données fournies.
     /// </summary>
     /// <param name="request">Les données JSON de la vidéo YouTube à résumer.</param>
+    /// <param name="travelId">Identifiant optionnel du voyage à associer au résumé.</param>
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Le résumé généré de la vidéo YouTube.</returns>
-    Task<string> GetYoutubeResume(YoutubeSummaryJson request, CancellationToken cancellationToken = default);
+    Task<string> GetYoutubeResume(YoutubeSummaryJson request, int? travelId = null, CancellationToken cancellationToken = default);
 }

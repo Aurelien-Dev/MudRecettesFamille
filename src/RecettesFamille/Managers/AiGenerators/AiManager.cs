@@ -121,7 +121,7 @@ Réponds uniquement au format json répondant à ce schéma:
         return GptMapper.ConvertToRecipeDto(result);
     }
 
-    public async Task<string> GetYoutubeResume(YoutubeSummaryJson request, CancellationToken cancellationToken = default)
+    public async Task<string> GetYoutubeResume(YoutubeSummaryJson request, int? travelId = null, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -142,7 +142,13 @@ Réponds uniquement au format json répondant à ce schéma:
 
             var result = await GetChatResponse(messages, AiClientType.OpenAi, ChatResponseFormat.Text);
 
-            _ = await youtubeRepository.AddSummary(new YoutubeResumeDto() { Resume = result, Title = request.Title, Url = request.Url });
+            _ = await youtubeRepository.AddSummary(new YoutubeResumeDto() 
+            { 
+                Resume = result, 
+                Title = request.Title, 
+                Url = request.Url,
+                TravelId = travelId
+            });
 
             return result;
         }

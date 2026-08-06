@@ -11,7 +11,10 @@ public class YoutubeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCo
     public async Task<List<YoutubeResumeDto>> GetAllSummary(CancellationToken cancellationToken = default)
     {
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-        return mapper.Map<List<YoutubeResumeDto>>(await context.YoutubeSummarys.ToListAsync(cancellationToken));
+        var summaries = await context.YoutubeSummarys
+            .Include(y => y.Travel)
+            .ToListAsync(cancellationToken);
+        return mapper.Map<List<YoutubeResumeDto>>(summaries);
     }
 
     public async Task<YoutubeResumeDto> AddSummary(YoutubeResumeDto youtubeSummary, CancellationToken cancellationToken = default)
@@ -36,6 +39,23 @@ public class YoutubeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCo
         }
 
         context.YoutubeSummarys.Remove(youtubeResumeEntity);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
+
+    public async Task<bool> UpdateSummaryTravel(int summaryId, int? travelId, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var youtubeResumeEntity = await context.YoutubeSummarys.FindAsync([summaryId], cancellationToken);
+
+        if (youtubeResumeEntity == null)
+        {
+            return false;
+        }
+
+        youtubeResumeEntity.TravelId = travelId;
+        context.YoutubeSummarys.Update(youtubeResumeEntity);
         await context.SaveChangesAsync(cancellationToken);
 
         return true;

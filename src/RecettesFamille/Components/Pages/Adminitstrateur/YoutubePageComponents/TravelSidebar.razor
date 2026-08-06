@@ -1,0 +1,120 @@
+@using RecettesFamille.Dto.Models
+
+<MudPaper Elevation="2" Class="pa-4" Style="background-color: white; height: 100%;">
+    <MudStack Spacing="3">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+            <MudText Typo="Typo.h6">Mes voyages</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Add" 
+                          Color="Color.Primary" 
+                          Size="Size.Small"
+                          OnClick="OnCreateTravel"
+                          Title="Créer un voyage" />
+        </MudStack>
+
+        <MudDivider />
+
+        <MudList T="string" Dense="true" Class="pa-0">
+            <MudListItem T="string" 
+                        OnClick="@(() => OnFilterChange(null, "all"))"
+                        Class="@GetListItemClass(null, "all")">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <MudIcon Icon="@Icons.Material.Filled.List" Size="Size.Small" />
+                        <MudText>Tous les résumés</MudText>
+                    </MudStack>
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@TotalCount</MudChip>
+                </MudStack>
+            </MudListItem>
+
+            <MudListItem T="string" 
+                        OnClick="@(() => OnFilterChange(null, "unclassified"))"
+                        Class="@GetListItemClass(null, "unclassified")">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Size="Size.Small" Color="Color.Default" />
+                        <MudText>Non classés</MudText>
+                    </MudStack>
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@UnclassifiedCount</MudChip>
+                </MudStack>
+            </MudListItem>
+
+            <MudDivider Class="my-2" />
+
+            @foreach (var travel in Travels.Where(t => !t.IsArchived).OrderByDescending(t => t.CreatedDate))
+            {
+                var count = SummariesCount.GetValueOrDefault(travel.Id, 0);
+                <MudListItem T="string" 
+                            OnClick="@(() => OnFilterChange(travel.Id, "travel"))"
+                            Class="@GetListItemClass(travel.Id, "travel")">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudIcon Icon="@Icons.Material.Filled.Luggage" Size="Size.Small" Color="Color.Primary" />
+                            <div style="flex: 1; min-width: 0;">
+                                <MudText Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@travel.Name</MudText>
+                            </div>
+                        </MudStack>
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@count</MudChip>
+                            <div @onclick:stopPropagation="true">
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                                              Size="Size.Small" 
+                                              OnClick="@(() => OnEditTravel(travel))"
+                                              Title="Modifier" />
+                            </div>
+                        </MudStack>
+                    </MudStack>
+                </MudListItem>
+            }
+
+            @if (Travels.Any(t => t.IsArchived))
+            {
+                <MudDivider Class="my-2" />
+                <MudListItem T="string" 
+                            OnClick="@(() => OnFilterChange(null, "archived"))"
+                            Class="@GetListItemClass(null, "archived")">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudIcon Icon="@Icons.Material.Filled.Archive" Size="Size.Small" />
+                            <MudText>Archivés</MudText>
+                        </MudStack>
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@Travels.Count(t => t.IsArchived)</MudChip>
+                    </MudStack>
+                </MudListItem>
+            }
+        </MudList>
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter] public List<TravelDto> Travels { get; set; } = [];
+    [Parameter] public Dictionary<int, int> SummariesCount { get; set; } = new();
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public int UnclassifiedCount { get; set; }
+    [Parameter] public int? SelectedTravelId { get; set; }
+    [Parameter] public string SelectedFilterType { get; set; } = "all";
+    [Parameter] public EventCallback<(int? travelId, string filterType)> OnFilterChanged { get; set; }
+    [Parameter] public EventCallback OnCreateTravelClicked { get; set; }
+    [Parameter] public EventCallback<TravelDto> OnEditTravelClicked { get; set; }
+
+    private string GetListItemClass(int? travelId, string filterType)
+    {
+        var isSelected = (SelectedFilterType == filterType && 
+                         (filterType != "travel" || SelectedTravelId == travelId));
+        return isSelected ? "mud-selected-item mud-ripple" : "";
+    }
+
+    private async Task OnFilterChange(int? travelId, string filterType)
+    {
+        await OnFilterChanged.InvokeAsync((travelId, filterType));
+    }
+
+    private async Task OnCreateTravel()
+    {
+        await OnCreateTravelClicked.InvokeAsync();
+    }
+
+    private async Task OnEditTravel(TravelDto travel)
+    {
+        await OnEditTravelClicked.InvokeAsync(travel);
+    }
+}

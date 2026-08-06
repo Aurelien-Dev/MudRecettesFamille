@@ -18,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IYoutubeRepository, YoutubeRepository>();
+        services.AddScoped<ITravelRepository, TravelRepository>();
 
         //AutoMapper
         services.AddAutoMapper(cfg =>

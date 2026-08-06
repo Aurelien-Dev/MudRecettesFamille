@@ -16,6 +16,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TagEntity> Tags { get; set; }
 
     public DbSet<YoutubeResumeEntity> YoutubeSummarys { get; set; }
+    public DbSet<TravelEntity> Travels { get; set; }
 
     // Data Protection keys table
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
@@ -89,6 +90,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<BlockBaseEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
 
         builder.Entity<YoutubeResumeEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
+
+        builder.Entity<TravelEntity>(entity =>
+        {
+            entity.HasKey(t => t.Id);
+            entity.Property(t => t.Id).ValueGeneratedOnAdd();
+            entity.HasMany(t => t.YoutubeSummaries)
+                  .WithOne(y => y.Travel)
+                  .HasForeignKey(y => y.TravelId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
 
         base.OnModelCreating(builder);
     }

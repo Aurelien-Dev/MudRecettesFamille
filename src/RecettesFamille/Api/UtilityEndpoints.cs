@@ -32,7 +32,7 @@ public static class UtilityEndpoints
             return Results.BadRequest("Invalid request body.");
         }
 
-        var resume = await aiManager.GetYoutubeResume(requestBody, cancellationToken);
+        var resume = await aiManager.GetYoutubeResume(requestBody, null, cancellationToken);
         return Results.Ok(new { result = resume });
     }
 }

@@ -31,4 +31,13 @@ public interface IYoutubeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>True si la suppression a réussi, false sinon.</returns>
     Task<bool> DeleteSummary(int id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Met à jour le voyage associé à un résumé YouTube.
+    /// </summary>
+    /// <param name="summaryId">L'identifiant du résumé à mettre à jour.</param>
+    /// <param name="travelId">L'identifiant du voyage à associer (null pour "Non classé").</param>
+    /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
+    /// <returns>True si la mise à jour a réussi, false sinon.</returns>
+    Task<bool> UpdateSummaryTravel(int summaryId, int? travelId, CancellationToken cancellationToken = default);
 }

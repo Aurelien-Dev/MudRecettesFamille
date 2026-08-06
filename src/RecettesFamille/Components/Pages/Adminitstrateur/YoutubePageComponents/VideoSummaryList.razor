@@ -1,0 +1,106 @@
+@using RecettesFamille.Dto.Models
+
+<MudPaper Elevation="2" Class="pa-4" Style="background-color: white; height: 100%;">
+    <MudStack Spacing="3">
+        <MudTextField @bind-Value="SearchText" 
+                      Label="Rechercher un résumé" 
+                      Variant="Variant.Outlined"
+                      Placeholder="Titre ou contenu..."
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true"
+                      Clearable="true"
+                      OnClearButtonClick="@(() => OnSearchChanged.InvokeAsync(string.Empty))"
+                      DebounceInterval="300"
+                      OnDebounceIntervalElapsed="@(() => OnSearchChanged.InvokeAsync(SearchText))" />
+
+        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">
+            @FilteredSummaries.Count résumé(s)
+        </MudText>
+
+        <MudDivider />
+
+        @if (!FilteredSummaries.Any())
+        {
+            <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Secondary" Class="my-8">
+                <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-2" />
+                <br />
+                Aucun résumé ne correspond aux critères.
+            </MudText>
+        }
+        else
+        {
+            <div style="max-height: 60vh; overflow-y: auto;">
+                <MudStack Spacing="2">
+                    @foreach (var summary in FilteredSummaries.OrderByDescending(x => x.CreatedDate))
+                    {
+                        <MudPaper Elevation="@(SelectedSummaryId == summary.Id ? 3 : 1)" 
+                                 Class="@(SelectedSummaryId == summary.Id ? "mud-theme-primary pa-3" : "pa-3")"
+                                 Style="cursor: pointer; transition: all 0.2s;">
+                            <MudStack Spacing="1" @onclick="@(() => OnSummarySelected.InvokeAsync(summary))">
+                                <MudStack Row="true" AlignItems="AlignItems.Start" Justify="Justify.SpaceBetween">
+                                    <div style="flex: 1; min-width: 0;">
+                                        <MudText Typo="Typo.subtitle1" Style="font-weight: 600;">@summary.Title</MudText>
+                                    </div>
+                                    <div @onclick:stopPropagation="true">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                                      Color="Color.Error" 
+                                                      Size="Size.Small"
+                                                      OnClick="@(() => OnDeleteSummaryClicked.InvokeAsync(summary))"
+                                                      Title="Supprimer" />
+                                    </div>
+                                </MudStack>
+
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudIcon Icon="@Icons.Custom.Brands.YouTube" Color="Color.Error" Size="Size.Small" />
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; flex: 1;">
+                                        @summary.Url
+                                    </MudText>
+                                </MudStack>
+
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Class="mt-1">
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                        <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Style="font-size: 0.8rem;" />
+                                        <MudText Typo="Typo.caption" Style="font-size: 0.7rem;">
+                                            @summary.CreatedDate.ToLocalTime().ToString("dd/MM/yyyy")
+                                        </MudText>
+                                    </MudStack>
+
+                                    @if (!string.IsNullOrWhiteSpace(summary.TravelName))
+                                    {
+                                        <MudChip T="string" 
+                                                Size="Size.Small" 
+                                                Color="Color.Primary" 
+                                                Variant="Variant.Text"
+                                                Icon="@Icons.Material.Filled.Luggage">
+                                            @summary.TravelName
+                                        </MudChip>
+                                    }
+                                    else
+                                    {
+                                        <MudChip T="string" 
+                                                Size="Size.Small" 
+                                                Color="Color.Default" 
+                                                Variant="Variant.Text"
+                                                Icon="@Icons.Material.Filled.HelpOutline">
+                                            Non classé
+                                        </MudChip>
+                                    }
+                                </MudStack>
+                            </MudStack>
+                        </MudPaper>
+                    }
+                </MudStack>
+            </div>
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter] public List<YoutubeResumeDto> FilteredSummaries { get; set; } = [];
+    [Parameter] public int? SelectedSummaryId { get; set; }
+    [Parameter] public string SearchText { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> OnSearchChanged { get; set; }
+    [Parameter] public EventCallback<YoutubeResumeDto> OnSummarySelected { get; set; }
+    [Parameter] public EventCallback<YoutubeResumeDto> OnDeleteSummaryClicked { get; set; }
+}

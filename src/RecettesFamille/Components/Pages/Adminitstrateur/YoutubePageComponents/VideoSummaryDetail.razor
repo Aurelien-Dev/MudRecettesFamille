@@ -1,0 +1,124 @@
+@using RecettesFamille.Dto.Models
+
+@if (Summary is not null)
+{
+    <MudPaper Elevation="2" Class="pa-4" Style="background-color: white; height: 100%;">
+        <MudStack Spacing="3">
+            <div>
+                <MudText Typo="Typo.h5" GutterBottom="true">@Summary.Title</MudText>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                    <MudChip T="string" 
+                             Icon="@Icons.Material.Filled.Link" 
+                             Size="Size.Small" 
+                             Color="Color.Error" 
+                             Variant="Variant.Text"
+                             Href="@Summary.Url" 
+                             Target="_blank">
+                        Voir la vidéo YouTube
+                    </MudChip>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        Ajouté le @Summary.CreatedDate.ToLocalTime().ToString("dd/MM/yyyy à HH:mm")
+                    </MudText>
+                </MudStack>
+            </div>
+
+            <MudDivider />
+
+            <div>
+                <MudText Typo="Typo.subtitle2" GutterBottom="true">Voyage associé</MudText>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    @if (Travels.Any())
+                    {
+                        <MudSelect T="int?" 
+                                  @bind-Value="selectedTravelId" 
+                                  Label="Changer le voyage" 
+                                  Variant="Variant.Outlined"
+                                  Clearable="true"
+                                  AnchorOrigin="Origin.BottomCenter"
+                                  Style="max-width: 300px;">
+                            <MudSelectItem T="int?" Value="@((int?)null)">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Size="Size.Small" />
+                                    <MudText>Non classé</MudText>
+                                </MudStack>
+                            </MudSelectItem>
+                            @foreach (var travel in Travels.Where(t => !t.IsArchived).OrderBy(t => t.Name))
+                            {
+                                <MudSelectItem T="int?" Value="@((int?)travel.Id)">
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                        <MudIcon Icon="@Icons.Material.Filled.Luggage" Size="Size.Small" Color="Color.Primary" />
+                                        <MudText>@travel.Name</MudText>
+                                    </MudStack>
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudButton Variant="Variant.Filled" 
+                                  Color="Color.Primary" 
+                                  Size="Size.Small"
+                                  OnClick="SaveTravelChange">
+                            Enregistrer
+                        </MudButton>
+                    }
+                    else
+                    {
+                        @if (!string.IsNullOrWhiteSpace(Summary.TravelName))
+                        {
+                            <MudChip T="string" 
+                                    Icon="@Icons.Material.Filled.Luggage" 
+                                    Color="Color.Primary">
+                                @Summary.TravelName
+                            </MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string" 
+                                    Icon="@Icons.Material.Filled.HelpOutline" 
+                                    Color="Color.Default">
+                                Non classé
+                            </MudChip>
+                        }
+                    }
+                </MudStack>
+            </div>
+
+            <MudDivider />
+
+            <div style="max-height: 50vh; overflow-y: auto;">
+                <MudText Typo="Typo.subtitle2" GutterBottom="true">Résumé</MudText>
+                <MudMarkdown Value="@Summary.Resume" />
+            </div>
+        </MudStack>
+    </MudPaper>
+}
+else
+{
+    <MudPaper Elevation="1" Class="pa-4" Style="background-color: white; height: 100%;">
+        <MudText Typo="Typo.body1" Align="Align.Center" Class="my-8" Color="Color.Secondary">
+            <MudIcon Icon="@Icons.Material.Filled.VideoLibrary" Size="Size.Large" Class="mb-2" />
+            <br />
+            Sélectionnez un résumé dans la liste pour l'afficher ici.
+        </MudText>
+    </MudPaper>
+}
+
+@code {
+    [Parameter] public YoutubeResumeDto? Summary { get; set; }
+    [Parameter] public List<TravelDto> Travels { get; set; } = [];
+    [Parameter] public EventCallback<YoutubeResumeDto> OnTravelChanged { get; set; }
+
+    private int? selectedTravelId;
+
+    protected override void OnParametersSet()
+    {
+        selectedTravelId = Summary?.TravelId;
+    }
+
+    private async Task SaveTravelChange()
+    {
+        if (Summary != null)
+        {
+            Summary.TravelId = selectedTravelId;
+            await OnTravelChanged.InvokeAsync(Summary);
+        }
+    }
+}

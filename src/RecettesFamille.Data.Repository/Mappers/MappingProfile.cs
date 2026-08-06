@@ -33,6 +33,14 @@ public class MappingProfile : Profile
         CreateMap<AiConsumptionEntity, AiConsumptionDto>().ReverseMap();
         CreateMap<TagEntity, TagDto>().ReverseMap();
 
-        CreateMap<YoutubeResumeEntity, YoutubeResumeDto>().ReverseMap();
+        // Mapping Entity → DTO (inclut TravelName depuis la navigation property)
+        CreateMap<YoutubeResumeEntity, YoutubeResumeDto>()
+            .ForMember(dest => dest.TravelName, opt => opt.MapFrom(src => src.Travel != null ? src.Travel.Name : null));
+
+        // Mapping DTO → Entity (ignore la navigation property, seul TravelId est mappé)
+        CreateMap<YoutubeResumeDto, YoutubeResumeEntity>()
+            .ForMember(dest => dest.Travel, opt => opt.Ignore());
+
+        CreateMap<TravelEntity, TravelDto>().ReverseMap();
     }
 }

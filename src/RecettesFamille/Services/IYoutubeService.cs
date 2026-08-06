@@ -14,9 +14,10 @@ public interface IYoutubeService
     /// la génération du résumé via l'AI, et la sauvegarde en base de données.
     /// </summary>
     /// <param name="youtubeUrl">L'URL complète de la vidéo YouTube (supporte les formats youtube.com/watch?v=, youtu.be/, youtube.com/embed/).</param>
+    /// <param name="travelId">Identifiant optionnel du voyage à associer au résumé.</param>
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Le résumé de la vidéo YouTube avec toutes les métadonnées.</returns>
     /// <exception cref="ArgumentException">Lancée si l'URL n'est pas une URL YouTube valide.</exception>
     /// <exception cref="HttpRequestException">Lancée si l'appel à l'API Supadata échoue.</exception>
-    Task<YoutubeResumeDto> GenerateSummaryFromUrl(string youtubeUrl, CancellationToken cancellationToken = default);
+    Task<YoutubeResumeDto> GenerateSummaryFromUrl(string youtubeUrl, int? travelId = null, CancellationToken cancellationToken = default);
 }
