@@ -38,8 +38,6 @@
                 </MudStack>
             </MudListItem>
 
-            <MudDivider Class="my-2" />
-
             @foreach (var travel in Travels.Where(t => !t.IsArchived).OrderByDescending(t => t.CreatedDate))
             {
                 var count = SummariesCount.GetValueOrDefault(travel.Id, 0);
