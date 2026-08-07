@@ -1,8 +1,8 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
+<Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
-                @* Redirection vers la page de login personnalisée *@
+                @* Redirection vers la page de login personnalis�e *@
                 <RedirectToLogin />
             </NotAuthorized>
         </AuthorizeRouteView>

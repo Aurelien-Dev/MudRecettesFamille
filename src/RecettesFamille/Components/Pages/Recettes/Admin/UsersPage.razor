@@ -1,13 +1,9 @@
-ï»¿@page "/admin/users"
+@page "/admin/users"
 @attribute [Authorize(Roles = "Admin")]
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
-@using RecettesFamille.Components.Layout
-@using RecettesFamille.Components.Dialogs
 @using RecettesFamille.Data
-@using RecettesFamille.Data.Repository.IRepositories
-@using MudBlazor
 @layout AdminLayout
 
 @inject IUserRepository userRepository
@@ -104,7 +100,7 @@
 						<CardHeaderContent>
 							<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
 								<MudIcon Icon="@Icons.Material.Filled.Schedule" Color="Color.Info" Size="Size.Large" />
-								<MudText Typo="Typo.h6">DerniÃ¨re Connexion</MudText>
+								<MudText Typo="Typo.h6">Dernière Connexion</MudText>
 							</MudStack>
 						</CardHeaderContent>
 					</MudCardHeader>
@@ -113,7 +109,7 @@
 							<div>
 								@if (_lastConnectionDate.HasValue)
 								{
-									<MudText Typo="Typo.body2" Color="Color.Secondary">Plus rÃ©cente</MudText>
+									<MudText Typo="Typo.body2" Color="Color.Secondary">Plus récente</MudText>
 									<MudText Typo="Typo.body1" Color="Color.Info">@_lastConnectionDate.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</MudText>
 								}
 								else
@@ -147,8 +143,8 @@
 								  Style="background-color: white;">
 							<HeaderContent>
 								<MudTh>Utilisateur</MudTh>
-								<MudTh>RÃ´les</MudTh>
-								<MudTh>DerniÃ¨re connexion</MudTh>
+								<MudTh>Rôles</MudTh>
+								<MudTh>Dernière connexion</MudTh>
 								<MudTh Style="text-align: center;">Actions</MudTh>
 							</HeaderContent>
 							<RowTemplate>
@@ -158,7 +154,7 @@
 										<MudText Typo="Typo.body2">@context.Name</MudText>
 									</MudStack>
 								</MudTd>
-								<MudTd DataLabel="RÃ´les">
+								<MudTd DataLabel="Rôles">
 									<MudStack Row="true" Spacing="1">
 										@if (context.IsAdmin)
 										{
@@ -231,7 +227,7 @@
 										}
 									</MudStack>
 								</MudTd>
-								<MudTd DataLabel="DerniÃ¨re connexion">
+								<MudTd DataLabel="Dernière connexion">
 									@if (context.LastLoginDate.HasValue)
 									{
 										<MudStack Spacing="0">
@@ -254,7 +250,7 @@
 
 							<PagerContent>
 								<MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"
-											   RowsPerPageString="Ã‰lÃ©ments par page :"
+											   RowsPerPageString="Éléments par page :"
 											   InfoFormat="{first_item}-{last_item} sur {all_items}" />
 							</PagerContent>
 						</MudTable>
@@ -354,11 +350,11 @@
 
 			StateHasChanged();
 
-			Snackbar.Add($"RÃ´le {role} {(!currentValue ? "ajoutÃ©" : "retirÃ©")} pour {userVm.Name}", Severity.Success);
+			Snackbar.Add($"Rôle {role} {(!currentValue ? "ajouté" : "retiré")} pour {userVm.Name}", Severity.Success);
 		}
 		catch (Exception ex)
 		{
-			Snackbar.Add($"Erreur lors de la modification du rÃ´le: {ex.Message}", Severity.Error);
+			Snackbar.Add($"Erreur lors de la modification du rôle: {ex.Message}", Severity.Error);
 		}
 	}
 	private async Task DeleteUserDialog(UserViewModel userVm)
@@ -369,7 +365,7 @@
 		var parameters = new DialogParameters
 		{
 			{ "Title", "Confirmation de suppression" },
-			{ "Message", $"ÃŠtes-vous sÃ»r de vouloir supprimer l'utilisateur {userVm.Name}?" },
+			{ "Message", $"Êtes-vous sûr de vouloir supprimer l'utilisateur {userVm.Name}?" },
 			{ "ConfirmText", "Supprimer" },
 			{ "CancelText", "Annuler" }
 		};
@@ -398,7 +394,7 @@
 				_adminCount = users.Count(u => u.IsAdmin);
 				_contributorCount = users.Count(u => u.IsContributor);
 
-				Snackbar.Add($"L'utilisateur {userVm.Name} a Ã©tÃ© supprimÃ© avec succÃ¨s", Severity.Success);
+				Snackbar.Add($"L'utilisateur {userVm.Name} a été supprimé avec succès", Severity.Success);
 			}
 			else
 			{

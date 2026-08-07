@@ -1,4 +1,3 @@
-﻿@using RecettesFamille.Dto.Models
 @code {
     private static string GetRestTimeText(int restTime)
     {
@@ -20,7 +19,7 @@
         @{
             var instructions = new[]
             {
-                Recipe.PrepTime > 0 ? $"préparation : {Recipe.PrepTime} min" : string.Empty,
+                Recipe.PrepTime > 0 ? $"pr�paration : {Recipe.PrepTime} min" : string.Empty,
                 Recipe.CookingTime > 0 ? $"temps de cuisson: {Recipe.CookingTime} min" : string.Empty,
                 GetRestTimeText(Recipe.RestTime),
                 Recipe.Portion > 0 ? $"pour {Recipe.Portion} portions" : string.Empty

@@ -1,5 +1,3 @@
-ï»¿@using RecettesFamille.Components.Dialogs
-@using RecettesFamille.Dto.Models.Blocks
 @inherits BaseBlockDefinition<BlockBaseDto>
 @{
     Md = Block.HalfPage ? 6 : 12;
@@ -18,7 +16,7 @@
                 <ImageComponent EditMode="EditMode" Block="imageBlock" OnBlockUpdated="OnBlockUpdated" OnBlockDeleted="OnBlockDeleted" />
                 break;
 
-            // Ajoutez d'autres cas pour diffÃ©rents types de blocs ici
+            // Ajoutez d'autres cas pour différents types de blocs ici
             default:
                 <p>Type de bloc non pris en charge</p>
                 break;
@@ -60,7 +58,7 @@
         var parameters = new DialogParameters
         {
             { "Title", "Avertissement" },
-            { "Message", "La suppression est irrÃ©versible !" },
+            { "Message", "La suppression est irréversible !" },
             { "ConfirmText", "Supprimer !" },
             { "CancelText", "Annuler" }
         };

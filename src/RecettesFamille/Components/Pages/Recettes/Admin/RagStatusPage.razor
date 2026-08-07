@@ -1,17 +1,14 @@
 @page "/admin/rag-status"
 @using Microsoft.AspNetCore.Authorization
-@using Microsoft.EntityFrameworkCore
-@using Microsoft.JSInterop
-@using RecettesFamille.Components.Layout
-@using RecettesFamille.Data
-@using RecettesFamille.Data.EntityModel.Blocks
-@using RecettesFamille.Rag.Ingestion
-@using RecettesFamille.Rag.Services
+@using global::RecettesFamille.Data
+@using global::RecettesFamille.Data.EntityModel.Blocks
+@using global::RecettesFamille.Rag.Ingestion
+@using global::RecettesFamille.Rag.Services
 
 @inject IDbContextFactory<ApplicationDbContext> contextFactory
 @inject IngestionCacheDbContext ingestionCache
 @inject RagIngestionService ragIngestion
-@inject RecettesFamille.Services.RecipeRagService recipeRagService
+@inject global::RecettesFamille.Services.RecipeRagService recipeRagService
 @inject ILogger<RagStatusPage> logger
 @inject IJSRuntime JS
 

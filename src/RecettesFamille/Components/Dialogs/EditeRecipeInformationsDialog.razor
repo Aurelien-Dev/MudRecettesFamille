@@ -1,5 +1,5 @@
-ï»¿@using System.ComponentModel.DataAnnotations
-@using RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions
+@using System.ComponentModel.DataAnnotations
+@using RecettesFamille.Components.Pages.Recettes.RecetteBook.BlockDefinitions
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Dto.Models
 @using RecettesFamille.Dto.Models.Blocks
@@ -20,7 +20,7 @@
 			</MudItem>
 
 			<MudItem xs="12">
-				<MudTextField @bind-Value="recipePrepTime" Label="Temp de prÃ©paration" Variant="Variant.Text" InputType="InputType.Number" AdornmentText="min" Adornment="Adornment.End" />
+				<MudTextField @bind-Value="recipePrepTime" Label="Temp de préparation" Variant="Variant.Text" InputType="InputType.Number" AdornmentText="min" Adornment="Adornment.End" />
 			</MudItem>
 			
 			<MudItem xs="12">
@@ -32,7 +32,7 @@
 			</MudItem>
 
 			<MudItem xs="12">
-				<MudSelect T="TagDto" Label="CatÃ©gories" MultiSelection="true" @bind-SelectedValues="selectedTags">
+				<MudSelect T="TagDto" Label="Catégories" MultiSelection="true" @bind-SelectedValues="selectedTags">
 					@foreach (var tag in tags)
 					{
 						<MudSelectItem T="TagDto" Value="@tag">@tag</MudSelectItem>

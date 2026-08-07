@@ -2,8 +2,6 @@
 @attribute [Authorize(Roles = "Admin")]
 @layout RecettesFamille.Components.Layout.TravelPlannerAdminLayout
 @using Microsoft.AspNetCore.Authorization
-@using RecettesFamille.Services.TravelPlanner
-@using RecettesFamille.Data.Repository.IRepositories
 @inject ISummaryService SummaryService
 @inject ITravelRepository TravelRepository
 @inject ICategoryRepository CategoryRepository

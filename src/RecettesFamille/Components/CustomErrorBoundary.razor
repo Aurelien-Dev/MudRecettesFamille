@@ -1,4 +1,4 @@
-﻿@inherits ErrorBoundary
+@inherits ErrorBoundary
 @inject ILogger<CustomErrorBoundary> Logger
 
 @if (CurrentException is null)
@@ -15,7 +15,7 @@ else if (ErrorContent is not null)
 
     protected override Task OnErrorAsync(Exception exception)
     {
-        Logger.LogError(exception, "😈 A rotten gremlin got us. Sorry!");
+        Logger.LogError(exception, "?? A rotten gremlin got us. Sorry!");
         Recover();
         NavigationManager.Refresh(true);
 

@@ -1,4 +1,4 @@
-ï»¿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 @using RecettesFamille.Components.Layout
 @using RecettesFamille.Data
 <!DOCTYPE html>
@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
-    <meta name="description" content="Livre de recettes familiales privÃ© - Conservez et partagez vos recettes prÃ©fÃ©rÃ©es" />
+    <meta name="description" content="Livre de recettes familiales privé - Conservez et partagez vos recettes préférées" />
     <base href="/" />
     <PageTitle>Recettes famille - Livre de recettes</PageTitle>
 
@@ -68,10 +68,10 @@
             }
         }
 
-        // Helper pour reconnexion aprÃ¨s login/logout
-        // Utilise window.location.replace pour Ã©viter l'historique de navigation
+        // Helper pour reconnexion après login/logout
+        // Utilise window.location.replace pour éviter l'historique de navigation
         window.blazorForceReconnect = (redirectUrl) => {
-            // replace() remplace l'URL actuelle sans ajouter d'entrÃ©e dans l'historique
+            // replace() remplace l'URL actuelle sans ajouter d'entrée dans l'historique
             // et force un rechargement complet (nouveau circuit SignalR avec les cookies)
             window.location.replace(redirectUrl || '/');
         }

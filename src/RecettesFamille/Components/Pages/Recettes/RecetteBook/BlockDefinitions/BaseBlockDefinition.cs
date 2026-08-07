@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using RecettesFamille.Dto.Models.Blocks;
 
-namespace RecettesFamille.Components.Pages.RecetteBook.BlockDefinitions;
+namespace RecettesFamille.Components.Pages.Recettes.RecetteBook.BlockDefinitions;
 
 public abstract class BaseBlockDefinition<TBlock> : ComponentBase where TBlock : BlockBaseDto
 {

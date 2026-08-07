@@ -1,12 +1,6 @@
-ï»¿@implements IBrowserViewportObserver
+@implements IBrowserViewportObserver
 @inject RecipeRagService RagService
 
-@using Microsoft.AspNetCore.Authorization
-@using System.ComponentModel
-@using RecettesFamille.Data.Repository.IRepositories
-@using RecettesFamille.Dto.ModelByPage.RecetteBook
-@using RecettesFamille.Dto.Models
-@using RecettesFamille.Extensions
 
 
 <MudGrid>
@@ -40,7 +34,7 @@
 					<ChildContent>
 						<MudRadioGroup T="Direction" Value="_selectedDirection" ValueChanged="OnSelectedSortChanged">
 							<MudRadio Value="Direction.Alphabetique" Color="Color.Primary">Alphabetique</MudRadio>
-							<MudRadio Value="Direction.DateAjout" Color="Color.Primary">DerniÃ¨res recettes en haut</MudRadio>
+							<MudRadio Value="Direction.DateAjout" Color="Color.Primary">Dernières recettes en haut</MudRadio>
 						</MudRadioGroup>
 					</ChildContent>
 				</MudExpansionPanel>
@@ -51,7 +45,7 @@
 					<TitleContent>
 						<div class="d-flex">
 							<MudIcon Icon="@Icons.Material.Filled.FilterAlt" class="mr-3" Size="Size.Medium"></MudIcon>
-							<MudText Typo="Typo.subtitle2">Filtre par catÃ©gories</MudText>
+							<MudText Typo="Typo.subtitle2">Filtre par catégories</MudText>
 						</div>
 					</TitleContent>
 					<ChildContent>
@@ -217,7 +211,7 @@
 	#region RAG Semantic Search
 
 	/// <summary>
-	/// Recherche sÃ©mantique de recettes via RAG.
+	/// Recherche sémantique de recettes via RAG.
 	/// Si la recherche est vide, affiche toutes les recettes.
 	/// Sinon, utilise la recherche vectorielle pour trouver les recettes pertinentes.
 	/// </summary>
@@ -235,19 +229,19 @@
 				return;
 			}
 			_searchString = _searchString.Trim();
-			// Recherche sÃ©mantique RAG
+			// Recherche sémantique RAG
 			var searchResults = await RagService.SearchRecipesAsync(_searchString, maxResults: 100, scoreThreshold: 0.50);
 			var recipeIds = searchResults.Select(r => r.Id).ToArray();
 
-			// RÃ©cupÃ©rer les recettes lÃ©gÃ¨res avec leurs infos de favoris
+			// Récupérer les recettes légères avec leurs infos de favoris
 			var recipes = await RecipeRepository.GetAllLightRecipe(_userConnected);
 
-			// Filtrer pour ne garder que les rÃ©sultats de la recherche RAG
+			// Filtrer pour ne garder que les résultats de la recherche RAG
 			var filteredRecipes = recipes
 				.Where(r => recipeIds.Contains(r.Id))
 				.ToList();
 
-			// RÃ©ordonner selon la pertinence de la recherche RAG
+			// Réordonner selon la pertinence de la recherche RAG
 			var orderedRecipes = recipeIds
 				.Select(id => filteredRecipes.FirstOrDefault(r => r.Id == id))
 				.Where(r => r != null)

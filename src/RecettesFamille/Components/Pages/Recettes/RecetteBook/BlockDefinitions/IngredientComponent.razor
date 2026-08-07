@@ -1,9 +1,5 @@
-﻿@using RecettesFamille.Components.Dialogs
-@using RecettesFamille.Data.Repository.IRepositories
-@using RecettesFamille.Dto.Models.Blocks
-@using RecettesFamille.Managers.AiGenerators
-@using RecettesFamille.Managers.AiGenerators.Models
-@using RecettesFamille.Services
+@using global::RecettesFamille.Managers.AiGenerators
+@using global::RecettesFamille.Managers.AiGenerators.Models
 @inherits BaseBlockDefinition<BlockIngredientListDto>
 
 @inject IRecipeRepository RecipeRepository
@@ -40,7 +36,7 @@
                 @if (!Block.Calories.HasValue)
                 {
                     <MudChip T="string" Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small" Class="ml-3">
-                        @("No calories info ➡️")
+                        @("No calories info ??")
                     </MudChip>
                 }
                 <MudIconButton Icon="@Icons.Material.Filled.Fastfood" Size="Size.Small" OnClick="GetCalories" />
