@@ -147,7 +147,7 @@
             { "Travel", new TravelDto { Name = "", StartDate = null, EndDate = null, IsArchived = false } }
         };
 
-        var dialog = await DialogService.ShowAsync<RecettesFamille.Components.Dialogs.TravelDialog>("New Travel", parameters);
+        var dialog = await DialogService.ShowAsync<RecettesFamille.Components.Pages.TravelPlanner.Dialogs.TravelDialog>("New Travel", parameters);
         var result = await dialog.Result;
 
         if (!result.Canceled && result.Data is TravelDto travel)
@@ -165,7 +165,7 @@
             { "Travel", travel }
         };
 
-        var dialog = await DialogService.ShowAsync<RecettesFamille.Components.Dialogs.TravelDialog>("Edit Travel", parameters);
+        var dialog = await DialogService.ShowAsync<RecettesFamille.Components.Pages.TravelPlanner.Dialogs.TravelDialog>("Edit Travel", parameters);
         var result = await dialog.Result;
 
         if (!result.Canceled && result.Data is TravelDto updatedTravel)
@@ -208,7 +208,7 @@
             { "CancelText", "Cancel" }
         };
 
-        var dialog = await DialogService.ShowAsync<RecettesFamille.Components.Dialogs.ConfirmationDialog>("", parameters);
+        var dialog = await DialogService.ShowAsync<RecettesFamille.Components.Shared.Dialogs.ConfirmationDialog>("", parameters);
         var result = await dialog.Result;
 
         if (!result.Canceled)
