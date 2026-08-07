@@ -67,4 +67,13 @@ public interface IYoutubeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>True si la mise à jour a réussi, false sinon.</returns>
     Task<bool> UpdateCategories(int summaryId, List<int> categoryIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Met à jour le titre d'un résumé YouTube.
+    /// </summary>
+    /// <param name="summaryId">L'identifiant du résumé à mettre à jour.</param>
+    /// <param name="title">Le nouveau titre.</param>
+    /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
+    /// <returns>True si la mise à jour a réussi, false sinon.</returns>
+    Task<bool> UpdateTitle(int summaryId, string title, CancellationToken cancellationToken = default);
 }

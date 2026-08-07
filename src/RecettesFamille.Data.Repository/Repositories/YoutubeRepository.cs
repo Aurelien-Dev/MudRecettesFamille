@@ -125,4 +125,21 @@ public class YoutubeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCo
 
         return true;
     }
+
+    public async Task<bool> UpdateTitle(int summaryId, string title, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var youtubeResumeEntity = await context.YoutubeSummarys.FindAsync([summaryId], cancellationToken);
+
+        if (youtubeResumeEntity == null)
+        {
+            return false;
+        }
+
+        youtubeResumeEntity.Title = title;
+        context.YoutubeSummarys.Update(youtubeResumeEntity);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
 }
