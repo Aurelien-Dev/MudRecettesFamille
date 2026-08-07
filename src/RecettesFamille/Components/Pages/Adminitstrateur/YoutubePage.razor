@@ -18,11 +18,11 @@
         <TravelSidebar Travels="@travels"
                       Categories="@categories"
                       SummariesCount="@summariesCountByTravel"
-                      CategoryCounts="@summariesCountByCategory"
-                      StatusCounts="@summariesCountByStatus"
+                      CategoryCounts="@GetContextualCategoryCounts()"
+                      StatusCounts="@GetContextualStatusCounts()"
                       TotalCount="@ytResume.Count"
                       UnclassifiedCount="@GetUnclassifiedCount()"
-                      FavoritesCount="@GetFavoritesCount()"
+                      FavoritesCount="@GetContextualFavoritesCount()"
                       SelectedTravelId="@selectedTravelId"
                       SelectedFilterType="@selectedFilterType"
                       FilterFavoritesOnly="@filterFavoritesOnly"
@@ -146,6 +146,7 @@
     [Inject] IDialogService DialogService { get; set; } = null!;
 
     private List<YoutubeResumeDto> ytResume { get; set; } = [];
+    private List<YoutubeResumeDto> baseSummaries { get; set; } = [];
     private List<YoutubeResumeDto> filteredSummaries { get; set; } = [];
     private List<TravelDto> travels { get; set; } = [];
     private List<CategoryDto> categories { get; set; } = [];
@@ -191,22 +192,29 @@
 
     private void ApplyFilters()
     {
-        var query = ytResume.AsEnumerable();
+        // ÉTAPE 1 : Filtrage primaire (contexte de base pour les compteurs)
+        var baseQuery = ytResume.AsEnumerable();
 
         // Filtrer par voyage
         if (selectedFilterType == "travel" && selectedTravelId.HasValue)
         {
-            query = query.Where(s => s.TravelId == selectedTravelId.Value);
+            baseQuery = baseQuery.Where(s => s.TravelId == selectedTravelId.Value);
         }
         else if (selectedFilterType == "unclassified")
         {
-            query = query.Where(s => s.TravelId == null);
+            baseQuery = baseQuery.Where(s => s.TravelId == null);
         }
         else if (selectedFilterType == "archived")
         {
             var archivedTravelIds = travels.Where(t => t.IsArchived).Select(t => t.Id).ToList();
-            query = query.Where(s => s.TravelId.HasValue && archivedTravelIds.Contains(s.TravelId.Value));
+            baseQuery = baseQuery.Where(s => s.TravelId.HasValue && archivedTravelIds.Contains(s.TravelId.Value));
         }
+
+        // Stocker les résumés de base (après filtrage primaire)
+        baseSummaries = baseQuery.ToList();
+
+        // ÉTAPE 2 : Filtrage secondaire (à partir de baseSummaries)
+        var query = baseSummaries.AsEnumerable();
 
         // V2 Filters
         if (filterFavoritesOnly)
@@ -253,6 +261,26 @@
     private int GetFavoritesCount()
     {
         return ytResume.Count(s => s.IsFavorite);
+    }
+
+    private int GetContextualFavoritesCount()
+    {
+        return baseSummaries.Count(s => s.IsFavorite);
+    }
+
+    private Dictionary<SummaryStatus, int> GetContextualStatusCounts()
+    {
+        return baseSummaries
+            .GroupBy(s => s.Status)
+            .ToDictionary(g => g.Key, g => g.Count());
+    }
+
+    private Dictionary<int, int> GetContextualCategoryCounts()
+    {
+        return baseSummaries
+            .SelectMany(s => s.CategoryIds.Select(catId => catId))
+            .GroupBy(catId => catId)
+            .ToDictionary(g => g.Key, g => g.Count());
     }
 
     private void HandleFilterChanged((int? travelId, string filterType) filter)
@@ -347,11 +375,6 @@
                     summaryInList.Status = data.status;
                 }
 
-                // Recalculate status counts
-                summariesCountByStatus = ytResume
-                    .GroupBy(s => s.Status)
-                    .ToDictionary(g => g.Key, g => g.Count());
-
                 // Reapply filters
                 var wasCurrentlySelected = CurrentResume?.Id == data.summary.Id;
                 ApplyFilters();
@@ -429,9 +452,6 @@
                     summaryInList.CategoryNames = data.summary.CategoryNames;
                     summaryInList.CategoryColors = data.summary.CategoryColors;
                 }
-
-                // Recalculate category counts
-                summariesCountByCategory = await categoryRepository.GetSummariesCountByCategory();
 
                 // Reapply filters
                 ApplyFilters();
@@ -580,10 +600,6 @@
 
                 // Rafraîchir les compteurs
                 summariesCountByTravel = await travelRepository.GetSummariesCountByTravel();
-                summariesCountByCategory = await categoryRepository.GetSummariesCountByCategory();
-                summariesCountByStatus = ytResume
-                    .GroupBy(s => s.Status)
-                    .ToDictionary(g => g.Key, g => g.Count());
 
                 Snackbar.Add("Résumé supprimé avec succès", Severity.Success);
             }
