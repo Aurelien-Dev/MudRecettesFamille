@@ -10,6 +10,7 @@ using MudBlazor;
 using MudBlazor.Services;
 using RecettesFamille;
 using RecettesFamille.Api;
+using RecettesFamille.Api.TravelPlanner;
 using RecettesFamille.Components;
 using RecettesFamille.Data;
 using RecettesFamille.Data.EntityModel;
@@ -78,7 +79,10 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<EmailManager>();
 builder.Services.AddScoped<RecettesFamille.Services.ApprovalTokenService>();
 builder.Services.AddScoped<RecettesFamille.Services.UserApprovalEmailService>();
-builder.Services.AddScoped<RecettesFamille.Services.IYoutubeService, RecettesFamille.Services.YoutubeService>();
+
+// TravelPlanner (YouSummarize) services
+builder.Services.AddScoped<RecettesFamille.Services.TravelPlanner.Sources.YoutubeSourceService>();
+builder.Services.AddScoped<RecettesFamille.Services.TravelPlanner.ISummaryService, RecettesFamille.Services.TravelPlanner.SummaryService>();
 
 builder.Services.AddRepository();
 
@@ -219,6 +223,9 @@ app.MapUserApprovalEndpoints();
 
 // Enregistrer les endpoints utilitaires
 app.MapUtilityEndpoints();
+
+// Enregistrer les endpoints TravelPlanner (YouSummarize)
+app.MapTravelPlannerEndpoints();
 
 await app.RunAsync();
 

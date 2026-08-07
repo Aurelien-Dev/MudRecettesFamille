@@ -1,14 +1,14 @@
-@page "/admin/youtube"
-@attribute [Authorize(Roles = "Admin")]
+@page "/travelplanner"
+@attribute [Authorize]
 @layout TravelPlannerLayout
 @using Microsoft.AspNetCore.Authorization
 @using RecettesFamille.Components.Layout
 @using RecettesFamille.Components.Dialogs
-@using RecettesFamille.Components.Pages.Adminitstrateur.YoutubePageComponents
+@using RecettesFamille.Components.Pages.TravelPlanner.TravelPlannerPageComponents
 @using RecettesFamille.Data.Repository.IRepositories
 @using RecettesFamille.Dto.Models
 
-<PageTitle>Résumés YouTube | Recettes famille</PageTitle>
+<PageTitle>YouSummarize | Recettes famille</PageTitle>
 
 @* Structure avec sidebar + contenu *@
 <div style="display: flex; min-height: calc(100vh - 64px); overflow: hidden;">
@@ -141,7 +141,7 @@
     [Inject] IYoutubeRepository youtubeRepository { get; set; } = null!;
     [Inject] ITravelRepository travelRepository { get; set; } = null!;
     [Inject] ICategoryRepository categoryRepository { get; set; } = null!;
-    [Inject] RecettesFamille.Services.IYoutubeService youtubeService { get; set; } = null!;
+    [Inject] RecettesFamille.Services.TravelPlanner.ISummaryService summaryService { get; set; } = null!;
     [Inject] ISnackbar Snackbar { get; set; } = null!;
     [Inject] IDialogService DialogService { get; set; } = null!;
 
@@ -515,7 +515,7 @@
         try
         {
             // Étape 1 : Extraction et génération
-            var newResume = await youtubeService.GenerateSummaryFromUrl(currentUrl, selectedTravelIdForCreation);
+            var newResume = await summaryService.CreateSummaryFromYoutube(currentUrl, selectedTravelIdForCreation);
 
             // Étape 2 : Succès
             processingMessage = "Finalisation...";

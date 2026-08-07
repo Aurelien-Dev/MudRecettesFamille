@@ -10,12 +10,20 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Components\Pages\RecetteBook\BlockDefinitions\Components\**" />
+    <Compile Remove="Components\Pages\TravelPlanner\Categories\**" />
+    <Compile Remove="Components\Pages\TravelPlanner\Travels\**" />
     <Compile Remove="Properties\PublishProfiles\**" />
     <Content Remove="Components\Pages\RecetteBook\BlockDefinitions\Components\**" />
+    <Content Remove="Components\Pages\TravelPlanner\Categories\**" />
+    <Content Remove="Components\Pages\TravelPlanner\Travels\**" />
     <Content Remove="Properties\PublishProfiles\**" />
     <EmbeddedResource Remove="Components\Pages\RecetteBook\BlockDefinitions\Components\**" />
+    <EmbeddedResource Remove="Components\Pages\TravelPlanner\Categories\**" />
+    <EmbeddedResource Remove="Components\Pages\TravelPlanner\Travels\**" />
     <EmbeddedResource Remove="Properties\PublishProfiles\**" />
     <None Remove="Components\Pages\RecetteBook\BlockDefinitions\Components\**" />
+    <None Remove="Components\Pages\TravelPlanner\Categories\**" />
+    <None Remove="Components\Pages\TravelPlanner\Travels\**" />
     <None Remove="Properties\PublishProfiles\**" />
     <_WebToolingArtifacts Remove="Properties\PublishProfiles\**" />
   </ItemGroup>
@@ -42,5 +50,8 @@
   <ItemGroup>
     <ProjectReference Include="..\RecettesFamille.Rag\RecettesFamille.Rag.csproj" />
     <ProjectReference Include="..\RecettesFamille.Data.Repository\RecettesFamille.Data.Repository.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Components\Pages\TravelPlanner\Summaries\" />
   </ItemGroup>
 </Project>

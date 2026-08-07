@@ -35,6 +35,12 @@
             <MudIconButton Href="gpt/import" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.UploadFile" />
         </AuthorizeView>
 
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <MudIconButton Href="/travelplanner" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.Explore" Title="YouSummarize" />
+            </Authorized>
+        </AuthorizeView>
+
         <AuthorizeView Roles="Admin, Contributor">
             <MudIconButton Href="/Admin" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.Settings" />
         </AuthorizeView>

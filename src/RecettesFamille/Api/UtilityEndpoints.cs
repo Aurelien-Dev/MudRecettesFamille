@@ -14,31 +14,15 @@ public static class UtilityEndpoints
     /// </summary>
     public static IEndpointRouteBuilder MapUtilityEndpoints(this IEndpointRouteBuilder app)
     {
-        // Endpoint pour obtenir un résumé YouTube
-        app.MapPost("/api/youtube-summary", HandleYoutubeSummary).WithName("YoutubeSummary");
+        // Note: YouTube summary endpoint has been moved to TravelPlannerEndpoints
+        // No utility endpoints currently registered
         return app;
-    }
-
-    /// <summary>
-    /// Gère la demande de résumé YouTube
-    /// </summary>
-    private static async Task<IResult> HandleYoutubeSummary(HttpRequest request, [FromServices] AiManager aiManager, CancellationToken cancellationToken)
-    {
-        using var reader = new StreamReader(request.Body);
-        var body = await reader.ReadToEndAsync();
-        var requestBody = JsonSerializer.Deserialize<YoutubeSummaryJson>(body);
-        if (requestBody is null)
-        {
-            return Results.BadRequest("Invalid request body.");
-        }
-
-        var resume = await aiManager.GetYoutubeResume(requestBody, null, cancellationToken);
-        return Results.Ok(new { result = resume });
     }
 }
 
 /// <summary>
 /// Modèle de requête pour le résumé YouTube
+/// Note: This class is still used by AiManager and will be refactored in the future
 /// </summary>
 public class YoutubeSummaryJson
 {

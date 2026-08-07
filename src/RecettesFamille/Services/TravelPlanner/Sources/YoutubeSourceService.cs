@@ -1,66 +1,65 @@
-using RecettesFamille.Api;
-using RecettesFamille.Dto.Models;
-using RecettesFamille.Managers.AiGenerators;
 using RecettesFamille.Services.Models;
 using System.Text.Json;
 
-namespace RecettesFamille.Services;
+namespace RecettesFamille.Services.TravelPlanner.Sources;
 
 /// <summary>
-/// Service pour la gestion des opérations YouTube incluant l'extraction de transcripts
-/// et la génération de résumés via l'intelligence artificielle.
+/// Service pour l'extraction de contenu depuis YouTube.
+/// Gère l'extraction des métadonnées et des transcripts via l'API Supadata et YouTube oEmbed.
 /// </summary>
-public class YoutubeService : IYoutubeService
+public class YoutubeSourceService : IContentSourceService
 {
-    private readonly HttpClient _httpClient;
-    private readonly IAiManager _aiManager;
+    private readonly HttpClient _supadataClient;
+
+    /// <inheritdoc/>
+    public string SourceType => "YouTube";
 
     /// <summary>
     /// Initialise une nouvelle instance du service YouTube.
     /// </summary>
     /// <param name="httpClientFactory">Factory pour créer des instances HttpClient configurées.</param>
-    /// <param name="aiManager">Manager pour les opérations d'intelligence artificielle.</param>
-    public YoutubeService(IHttpClientFactory httpClientFactory, IAiManager aiManager)
+    public YoutubeSourceService(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClientFactory.CreateClient("Supadata");
-        _aiManager = aiManager;
+        _supadataClient = httpClientFactory.CreateClient("Supadata");
     }
 
     /// <inheritdoc/>
-    public async Task<YoutubeResumeDto> GenerateSummaryFromUrl(string youtubeUrl, int? travelId = null, CancellationToken cancellationToken = default)
+    public async Task<ContentMetadata> ExtractMetadata(string sourceUrl, CancellationToken cancellationToken = default)
     {
-        // 1. Valider et extraire le videoId depuis l'URL
-        var videoId = ExtractVideoId(youtubeUrl);
+        var videoId = ExtractVideoId(sourceUrl);
+        var standardUrl = $"https://www.youtube.com/watch?v={videoId}";
 
-        // 2. Récupérer le titre de la vidéo via YouTube oEmbed
-        var videoTitle = await GetVideoTitle(videoId, cancellationToken);
+        // Récupérer les métadonnées via YouTube oEmbed
+        var oembedData = await GetVideoMetadataFromOEmbed(videoId, cancellationToken);
 
-        // 3. Récupérer le transcript depuis l'API Supadata
+        // Récupérer des métadonnées supplémentaires depuis Supadata (si disponibles)
         var transcriptResponse = await GetTranscriptFromSupadata(videoId, cancellationToken);
 
-        // 4. Construire l'URL YouTube standard pour la sauvegarde
-        var standardYoutubeUrl = $"https://www.youtube.com/watch?v={videoId}";
+        var title = oembedData?.Title 
+                    ?? transcriptResponse.Title 
+                    ?? $"Vidéo YouTube {videoId}";
 
-        // 5. Créer l'objet de requête pour l'AI Manager
-        var youtubeSummaryRequest = new YoutubeSummaryJson
-        {
-            Transcript = transcriptResponse.Content,
-            Url = standardYoutubeUrl,
-            Title = videoTitle ?? transcriptResponse.Title ?? $"Vidéo YouTube {videoId}"
-        };
+        var author = oembedData?.AuthorName;
 
-        // 6. Générer le résumé via l'AI Manager (qui gère aussi la sauvegarde en base)
-        var resumeText = await _aiManager.GetYoutubeResume(youtubeSummaryRequest, travelId, cancellationToken);
+        TimeSpan? duration = transcriptResponse.Duration.HasValue 
+            ? TimeSpan.FromSeconds(transcriptResponse.Duration.Value) 
+            : null;
 
-        // 7. Retourner le résumé complet
-        return new YoutubeResumeDto
-        {
-            Resume = resumeText,
-            Url = standardYoutubeUrl,
-            Title = youtubeSummaryRequest.Title,
-            CreatedDate = DateTime.UtcNow,
-            TravelId = travelId
-        };
+        return new ContentMetadata(
+            Title: title,
+            Url: standardUrl,
+            SourceType: SourceType,
+            Author: author,
+            Duration: duration
+        );
+    }
+
+    /// <inheritdoc/>
+    public async Task<string> GetContent(string sourceUrl, CancellationToken cancellationToken = default)
+    {
+        var videoId = ExtractVideoId(sourceUrl);
+        var transcriptResponse = await GetTranscriptFromSupadata(videoId, cancellationToken);
+        return transcriptResponse.Content;
     }
 
     /// <summary>
@@ -117,12 +116,12 @@ public class YoutubeService : IYoutubeService
     }
 
     /// <summary>
-    /// Récupère le titre d'une vidéo YouTube via l'API oEmbed (gratuite, sans clé).
+    /// Récupère les métadonnées d'une vidéo YouTube via l'API oEmbed (gratuite, sans clé).
     /// </summary>
     /// <param name="videoId">L'identifiant de la vidéo YouTube.</param>
     /// <param name="cancellationToken">Token d'annulation pour l'opération asynchrone.</param>
-    /// <returns>Le titre de la vidéo ou null si non disponible.</returns>
-    private async Task<string?> GetVideoTitle(string videoId, CancellationToken cancellationToken)
+    /// <returns>Les métadonnées oEmbed ou null si non disponibles.</returns>
+    private async Task<YoutubeOEmbedResponse?> GetVideoMetadataFromOEmbed(string videoId, CancellationToken cancellationToken)
     {
         try
         {
@@ -138,12 +137,12 @@ public class YoutubeService : IYoutubeService
                     PropertyNameCaseInsensitive = true
                 });
 
-                return oembedResponse?.Title;
+                return oembedResponse;
             }
         }
         catch
         {
-            // Si l'appel échoue, on retournera null et utilisera un fallback
+            // Si l'appel échoue, on retournera null
         }
 
         return null;
@@ -163,7 +162,7 @@ public class YoutubeService : IYoutubeService
         // Si l'anglais n'est pas disponible, l'API retournera la première langue disponible
         var requestUrl = $"/v1/youtube/transcript?videoId={videoId}&text=true&lang=en";
 
-        var response = await _httpClient.GetAsync(requestUrl, cancellationToken);
+        var response = await _supadataClient.GetAsync(requestUrl, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {

@@ -18,15 +18,12 @@
             <MudSpacer />
 
             @* Actions *@
-            <MudIconButton Icon="@Icons.Material.Filled.LightMode" 
-                          Color="Color.Default" 
-                          Size="Size.Medium"
-                          Title="Changer le thème" />
-            <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" 
-                          Href="/profile"
-                          Color="Color.Default" 
-                          Size="Size.Medium"
-                          Title="Mon profil" />
+            <AuthorizeView Roles="Admin">
+                <MudIconButton Href="/travelplanner/admin" Color="Color.Default" Variant="Variant.Text" Icon="@Icons.Material.Filled.Settings" />
+            </AuthorizeView>
+
+            <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Href="/profile" Color="Color.Default"
+                           Size="Size.Medium" Title="Mon profil" />
             <LogoutButton />
         </MudStack>
     </MudAppBar>

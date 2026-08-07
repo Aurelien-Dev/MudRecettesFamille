@@ -1,0 +1,65 @@
+@using RecettesFamille.Components.Shared
+@using RecettesFamille.Managers
+@inherits LayoutComponentBase
+
+<MudThemeProvider IsDarkMode="false" Theme="CustomThemeManager.Customtheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="0" Dense="false" Fixed="false" Style="background-color: white; color: #1a1a1a; border-bottom: 1px solid #e0e0e0;">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Default" Edge="Edge.Start" OnClick="DrawerToggle" />
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@Icons.Custom.Brands.YouTube" Color="Color.Error" Size="Size.Large" />
+            <MudText Typo="Typo.h6" Style="font-weight: 600;">YouSummarize - Administration</MudText>
+        </MudStack>
+        <MudSpacer />
+
+        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" 
+                      Href="/profile"
+                      Color="Color.Default" 
+                      Size="Size.Medium"
+                      Title="Mon profil" />
+        <LogoutButton />
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2" Variant="DrawerVariant.Persistent">
+        <MudNavMenu>
+            <MudNavLink Href="/travelplanner/admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
+                Dashboard
+            </MudNavLink>
+            <MudNavLink Href="/travelplanner/admin/travels" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.FlightTakeoff">
+                Gestion des voyages
+            </MudNavLink>
+            <MudNavLink Href="/travelplanner/admin/categories" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Category">
+                Gestion des catégories
+            </MudNavLink>
+            <MudDivider Class="my-2" />
+            <MudNavLink Href="/travelplanner" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ArrowBack">
+                Retour à YouSummarize
+            </MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Style="padding: 24px; background-color: #f5f5f5;">
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code {
+    private bool _drawerOpen = true;
+
+    private void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}
