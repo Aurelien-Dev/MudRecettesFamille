@@ -13,6 +13,7 @@ public class YoutubeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCo
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var summaries = await context.YoutubeSummarys
             .Include(y => y.Travel)
+            .Include(y => y.Categories)
             .ToListAsync(cancellationToken);
         return mapper.Map<List<YoutubeResumeDto>>(summaries);
     }
@@ -56,6 +57,70 @@ public class YoutubeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCo
 
         youtubeResumeEntity.TravelId = travelId;
         context.YoutubeSummarys.Update(youtubeResumeEntity);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
+
+    public async Task<bool> UpdateFavorite(int summaryId, bool isFavorite, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var youtubeResumeEntity = await context.YoutubeSummarys.FindAsync([summaryId], cancellationToken);
+
+        if (youtubeResumeEntity == null)
+        {
+            return false;
+        }
+
+        youtubeResumeEntity.IsFavorite = isFavorite;
+        context.YoutubeSummarys.Update(youtubeResumeEntity);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
+
+    public async Task<bool> UpdateStatus(int summaryId, Dto.Models.SummaryStatus status, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var youtubeResumeEntity = await context.YoutubeSummarys.FindAsync([summaryId], cancellationToken);
+
+        if (youtubeResumeEntity == null)
+        {
+            return false;
+        }
+
+        // Convert DTO enum to Entity enum (they have the same values)
+        youtubeResumeEntity.Status = (EntityModel.SummaryStatus)status;
+        context.YoutubeSummarys.Update(youtubeResumeEntity);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
+
+    public async Task<bool> UpdateCategories(int summaryId, List<int> categoryIds, CancellationToken cancellationToken = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+        var youtubeResumeEntity = await context.YoutubeSummarys
+            .Include(y => y.Categories)
+            .FirstOrDefaultAsync(y => y.Id == summaryId, cancellationToken);
+
+        if (youtubeResumeEntity == null)
+        {
+            return false;
+        }
+
+        // Load the categories from the database
+        var categories = await context.Categories
+            .Where(c => categoryIds.Contains(c.Id))
+            .ToListAsync(cancellationToken);
+
+        // Clear existing categories and add new ones
+        youtubeResumeEntity.Categories.Clear();
+        foreach (var category in categories)
+        {
+            youtubeResumeEntity.Categories.Add(category);
+        }
+
         await context.SaveChangesAsync(cancellationToken);
 
         return true;

@@ -16,7 +16,7 @@ public interface IYoutubeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Le résumé ajouté avec son identifiant.</returns>
     Task<YoutubeResumeDto> AddSummary(YoutubeResumeDto youtubeSummary, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Récupère tous les résumés de vidéos YouTube disponibles.
     /// </summary>
@@ -40,4 +40,31 @@ public interface IYoutubeRepository
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>True si la mise à jour a réussi, false sinon.</returns>
     Task<bool> UpdateSummaryTravel(int summaryId, int? travelId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Met à jour l'état favori d'un résumé YouTube.
+    /// </summary>
+    /// <param name="summaryId">L'identifiant du résumé à mettre à jour.</param>
+    /// <param name="isFavorite">True pour marquer comme favori, false sinon.</param>
+    /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
+    /// <returns>True si la mise à jour a réussi, false sinon.</returns>
+    Task<bool> UpdateFavorite(int summaryId, bool isFavorite, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Met à jour le statut d'un résumé YouTube.
+    /// </summary>
+    /// <param name="summaryId">L'identifiant du résumé à mettre à jour.</param>
+    /// <param name="status">Le nouveau statut.</param>
+    /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
+    /// <returns>True si la mise à jour a réussi, false sinon.</returns>
+    Task<bool> UpdateStatus(int summaryId, Dto.Models.SummaryStatus status, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Met à jour les catégories associées à un résumé YouTube.
+    /// </summary>
+    /// <param name="summaryId">L'identifiant du résumé à mettre à jour.</param>
+    /// <param name="categoryIds">Liste des identifiants de catégories à associer.</param>
+    /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
+    /// <returns>True si la mise à jour a réussi, false sinon.</returns>
+    Task<bool> UpdateCategories(int summaryId, List<int> categoryIds, CancellationToken cancellationToken = default);
 }

@@ -17,6 +17,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<YoutubeResumeEntity> YoutubeSummarys { get; set; }
     public DbSet<TravelEntity> Travels { get; set; }
+    public DbSet<CategoryEntity> Categories { get; set; }
 
     // Data Protection keys table
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
@@ -89,7 +90,41 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<PromptEntity>().HasKey(c => c.Id);
         builder.Entity<BlockBaseEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
 
-        builder.Entity<YoutubeResumeEntity>().Property(c => c.Id).ValueGeneratedOnAdd();
+        builder.Entity<YoutubeResumeEntity>(entity =>
+        {
+            entity.Property(c => c.Id).ValueGeneratedOnAdd();
+            entity.Property(c => c.IsFavorite).HasDefaultValue(false);
+            entity.Property(c => c.Status).HasDefaultValue(SummaryStatus.ToReview);
+
+            // Many-to-many relationship with Categories
+            entity.HasMany(y => y.Categories)
+                  .WithMany(c => c.YoutubeSummaries)
+                  .UsingEntity<Dictionary<string, object>>(
+                      "YoutubeResumeCategories",
+                      j => j.HasOne<CategoryEntity>()
+                            .WithMany()
+                            .HasForeignKey("CategoryId")
+                            .HasPrincipalKey(nameof(CategoryEntity.Id))
+                            .OnDelete(DeleteBehavior.Cascade),
+                      j => j.HasOne<YoutubeResumeEntity>()
+                            .WithMany()
+                            .HasForeignKey("YoutubeResumeId")
+                            .HasPrincipalKey(nameof(YoutubeResumeEntity.Id))
+                            .OnDelete(DeleteBehavior.Cascade),
+                      j =>
+                      {
+                          j.HasKey("YoutubeResumeId", "CategoryId");
+                          j.ToTable("YoutubeResumeCategories");
+                          j.HasIndex("CategoryId");
+                      });
+        });
+
+        builder.Entity<CategoryEntity>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Id).ValueGeneratedOnAdd();
+            entity.HasIndex(c => c.Name).IsUnique();
+        });
 
         builder.Entity<TravelEntity>(entity =>
         {

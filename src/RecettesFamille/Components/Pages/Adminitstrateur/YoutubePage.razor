@@ -16,14 +16,25 @@
     @* Sidebar gauche fixe *@
     <div style="width: 280px; background-color: white; border-right: 1px solid #e0e0e0; overflow-y: auto; flex-shrink: 0;">
         <TravelSidebar Travels="@travels"
+                      Categories="@categories"
                       SummariesCount="@summariesCountByTravel"
+                      CategoryCounts="@summariesCountByCategory"
+                      StatusCounts="@summariesCountByStatus"
                       TotalCount="@ytResume.Count"
                       UnclassifiedCount="@GetUnclassifiedCount()"
+                      FavoritesCount="@GetFavoritesCount()"
                       SelectedTravelId="@selectedTravelId"
                       SelectedFilterType="@selectedFilterType"
+                      FilterFavoritesOnly="@filterFavoritesOnly"
+                      SelectedCategoryIds="@selectedCategoryIds"
+                      SelectedStatuses="@selectedStatuses"
                       OnFilterChanged="@HandleFilterChanged"
+                      OnFavoritesFilterChanged="@HandleFavoritesFilterChanged"
+                      OnCategoryFiltersChanged="@HandleCategoryFiltersChanged"
+                      OnStatusFiltersChanged="@HandleStatusFiltersChanged"
                       OnCreateTravelClicked="@OpenCreateTravelDialog"
-                      OnEditTravelClicked="@OpenEditTravelDialog" />
+                      OnEditTravelClicked="@OpenEditTravelDialog"
+                      OnCreateCategoryClicked="@OpenCreateCategoryDialog" />
     </div>
 
     @* Zone de contenu principale *@
@@ -91,6 +102,7 @@
                                      SearchText="@searchText"
                                      OnSearchChanged="@HandleSearchChanged"
                                      OnSummarySelected="@HandleSummarySelected"
+                                     OnToggleFavorite="@ToggleFavorite"
                                      OnDeleteSummaryClicked="@DeleteSummaryWithConfirmation" />
                 </MudItem>
 
@@ -98,7 +110,11 @@
                 <MudItem xs="12" md="7">
                     <VideoSummaryDetail Summary="@CurrentResume"
                                        Travels="@travels"
-                                       OnTravelChanged="@UpdateSummaryTravel" />
+                                       Categories="@categories"
+                                       OnTravelChanged="@UpdateSummaryTravel"
+                                       OnFavoriteToggled="@ToggleFavorite"
+                                       OnStatusChanged="@UpdateSummaryStatus"
+                                       OnCategoriesChanged="@UpdateSummaryCategories" />
                 </MudItem>
             </MudGrid>
 
@@ -122,6 +138,7 @@
 @code {
     [Inject] IYoutubeRepository youtubeRepository { get; set; } = null!;
     [Inject] ITravelRepository travelRepository { get; set; } = null!;
+    [Inject] ICategoryRepository categoryRepository { get; set; } = null!;
     [Inject] RecettesFamille.Services.IYoutubeService youtubeService { get; set; } = null!;
     [Inject] ISnackbar Snackbar { get; set; } = null!;
     [Inject] IDialogService DialogService { get; set; } = null!;
@@ -129,7 +146,10 @@
     private List<YoutubeResumeDto> ytResume { get; set; } = [];
     private List<YoutubeResumeDto> filteredSummaries { get; set; } = [];
     private List<TravelDto> travels { get; set; } = [];
+    private List<CategoryDto> categories { get; set; } = [];
     private Dictionary<int, int> summariesCountByTravel { get; set; } = new();
+    private Dictionary<int, int> summariesCountByCategory { get; set; } = new();
+    private Dictionary<SummaryStatus, int> summariesCountByStatus { get; set; } = new();
 
     private YoutubeResumeDto? CurrentResume { get; set; }
     private bool isProcessing { get; set; } = false;
@@ -141,6 +161,11 @@
     private string selectedFilterType { get; set; } = "all";
     private int? selectedTravelIdForCreation { get; set; }
 
+    // V2 Filter states
+    private bool filterFavoritesOnly { get; set; } = false;
+    private HashSet<int> selectedCategoryIds { get; set; } = new();
+    private HashSet<SummaryStatus> selectedStatuses { get; set; } = new();
+
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
@@ -150,7 +175,14 @@
     {
         ytResume = await youtubeRepository.GetAllSummary();
         travels = await travelRepository.GetAll();
+        categories = await categoryRepository.GetAll();
         summariesCountByTravel = await travelRepository.GetSummariesCountByTravel();
+        summariesCountByCategory = await categoryRepository.GetSummariesCountByCategory();
+
+        // Calculate status counts
+        summariesCountByStatus = ytResume
+            .GroupBy(s => s.Status)
+            .ToDictionary(g => g.Key, g => g.Count());
 
         ApplyFilters();
     }
@@ -172,6 +204,22 @@
         {
             var archivedTravelIds = travels.Where(t => t.IsArchived).Select(t => t.Id).ToList();
             query = query.Where(s => s.TravelId.HasValue && archivedTravelIds.Contains(s.TravelId.Value));
+        }
+
+        // V2 Filters
+        if (filterFavoritesOnly)
+        {
+            query = query.Where(s => s.IsFavorite);
+        }
+
+        if (selectedCategoryIds.Any())
+        {
+            query = query.Where(s => s.CategoryIds.Any(catId => selectedCategoryIds.Contains(catId)));
+        }
+
+        if (selectedStatuses.Any())
+        {
+            query = query.Where(s => selectedStatuses.Contains(s.Status));
         }
 
         // Recherche textuelle
@@ -200,10 +248,33 @@
         return ytResume.Count(s => s.TravelId == null);
     }
 
+    private int GetFavoritesCount()
+    {
+        return ytResume.Count(s => s.IsFavorite);
+    }
+
     private void HandleFilterChanged((int? travelId, string filterType) filter)
     {
         selectedTravelId = filter.travelId;
         selectedFilterType = filter.filterType;
+        ApplyFilters();
+    }
+
+    private void HandleFavoritesFilterChanged(bool enabled)
+    {
+        filterFavoritesOnly = enabled;
+        ApplyFilters();
+    }
+
+    private void HandleCategoryFiltersChanged(HashSet<int> categoryIds)
+    {
+        selectedCategoryIds = categoryIds;
+        ApplyFilters();
+    }
+
+    private void HandleStatusFiltersChanged(HashSet<SummaryStatus> statuses)
+    {
+        selectedStatuses = statuses;
         ApplyFilters();
     }
 
@@ -216,6 +287,167 @@
     private void HandleSummarySelected(YoutubeResumeDto summary)
     {
         CurrentResume = summary;
+    }
+
+    private async Task ToggleFavorite(YoutubeResumeDto summary)
+    {
+        try
+        {
+            var newFavoriteState = !summary.IsFavorite;
+            var success = await youtubeRepository.UpdateFavorite(summary.Id, newFavoriteState);
+
+            if (success)
+            {
+                // Update local data
+                summary.IsFavorite = newFavoriteState;
+                var summaryInList = ytResume.FirstOrDefault(s => s.Id == summary.Id);
+                if (summaryInList != null)
+                {
+                    summaryInList.IsFavorite = newFavoriteState;
+                }
+
+                // Reapply filters (may remove item if favorites filter is active)
+                var wasCurrentlySelected = CurrentResume?.Id == summary.Id;
+                ApplyFilters();
+
+                // If the item was removed from filtered list, select next
+                if (wasCurrentlySelected && !filteredSummaries.Any(s => s.Id == summary.Id))
+                {
+                    CurrentResume = filteredSummaries.FirstOrDefault();
+                }
+
+                Snackbar.Add(newFavoriteState ? "Ajouté aux favoris" : "Retiré des favoris", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Erreur lors de la mise à jour du favori", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erreur : {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task UpdateSummaryStatus((YoutubeResumeDto summary, SummaryStatus status) data)
+    {
+        try
+        {
+            var success = await youtubeRepository.UpdateStatus(data.summary.Id, data.status);
+
+            if (success)
+            {
+                // Update local data
+                data.summary.Status = data.status;
+                var summaryInList = ytResume.FirstOrDefault(s => s.Id == data.summary.Id);
+                if (summaryInList != null)
+                {
+                    summaryInList.Status = data.status;
+                }
+
+                // Recalculate status counts
+                summariesCountByStatus = ytResume
+                    .GroupBy(s => s.Status)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                // Reapply filters
+                var wasCurrentlySelected = CurrentResume?.Id == data.summary.Id;
+                ApplyFilters();
+
+                // If the item was removed from filtered list, select next
+                if (wasCurrentlySelected && !filteredSummaries.Any(s => s.Id == data.summary.Id))
+                {
+                    CurrentResume = filteredSummaries.FirstOrDefault();
+                }
+
+                Snackbar.Add("Statut mis à jour avec succès", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Erreur lors de la mise à jour du statut", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erreur : {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task UpdateSummaryCategories((YoutubeResumeDto summary, List<int> categoryIds) data)
+    {
+        try
+        {
+            var success = await youtubeRepository.UpdateCategories(data.summary.Id, data.categoryIds);
+
+            if (success)
+            {
+                // Update local data
+                data.summary.CategoryIds = data.categoryIds;
+                data.summary.CategoryNames = categories
+                    .Where(c => data.categoryIds.Contains(c.Id))
+                    .Select(c => c.Name)
+                    .ToList();
+                data.summary.CategoryColors = categories
+                    .Where(c => data.categoryIds.Contains(c.Id))
+                    .Select(c => c.Color)
+                    .ToList();
+
+                var summaryInList = ytResume.FirstOrDefault(s => s.Id == data.summary.Id);
+                if (summaryInList != null)
+                {
+                    summaryInList.CategoryIds = data.categoryIds;
+                    summaryInList.CategoryNames = data.summary.CategoryNames;
+                    summaryInList.CategoryColors = data.summary.CategoryColors;
+                }
+
+                // Recalculate category counts
+                summariesCountByCategory = await categoryRepository.GetSummariesCountByCategory();
+
+                // Reapply filters
+                ApplyFilters();
+
+                Snackbar.Add("Catégories mises à jour avec succès", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Erreur lors de la mise à jour des catégories", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erreur : {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OpenCreateCategoryDialog()
+    {
+        var parameters = new DialogParameters<CategoryDialog>
+        {
+            { x => x.Category, new CategoryDto { Name = "" } }
+        };
+
+        var dialog = await DialogService.ShowAsync<CategoryDialog>("Créer une catégorie", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is CategoryDto newCategory)
+        {
+            await CreateCategory(newCategory);
+        }
+    }
+
+    private async Task CreateCategory(CategoryDto newCategory)
+    {
+        try
+        {
+            var addedCategory = await categoryRepository.Add(newCategory);
+            categories.Add(addedCategory);
+
+            Snackbar.Add($"Catégorie \"{addedCategory.Name}\" créée avec succès", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erreur lors de la création de la catégorie : {ex.Message}", Severity.Error);
+        }
     }
 
     private async Task ProcessYoutubeUrl()
@@ -294,7 +526,7 @@
                 // Retirer de la liste locale
                 ytResume.Remove(summary);
 
-                // Si c'était le résumé actuellement affiché, sélectionner le suivant/précédent
+                // Si c'était le résumé sélectionné, gérer la sélection
                 if (CurrentResume?.Id == summary.Id)
                 {
                     var index = filteredSummaries.IndexOf(summary);
@@ -318,6 +550,10 @@
 
                 // Rafraîchir les compteurs
                 summariesCountByTravel = await travelRepository.GetSummariesCountByTravel();
+                summariesCountByCategory = await categoryRepository.GetSummariesCountByCategory();
+                summariesCountByStatus = ytResume
+                    .GroupBy(s => s.Status)
+                    .ToDictionary(g => g.Key, g => g.Count());
 
                 Snackbar.Add("Résumé supprimé avec succès", Severity.Success);
             }

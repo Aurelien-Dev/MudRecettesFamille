@@ -24,62 +24,143 @@
 
             <MudDivider />
 
-            <div>
-                <MudText Typo="Typo.subtitle2" GutterBottom="true">Voyage associé</MudText>
-                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                    @if (Travels.Any())
-                    {
-                        <MudSelect T="int?" 
-                                  @bind-Value="selectedTravelId" 
-                                  Label="Changer le voyage" 
+            @* Organisation Section *@
+            <MudPaper Elevation="1" Class="pa-3" Style="background-color: #f5f5f5;">
+                <MudText Typo="Typo.subtitle2" GutterBottom="true" Style="font-weight: 600;">Organisation</MudText>
+
+                <MudGrid Spacing="2">
+                    @* Favorite Toggle *@
+                    <MudItem xs="12" md="6">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudText Typo="Typo.body2">Favori :</MudText>
+                            <MudIconButton Icon="@(Summary.IsFavorite ? Icons.Material.Filled.Star : Icons.Material.Outlined.StarBorder)" 
+                                          Color="@(Summary.IsFavorite ? Color.Warning : Color.Default)" 
+                                          Size="Size.Medium"
+                                          OnClick="@ToggleFavorite"
+                                          Title="@(Summary.IsFavorite ? "Retirer des favoris" : "Ajouter aux favoris")" />
+                        </MudStack>
+                    </MudItem>
+
+                    @* Status Selector *@
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="SummaryStatus" 
+                                  @bind-Value="selectedStatus" 
+                                  Label="Statut" 
                                   Variant="Variant.Outlined"
-                                  Clearable="true"
-                                  AnchorOrigin="Origin.BottomCenter"
-                                  Style="max-width: 300px;">
-                            <MudSelectItem T="int?" Value="@((int?)null)">
+                                  Dense="true"
+                                  AnchorOrigin="Origin.BottomCenter">
+                            <MudSelectItem T="SummaryStatus" Value="@SummaryStatus.ToReview">
                                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                    <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Size="Size.Small" />
-                                    <MudText>Non classé</MudText>
+                                    <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Default" />
+                                    <MudText>À consulter</MudText>
                                 </MudStack>
                             </MudSelectItem>
-                            @foreach (var travel in Travels.Where(t => !t.IsArchived).OrderBy(t => t.Name))
+                            <MudSelectItem T="SummaryStatus" Value="@SummaryStatus.Reviewed">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Info" />
+                                    <MudText>Consulté</MudText>
+                                </MudStack>
+                            </MudSelectItem>
+                            <MudSelectItem T="SummaryStatus" Value="@SummaryStatus.Selected">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Success" />
+                                    <MudText>Retenu</MudText>
+                                </MudStack>
+                            </MudSelectItem>
+                            <MudSelectItem T="SummaryStatus" Value="@SummaryStatus.Rejected">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Error" />
+                                    <MudText>Écarté</MudText>
+                                </MudStack>
+                            </MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+
+                    @* Travel Selector *@
+                    <MudItem xs="12">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            @if (Travels.Any())
                             {
-                                <MudSelectItem T="int?" Value="@((int?)travel.Id)">
+                                <MudSelect T="int?" 
+                                          @bind-Value="selectedTravelId" 
+                                          Label="Voyage associé" 
+                                          Variant="Variant.Outlined"
+                                          Dense="true"
+                                          Clearable="true"
+                                          AnchorOrigin="Origin.BottomCenter"
+                                          Style="flex: 1;">
+                                    <MudSelectItem T="int?" Value="@((int?)null)">
+                                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                            <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Size="Size.Small" />
+                                            <MudText>Non classé</MudText>
+                                        </MudStack>
+                                    </MudSelectItem>
+                                    @foreach (var travel in Travels.Where(t => !t.IsArchived).OrderBy(t => t.Name))
+                                    {
+                                        <MudSelectItem T="int?" Value="@((int?)travel.Id)">
+                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                                <MudIcon Icon="@Icons.Material.Filled.Luggage" Size="Size.Small" Color="Color.Primary" />
+                                                <MudText>@travel.Name</MudText>
+                                            </MudStack>
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                                <MudButton Variant="Variant.Filled" 
+                                          Color="Color.Primary" 
+                                          Size="Size.Small"
+                                          OnClick="SaveTravelChange">
+                                    Enregistrer
+                                </MudButton>
+                            }
+                            else
+                            {
+                                @if (!string.IsNullOrWhiteSpace(Summary.TravelName))
+                                {
+                                    <MudChip T="string" 
+                                            Icon="@Icons.Material.Filled.Luggage" 
+                                            Color="Color.Primary">
+                                        @Summary.TravelName
+                                    </MudChip>
+                                }
+                                else
+                                {
+                                    <MudChip T="string" 
+                                            Icon="@Icons.Material.Filled.HelpOutline" 
+                                            Color="Color.Default">
+                                        Non classé
+                                    </MudChip>
+                                }
+                            }
+                        </MudStack>
+                    </MudItem>
+
+                    @* Categories Selector *@
+                    <MudItem xs="12">
+                        <MudSelect T="int" 
+                                  SelectedValues="@selectedCategoryIds" 
+                                  SelectedValuesChanged="@OnCategorySelectedValuesChanged"
+                                  Label="Catégories" 
+                                  Variant="Variant.Outlined"
+                                  Dense="true"
+                                  MultiSelection="true"
+                                  Clearable="true"
+                                  AnchorOrigin="Origin.BottomCenter">
+                            @foreach (var category in Categories.OrderBy(c => c.Name))
+                            {
+                                <MudSelectItem T="int" Value="@category.Id">
                                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                        <MudIcon Icon="@Icons.Material.Filled.Luggage" Size="Size.Small" Color="Color.Primary" />
-                                        <MudText>@travel.Name</MudText>
+                                        @if (!string.IsNullOrWhiteSpace(category.Color))
+                                        {
+                                            <div style="width: 12px; height: 12px; border-radius: 50%; background-color: @category.Color;"></div>
+                                        }
+                                        <MudText>@category.Name</MudText>
                                     </MudStack>
                                 </MudSelectItem>
                             }
                         </MudSelect>
-                        <MudButton Variant="Variant.Filled" 
-                                  Color="Color.Primary" 
-                                  Size="Size.Small"
-                                  OnClick="SaveTravelChange">
-                            Enregistrer
-                        </MudButton>
-                    }
-                    else
-                    {
-                        @if (!string.IsNullOrWhiteSpace(Summary.TravelName))
-                        {
-                            <MudChip T="string" 
-                                    Icon="@Icons.Material.Filled.Luggage" 
-                                    Color="Color.Primary">
-                                @Summary.TravelName
-                            </MudChip>
-                        }
-                        else
-                        {
-                            <MudChip T="string" 
-                                    Icon="@Icons.Material.Filled.HelpOutline" 
-                                    Color="Color.Default">
-                                Non classé
-                            </MudChip>
-                        }
-                    }
-                </MudStack>
-            </div>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
 
             <MudDivider />
 
@@ -104,13 +185,24 @@ else
 @code {
     [Parameter] public YoutubeResumeDto? Summary { get; set; }
     [Parameter] public List<TravelDto> Travels { get; set; } = [];
+    [Parameter] public List<CategoryDto> Categories { get; set; } = [];
     [Parameter] public EventCallback<YoutubeResumeDto> OnTravelChanged { get; set; }
+    [Parameter] public EventCallback<YoutubeResumeDto> OnFavoriteToggled { get; set; }
+    [Parameter] public EventCallback<(YoutubeResumeDto, SummaryStatus)> OnStatusChanged { get; set; }
+    [Parameter] public EventCallback<(YoutubeResumeDto, List<int>)> OnCategoriesChanged { get; set; }
 
     private int? selectedTravelId;
+    private SummaryStatus selectedStatus;
+    private HashSet<int> selectedCategoryIds = new();
 
     protected override void OnParametersSet()
     {
-        selectedTravelId = Summary?.TravelId;
+        if (Summary != null)
+        {
+            selectedTravelId = Summary.TravelId;
+            selectedStatus = Summary.Status;
+            selectedCategoryIds = Summary.CategoryIds.ToHashSet();
+        }
     }
 
     private async Task SaveTravelChange()
@@ -119,6 +211,34 @@ else
         {
             Summary.TravelId = selectedTravelId;
             await OnTravelChanged.InvokeAsync(Summary);
+        }
+    }
+
+    private async Task ToggleFavorite()
+    {
+        if (Summary != null)
+        {
+            Summary.IsFavorite = !Summary.IsFavorite;
+            await OnFavoriteToggled.InvokeAsync(Summary);
+        }
+    }
+
+    private async Task OnStatusSelectedValuesChanged(SummaryStatus newStatus)
+    {
+        if (Summary != null && newStatus != selectedStatus)
+        {
+            selectedStatus = newStatus;
+            await OnStatusChanged.InvokeAsync((Summary, newStatus));
+        }
+    }
+
+    private async Task OnCategorySelectedValuesChanged(IEnumerable<int> newCategoryIds)
+    {
+        if (Summary != null)
+        {
+            var categoryIdList = newCategoryIds.ToList();
+            selectedCategoryIds = categoryIdList.ToHashSet();
+            await OnCategoriesChanged.InvokeAsync((Summary, categoryIdList));
         }
     }
 }
