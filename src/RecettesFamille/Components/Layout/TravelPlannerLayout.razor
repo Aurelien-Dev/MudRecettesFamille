@@ -1,0 +1,40 @@
+@inherits LayoutComponentBase
+@using RecettesFamille.Components.Shared
+@using RecettesFamille.Managers
+
+<MudThemeProvider IsDarkMode="false" Theme="CustomThemeManager.Customtheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<MudLayout>
+    @* Header *@
+    <MudAppBar Elevation="0" Dense="false" Style="background-color: white; color: #1a1a1a;">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Style="width: 100%;">
+            @* Logo / Branding *@
+            <MudIcon Icon="@Icons.Custom.Brands.YouTube" Color="Color.Error" Size="Size.Large" />
+            <MudText Typo="Typo.h6" Style="font-weight: 600;">YouSummarize</MudText>
+
+            <MudSpacer />
+
+            @* Actions *@
+            <MudIconButton Icon="@Icons.Material.Filled.LightMode" 
+                          Color="Color.Default" 
+                          Size="Size.Medium"
+                          Title="Changer le thème" />
+            <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" 
+                          Href="/profile"
+                          Color="Color.Default" 
+                          Size="Size.Medium"
+                          Title="Mon profil" />
+            <LogoutButton />
+        </MudStack>
+    </MudAppBar>
+
+    @* Layout principal avec contenu *@
+    <MudMainContent Style="padding: 0; background-color: #f5f5f5;">
+        <div style="min-height: calc(100vh - 64px);">
+            @Body
+        </div>
+    </MudMainContent>
+</MudLayout>

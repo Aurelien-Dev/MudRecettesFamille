@@ -1,6 +1,6 @@
 @page "/admin/youtube"
 @attribute [Authorize(Roles = "Admin")]
-@layout AdminLayout
+@layout TravelPlannerLayout
 @using Microsoft.AspNetCore.Authorization
 @using RecettesFamille.Components.Layout
 @using RecettesFamille.Components.Dialogs
@@ -10,105 +10,114 @@
 
 <PageTitle>Résumés YouTube | Recettes famille</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="mt-4">
-    <MudText Typo="Typo.h4" GutterBottom="true">Résumés de vidéos YouTube</MudText>
+@* Structure avec sidebar + contenu *@
+<div style="display: flex; height: calc(100vh - 64px); overflow: hidden;">
 
-    @* Formulaire de création de résumé *@
-    <MudPaper Elevation="2" Class="mb-6 pa-4" Style="background-color: white;">
-        <MudText Typo="Typo.h6" Class="mb-4">Créer un nouveau résumé</MudText>
-        <MudGrid>
-            <MudItem xs="12" md="6">
-                <MudTextField @bind-Value="currentUrl" 
-                              Label="URL de la vidéo YouTube" 
-                              Variant="Variant.Outlined"
-                              Placeholder="https://www.youtube.com/watch?v=..."
-                              Disabled="@isProcessing"
-                              Adornment="Adornment.Start"
-                              AdornmentIcon="@Icons.Custom.Brands.YouTube"
-                              AdornmentColor="Color.Error" />
-            </MudItem>
-            <MudItem xs="12" md="3">
-                <MudSelect T="int?" 
-                          @bind-Value="selectedTravelIdForCreation" 
-                          Label="Ajouter au voyage (optionnel)" 
-                          Variant="Variant.Outlined"
-                          Clearable="true"
-                          Disabled="@isProcessing">
-                    <MudSelectItem T="int?" Value="@((int?)null)">Non classé</MudSelectItem>
-                    @foreach (var travel in travels.Where(t => !t.IsArchived).OrderBy(t => t.Name))
-                    {
-                        <MudSelectItem T="int?" Value="@((int?)travel.Id)">@travel.Name</MudSelectItem>
-                    }
-                </MudSelect>
-            </MudItem>
-            <MudItem xs="12" md="3" Class="d-flex align-center">
-                <MudButton Variant="Variant.Filled" 
-                           Color="Color.Primary" 
-                           FullWidth="true"
-                           Disabled="@(isProcessing)"
-                           OnClick="ProcessYoutubeUrl"
-                           StartIcon="@Icons.Material.Filled.AutoAwesome">
-                    @if (isProcessing)
-                    {
-                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-                        <span>Traitement...</span>
-                    }
-                    else
-                    {
-                        <span>Générer le résumé</span>
-                    }
-                </MudButton>
-            </MudItem>
-        </MudGrid>
-    </MudPaper>
+    @* Sidebar gauche fixe *@
+    <div style="width: 280px; background-color: white; border-right: 1px solid #e0e0e0; overflow-y: auto; flex-shrink: 0;">
+        <TravelSidebar Travels="@travels"
+                      SummariesCount="@summariesCountByTravel"
+                      TotalCount="@ytResume.Count"
+                      UnclassifiedCount="@GetUnclassifiedCount()"
+                      SelectedTravelId="@selectedTravelId"
+                      SelectedFilterType="@selectedFilterType"
+                      OnFilterChanged="@HandleFilterChanged"
+                      OnCreateTravelClicked="@OpenCreateTravelDialog"
+                      OnEditTravelClicked="@OpenEditTravelDialog" />
+    </div>
 
-    @* Layout 3 colonnes *@
-    <MudGrid>
-        @* Barre latérale gauche : Navigation par voyage *@
-        <MudItem xs="12" md="3">
-            <TravelSidebar Travels="@travels"
-                          SummariesCount="@summariesCountByTravel"
-                          TotalCount="@ytResume.Count"
-                          UnclassifiedCount="@GetUnclassifiedCount()"
-                          SelectedTravelId="@selectedTravelId"
-                          SelectedFilterType="@selectedFilterType"
-                          OnFilterChanged="@HandleFilterChanged"
-                          OnCreateTravelClicked="@OpenCreateTravelDialog"
-                          OnEditTravelClicked="@OpenEditTravelDialog" />
-        </MudItem>
+    @* Zone de contenu principale *@
+    <div style="flex: 1; overflow-y: auto; padding: 24px;">
+        <div style="max-width: 1400px; margin: 0 auto;">
+            <MudText Typo="Typo.h4" GutterBottom="true" Style="font-weight: 600; color: #1a1a1a;">
+                Résumés de vidéos YouTube
+            </MudText>
 
-        @* Colonne centrale : Liste des résumés avec recherche *@
-        <MudItem xs="12" md="3">
-            <VideoSummaryList FilteredSummaries="@filteredSummaries"
-                             SelectedSummaryId="@CurrentResume?.Id"
-                             SearchText="@searchText"
-                             OnSearchChanged="@HandleSearchChanged"
-                             OnSummarySelected="@HandleSummarySelected"
-                             OnDeleteSummaryClicked="@DeleteSummaryWithConfirmation" />
-        </MudItem>
-
-        @* Panneau de détail à droite *@
-        <MudItem xs="12" md="6">
-            <VideoSummaryDetail Summary="@CurrentResume"
-                               Travels="@travels"
-                               OnTravelChanged="@UpdateSummaryTravel" />
-        </MudItem>
-    </MudGrid>
-
-    @* Overlay de chargement *@
-    @if (isProcessing)
-    {
-        <MudOverlay Visible="true" DarkBackground="true" ZIndex="9999">
-            <MudPaper Elevation="8" Class="pa-8" Style="background-color: white; border-radius: 8px;">
-                <MudStack AlignItems="AlignItems.Center" Spacing="4">
-                    <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
-                    <MudText Typo="Typo.h6">@processingMessage</MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">Veuillez patienter...</MudText>
-                </MudStack>
+            @* Formulaire de création de résumé *@
+            <MudPaper Elevation="0" Class="mb-4 pa-4" Style="background-color: white; border: 1px solid #e0e0e0; border-radius: 8px;">
+                <MudText Typo="Typo.h6" Class="mb-4" Style="font-weight: 500;">Créer un nouveau résumé</MudText>
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="currentUrl" 
+                                      Label="URL de la vidéo YouTube" 
+                                      Variant="Variant.Outlined"
+                                      Placeholder="https://www.youtube.com/watch?v=..."
+                                      Disabled="@isProcessing"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Custom.Brands.YouTube"
+                                      AdornmentColor="Color.Error" />
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudSelect T="int?" 
+                                  @bind-Value="selectedTravelIdForCreation" 
+                                  Label="Ajouter au voyage (optionnel)" 
+                                  Variant="Variant.Outlined"
+                                  Clearable="true"
+                                  Disabled="@isProcessing">
+                            <MudSelectItem T="int?" Value="@((int?)null)">Non classé</MudSelectItem>
+                            @foreach (var travel in travels.Where(t => !t.IsArchived).OrderBy(t => t.Name))
+                            {
+                                <MudSelectItem T="int?" Value="@((int?)travel.Id)">@travel.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="3" Class="d-flex align-center">
+                        <MudButton Variant="Variant.Filled" 
+                                   Color="Color.Primary" 
+                                   FullWidth="true"
+                                   Disabled="@(isProcessing)"
+                                   OnClick="ProcessYoutubeUrl"
+                                   StartIcon="@Icons.Material.Filled.AutoAwesome">
+                            @if (isProcessing)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                <span>Traitement...</span>
+                            }
+                            else
+                            {
+                                <span>Générer le résumé</span>
+                            }
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
             </MudPaper>
-        </MudOverlay>
-    }
-</MudContainer>
+
+            @* Layout 2 colonnes : Liste + Détail *@
+            <MudGrid Spacing="3">
+                @* Colonne centrale : Liste des résumés avec recherche *@
+                <MudItem xs="12" md="5">
+                    <VideoSummaryList FilteredSummaries="@filteredSummaries"
+                                     SelectedSummaryId="@CurrentResume?.Id"
+                                     SearchText="@searchText"
+                                     OnSearchChanged="@HandleSearchChanged"
+                                     OnSummarySelected="@HandleSummarySelected"
+                                     OnDeleteSummaryClicked="@DeleteSummaryWithConfirmation" />
+                </MudItem>
+
+                @* Panneau de détail à droite *@
+                <MudItem xs="12" md="7">
+                    <VideoSummaryDetail Summary="@CurrentResume"
+                                       Travels="@travels"
+                                       OnTravelChanged="@UpdateSummaryTravel" />
+                </MudItem>
+            </MudGrid>
+
+            @* Overlay de chargement *@
+            @if (isProcessing)
+            {
+                <MudOverlay Visible="true" DarkBackground="true" ZIndex="9999">
+                    <MudPaper Elevation="8" Class="pa-8" Style="background-color: white; border-radius: 8px;">
+                        <MudStack AlignItems="AlignItems.Center" Spacing="4">
+                            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                            <MudText Typo="Typo.h6">@processingMessage</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Veuillez patienter...</MudText>
+                        </MudStack>
+                    </MudPaper>
+                </MudOverlay>
+            }
+        </div>
+    </div>
+</div>
 
 @code {
     [Inject] IYoutubeRepository youtubeRepository { get; set; } = null!;
