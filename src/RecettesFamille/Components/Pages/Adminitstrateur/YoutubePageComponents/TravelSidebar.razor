@@ -104,11 +104,12 @@
             @* Favorites Filter *@
             <MudListItem T="string" 
                         OnClick="ToggleFavoritesFilter"
-                        Class="@(FilterFavoritesOnly ? "mud-selected-item mud-ripple" : "")">
+                        Class="@(FilterFavoritesOnly ? "mud-selected-item mud-ripple" : "")"
+                        Style="@(FilterFavoritesOnly ? "background-color: rgba(var(--mud-palette-primary-rgb), 0.12) !important;" : "")">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small" Color="@(FilterFavoritesOnly ? Color.Warning : Color.Default)" />
-                        <MudText>Favoris uniquement</MudText>
+                        <MudText Style="@(FilterFavoritesOnly ? "font-weight: 600;" : "")">Favoris uniquement</MudText>
                     </MudStack>
                     @if (FavoritesCount > 0)
                     {
@@ -123,11 +124,12 @@
 
             <MudListItem T="string" 
                         OnClick="@(() => ToggleStatusFilter(SummaryStatus.ToReview))"
-                        Class="@(SelectedStatuses.Contains(SummaryStatus.ToReview) ? "mud-selected-item mud-ripple" : "")">
+                        Class="@(SelectedStatuses.Contains(SummaryStatus.ToReview) ? "mud-selected-item mud-ripple" : "")"
+                        Style="@(SelectedStatuses.Contains(SummaryStatus.ToReview) ? "background-color: rgba(var(--mud-palette-primary-rgb), 0.12) !important;" : "")">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Default" />
-                        <MudText>À consulter</MudText>
+                        <MudText Style="@(SelectedStatuses.Contains(SummaryStatus.ToReview) ? "font-weight: 600;" : "")">À consulter</MudText>
                     </MudStack>
                     @if (StatusCounts.GetValueOrDefault(SummaryStatus.ToReview, 0) > 0)
                     {
@@ -138,11 +140,12 @@
 
             <MudListItem T="string" 
                         OnClick="@(() => ToggleStatusFilter(SummaryStatus.Reviewed))"
-                        Class="@(SelectedStatuses.Contains(SummaryStatus.Reviewed) ? "mud-selected-item mud-ripple" : "")">
+                        Class="@(SelectedStatuses.Contains(SummaryStatus.Reviewed) ? "mud-selected-item mud-ripple" : "")"
+                        Style="@(SelectedStatuses.Contains(SummaryStatus.Reviewed) ? "background-color: rgba(var(--mud-palette-primary-rgb), 0.12) !important;" : "")">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Info" />
-                        <MudText>Consulté</MudText>
+                        <MudText Style="@(SelectedStatuses.Contains(SummaryStatus.Reviewed) ? "font-weight: 600;" : "")">Consulté</MudText>
                     </MudStack>
                     @if (StatusCounts.GetValueOrDefault(SummaryStatus.Reviewed, 0) > 0)
                     {
@@ -153,11 +156,12 @@
 
             <MudListItem T="string" 
                         OnClick="@(() => ToggleStatusFilter(SummaryStatus.Selected))"
-                        Class="@(SelectedStatuses.Contains(SummaryStatus.Selected) ? "mud-selected-item mud-ripple" : "")">
+                        Class="@(SelectedStatuses.Contains(SummaryStatus.Selected) ? "mud-selected-item mud-ripple" : "")"
+                        Style="@(SelectedStatuses.Contains(SummaryStatus.Selected) ? "background-color: rgba(var(--mud-palette-primary-rgb), 0.12) !important;" : "")">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Success" />
-                        <MudText>Retenu</MudText>
+                        <MudText Style="@(SelectedStatuses.Contains(SummaryStatus.Selected) ? "font-weight: 600;" : "")">Retenu</MudText>
                     </MudStack>
                     @if (StatusCounts.GetValueOrDefault(SummaryStatus.Selected, 0) > 0)
                     {
@@ -168,11 +172,12 @@
 
             <MudListItem T="string" 
                         OnClick="@(() => ToggleStatusFilter(SummaryStatus.Rejected))"
-                        Class="@(SelectedStatuses.Contains(SummaryStatus.Rejected) ? "mud-selected-item mud-ripple" : "")">
+                        Class="@(SelectedStatuses.Contains(SummaryStatus.Rejected) ? "mud-selected-item mud-ripple" : "")"
+                        Style="@(SelectedStatuses.Contains(SummaryStatus.Rejected) ? "background-color: rgba(var(--mud-palette-primary-rgb), 0.12) !important;" : "")">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Error" />
-                        <MudText>Écarté</MudText>
+                        <MudText Style="@(SelectedStatuses.Contains(SummaryStatus.Rejected) ? "font-weight: 600;" : "")">Écarté</MudText>
                     </MudStack>
                     @if (StatusCounts.GetValueOrDefault(SummaryStatus.Rejected, 0) > 0)
                     {
@@ -197,9 +202,11 @@
                 @foreach (var category in Categories.OrderBy(c => c.Name))
                 {
                     var count = CategoryCounts.GetValueOrDefault(category.Id, 0);
+                    var isSelected = SelectedCategoryIds.Contains(category.Id);
                     <MudListItem T="string" 
                                 OnClick="@(() => ToggleCategoryFilter(category.Id))"
-                                Class="@(SelectedCategoryIds.Contains(category.Id) ? "mud-selected-item mud-ripple" : "")">
+                                Class="@(isSelected ? "mud-selected-item mud-ripple" : "")"
+                                Style="@(isSelected ? "background-color: rgba(var(--mud-palette-primary-rgb), 0.12) !important;" : "")">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                                 @if (!string.IsNullOrWhiteSpace(category.Color))
@@ -210,7 +217,7 @@
                                 {
                                     <MudIcon Icon="@Icons.Material.Filled.Label" Size="Size.Small" Color="Color.Primary" />
                                 }
-                                <MudText Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@category.Name</MudText>
+                                <MudText Style="@($"white-space: nowrap; overflow: hidden; text-overflow: ellipsis;{(isSelected ? " font-weight: 600;" : "")}")">@category.Name</MudText>
                             </MudStack>
                             @if (count > 0)
                             {
