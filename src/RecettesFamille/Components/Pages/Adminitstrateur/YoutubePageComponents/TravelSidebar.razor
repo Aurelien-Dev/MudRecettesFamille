@@ -1,9 +1,9 @@
 @using RecettesFamille.Dto.Models
 
-<MudPaper Elevation="2" Class="pa-4" Style="background-color: white; height: 100%;">
+<div style="height: 100%; padding: 16px;">
     <MudStack Spacing="3">
-        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-            <MudText Typo="Typo.h6">Mes voyages</MudText>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2">
+            <MudText Typo="Typo.h6" Style="font-weight: 600; color: #1a1a1a;">Mes voyages</MudText>
             <MudIconButton Icon="@Icons.Material.Filled.Add" 
                           Color="Color.Primary" 
                           Size="Size.Small"
@@ -83,7 +83,7 @@
             }
         </MudList>
     </MudStack>
-</MudPaper>
+</div>
 
 @code {
     [Parameter] public List<TravelDto> Travels { get; set; } = [];
