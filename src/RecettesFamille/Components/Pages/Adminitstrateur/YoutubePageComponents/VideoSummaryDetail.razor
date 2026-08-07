@@ -26,7 +26,12 @@
                              AnchorOrigin="Origin.BottomRight"
                              TransformOrigin="Origin.TopRight">
                         <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@OpenEditDialog">Modifier</MudMenuItem>
-                        @* Future actions can be added here *@
+                        <MudDivider />
+                        <MudMenuItem Icon="@Icons.Material.Filled.Delete" 
+                                    IconColor="Color.Error"
+                                    OnClick="@HandleDelete">
+                            <MudText Color="Color.Error">Supprimer</MudText>
+                        </MudMenuItem>
                     </MudMenu>
                 </MudStack>
             </MudStack>
@@ -271,6 +276,7 @@ else
     [Parameter] public EventCallback<(YoutubeResumeDto, SummaryStatus)> OnStatusChanged { get; set; }
     [Parameter] public EventCallback<(YoutubeResumeDto, List<int>)> OnCategoriesChanged { get; set; }
     [Parameter] public EventCallback<YoutubeResumeDto> OnTitleChanged { get; set; }
+    [Parameter] public EventCallback<YoutubeResumeDto> OnDeleteClicked { get; set; }
 
     private int? selectedTravelId;
     private SummaryStatus selectedStatus;
@@ -301,6 +307,14 @@ else
         {
             Summary.IsFavorite = !Summary.IsFavorite;
             await OnFavoriteToggled.InvokeAsync(Summary);
+        }
+    }
+
+    private async Task HandleDelete()
+    {
+        if (Summary != null)
+        {
+            await OnDeleteClicked.InvokeAsync(Summary);
         }
     }
 

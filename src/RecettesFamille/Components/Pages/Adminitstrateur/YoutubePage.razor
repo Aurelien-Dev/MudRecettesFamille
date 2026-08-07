@@ -96,7 +96,7 @@
             @* Layout 2 colonnes : Liste + Détail *@
             <MudGrid Spacing="3">
                 @* Colonne centrale : Liste des résumés avec recherche *@
-                <MudItem xs="12" md="4">
+                <MudItem xs="12" md="5">
                     <VideoSummaryList FilteredSummaries="@filteredSummaries"
                                      SelectedSummaryId="@CurrentResume?.Id"
                                      SearchText="@searchText"
@@ -107,7 +107,7 @@
                 </MudItem>
 
                 @* Panneau de détail à droite *@
-                <MudItem xs="12" md="8">
+                <MudItem xs="12" md="7">
                     <VideoSummaryDetail Summary="@CurrentResume"
                                        Travels="@travels"
                                        Categories="@categories"
@@ -115,7 +115,8 @@
                                        OnFavoriteToggled="@ToggleFavorite"
                                        OnStatusChanged="@UpdateSummaryStatus"
                                        OnCategoriesChanged="@UpdateSummaryCategories"
-                                       OnTitleChanged="@UpdateSummaryTitle" />
+                                       OnTitleChanged="@UpdateSummaryTitle"
+                                       OnDeleteClicked="@DeleteSummaryWithConfirmation" />
                 </MudItem>
             </MudGrid>
 
