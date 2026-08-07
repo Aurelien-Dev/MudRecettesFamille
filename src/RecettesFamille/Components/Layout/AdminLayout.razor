@@ -2,7 +2,7 @@
 @using RecettesFamille.Managers
 @inherits LayoutComponentBase
 
-<MudThemeProvider IsDarkMode="true" Theme="CustomThemeManager.Customtheme" />
+<MudThemeProvider Theme="CustomThemeManager.AdminTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudPopoverProvider />
@@ -28,7 +28,6 @@
                 <MudNavLink Href="/admin/users" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Person">Utilisateurs</MudNavLink>
                 <MudNavLink Href="/admin/migrations" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Storage">Migrations & Backups</MudNavLink>
                 <MudNavLink Href="/admin/prompt" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.EditNote">Éditeur de prompts</MudNavLink>
-                <MudNavLink Href="/travelplanner/admin" Match="NavLinkMatch.All" Icon="@Icons.Custom.Brands.YouTube">YouSummarize</MudNavLink>
             </AuthorizeView>
             <AuthorizeView Roles="Admin, Contributor">
                 <MudNavLink Href="/admin/tag" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Tag">Étiquettes</MudNavLink>

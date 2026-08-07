@@ -2,7 +2,7 @@
 @using RecettesFamille.Components.Shared
 @using RecettesFamille.Managers
 
-<MudThemeProvider IsDarkMode="false" Theme="CustomThemeManager.Customtheme" />
+<MudThemeProvider IsDarkMode="false" Theme="CustomThemeManager.TravelPlannerTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudPopoverProvider />
@@ -23,7 +23,7 @@
             </AuthorizeView>
 
             <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Href="/profile" Color="Color.Default"
-                           Size="Size.Medium" Title="Mon profil" />
+                           Size="Size.Medium" title="Mon profil" />
             <LogoutButton />
         </MudStack>
     </MudAppBar>
