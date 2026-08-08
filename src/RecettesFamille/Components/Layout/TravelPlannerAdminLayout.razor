@@ -2,7 +2,7 @@
 @using RecettesFamille.Managers
 @inherits LayoutComponentBase
 
-<MudThemeProvider IsDarkMode="false" Theme="CustomThemeManager.TravelPlannerAdminTheme" />
+<MudThemeProvider @ref="_mudThemeProvider" Theme="_themeManager.Theme" @bind-IsDarkMode="@_isDarkMode" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudPopoverProvider />
@@ -22,6 +22,7 @@
                       Color="Color.Default" 
                       Size="Size.Medium"
                       title="Mon profil" />
+        <MudThemeManagerButton OnClick="@((e) => OpenThemeManager(true))" />
         <LogoutButton />
     </MudAppBar>
 
@@ -48,6 +49,8 @@
             @Body
         </MudContainer>
     </MudMainContent>
+
+    <MudThemeManager Open="_themeManagerOpen" OpenChanged="OpenThemeManager" Theme="_themeManager" ThemeChanged="UpdateTheme" IsDarkMode="@_isDarkMode" />
 </MudLayout>
 
 <div id="blazor-error-ui">
@@ -58,6 +61,28 @@
 
 @code {
     private bool _drawerOpen = true;
+    private bool _isDarkMode = false;
+    private MudThemeProvider? _mudThemeProvider;
+    private ThemeManagerTheme _themeManager = new ThemeManagerTheme();
+    private bool _themeManagerOpen = false;
+
+    protected override void OnInitialized()
+    {
+        // Initialize theme with CustomThemeManager.TravelPlannerAdminTheme
+        _themeManager.Theme = CustomThemeManager.TravelPlannerAdminTheme;
+        StateHasChanged();
+    }
+
+    void OpenThemeManager(bool value)
+    {
+        _themeManagerOpen = value;
+    }
+
+    void UpdateTheme(ThemeManagerTheme value)
+    {
+        _themeManager = value;
+        StateHasChanged();
+    }
 
     private void DrawerToggle()
     {

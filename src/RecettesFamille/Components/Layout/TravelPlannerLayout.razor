@@ -2,7 +2,7 @@
 @using RecettesFamille.Components.Shared
 @using RecettesFamille.Managers
 
-<MudThemeProvider IsDarkMode="false" Theme="CustomThemeManager.TravelPlannerTheme" />
+<MudThemeProvider @ref="_mudThemeProvider" Theme="_themeManager.Theme" @bind-IsDarkMode="@_isDarkMode" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudPopoverProvider />
@@ -24,6 +24,7 @@
 
             <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Href="/profile" Color="Color.Default"
                            Size="Size.Medium" title="Mon profil" />
+            <MudThemeManagerButton OnClick="@((e) => OpenThemeManager(true))" />
             <LogoutButton />
         </MudStack>
     </MudAppBar>
@@ -32,4 +33,31 @@
     <MudMainContent Style="padding: 0; background-color: #f5f5f5;">
         @Body
     </MudMainContent>
+
+    <MudThemeManager Open="_themeManagerOpen" OpenChanged="OpenThemeManager" Theme="_themeManager" ThemeChanged="UpdateTheme" IsDarkMode="@_isDarkMode" />
 </MudLayout>
+
+@code {
+    private bool _isDarkMode = false;
+    private MudThemeProvider? _mudThemeProvider;
+    private ThemeManagerTheme _themeManager = new ThemeManagerTheme();
+    private bool _themeManagerOpen = false;
+
+    protected override void OnInitialized()
+    {
+        // Initialize theme with CustomThemeManager.TravelPlannerTheme
+        _themeManager.Theme = CustomThemeManager.TravelPlannerTheme;
+        StateHasChanged();
+    }
+
+    void OpenThemeManager(bool value)
+    {
+        _themeManagerOpen = value;
+    }
+
+    void UpdateTheme(ThemeManagerTheme value)
+    {
+        _themeManager = value;
+        StateHasChanged();
+    }
+}

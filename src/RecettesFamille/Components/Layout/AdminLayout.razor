@@ -2,7 +2,7 @@
 @using RecettesFamille.Managers
 @inherits LayoutComponentBase
 
-<MudThemeProvider Theme="CustomThemeManager.AdminTheme" />
+<MudThemeProvider @ref="_mudThemeProvider" Theme="_themeManager.Theme" @bind-IsDarkMode="@_isDarkMode" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudPopoverProvider />
@@ -17,6 +17,7 @@
         <MudSpacer />
 
         <MudIconButton Href="/profile" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.AccountCircle" Title="Mon profil" />
+        <MudThemeManagerButton OnClick="@((e) => OpenThemeManager(true))" />
         <LogoutButton />
     </MudAppBar>
 
@@ -42,6 +43,8 @@
         </MudContainer>
     </MudMainContent>
 
+    <MudThemeManager Open="_themeManagerOpen" OpenChanged="OpenThemeManager" Theme="_themeManager" ThemeChanged="UpdateTheme" IsDarkMode="@_isDarkMode" />
+
 </MudLayout>
 
 
@@ -53,6 +56,28 @@
 
 @code {
     private bool _drawerOpen = true;
+    private bool _isDarkMode;
+    private MudThemeProvider? _mudThemeProvider;
+    private ThemeManagerTheme _themeManager = new ThemeManagerTheme();
+    private bool _themeManagerOpen = false;
+
+    protected override void OnInitialized()
+    {
+        // Initialize theme with CustomThemeManager.AdminTheme
+        _themeManager.Theme = CustomThemeManager.AdminTheme;
+        StateHasChanged();
+    }
+
+    void OpenThemeManager(bool value)
+    {
+        _themeManagerOpen = value;
+    }
+
+    void UpdateTheme(ThemeManagerTheme value)
+    {
+        _themeManager = value;
+        StateHasChanged();
+    }
 
     private void DrawerToggle()
     {

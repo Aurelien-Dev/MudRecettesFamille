@@ -45,6 +45,7 @@
     <PackageReference Include="MimeKit" Version="4.17.0" />
     <PackageReference Include="MudBlazor" Version="9.7.0" />
     <PackageReference Include="MudBlazor.Markdown" Version="9.0.0" />
+    <PackageReference Include="MudBlazor.ThemeManager" Version="4.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
   <ItemGroup>

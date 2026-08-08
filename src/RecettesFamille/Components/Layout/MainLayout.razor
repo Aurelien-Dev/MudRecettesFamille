@@ -13,7 +13,7 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudThemeProvider @ref="_mudThemeProvider" IsDarkMode="_isDarkMode" Theme="CustomThemeManager.MainTheme" />
+<MudThemeProvider @ref="_mudThemeProvider" Theme="_themeManager.Theme" @bind-IsDarkMode="@_isDarkMode" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudPopoverProvider />
@@ -48,6 +48,7 @@
         <AuthorizeView>
             <Authorized>
                 <MudIconButton Href="/profile" Color="Color.Inherit" Variant="Variant.Text" Icon="@Icons.Material.Filled.AccountCircle" Title="Mon profil" />
+                <MudThemeManagerButton OnClick="@((e) => OpenThemeManager(true))" />
                 <LogoutButton />
             </Authorized>
             <NotAuthorized>
@@ -63,6 +64,8 @@
         </MudContainer>
     </MudMainContent>
 
+    <MudThemeManager Open="_themeManagerOpen" OpenChanged="OpenThemeManager" Theme="_themeManager" ThemeChanged="UpdateTheme" IsDarkMode="@_isDarkMode" />
+
 </MudLayout>
 
 <div id="blazor-error-ui">
@@ -74,9 +77,14 @@
 @code {
     private bool _isDarkMode;
     private MudThemeProvider? _mudThemeProvider;
+    private ThemeManagerTheme _themeManager = new ThemeManagerTheme();
+    private bool _themeManagerOpen = false;
 
     protected override async Task OnInitializedAsync()
     {
+        // Initialize theme with CustomThemeManager.MainTheme
+        _themeManager.Theme = CustomThemeManager.MainTheme;
+
         var cookie = await CookieService.GetAsync("userPreferenceDarkMode");
         bool userPreferenceDarkMode = bool.TryParse(cookie?.Value, out var result) && result;
 
@@ -84,6 +92,19 @@
         {
             _isDarkMode = userPreferenceDarkMode && await _mudThemeProvider.GetSystemDarkModeAsync();
         }
+
+        StateHasChanged();
+    }
+
+    void OpenThemeManager(bool value)
+    {
+        _themeManagerOpen = value;
+    }
+
+    void UpdateTheme(ThemeManagerTheme value)
+    {
+        _themeManager = value;
+        StateHasChanged();
     }
 
     private async Task OpenNewRecipeDialog()
