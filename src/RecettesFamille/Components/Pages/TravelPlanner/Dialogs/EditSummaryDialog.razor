@@ -21,7 +21,6 @@
                       Label="Voyage associé" 
                       Variant="Variant.Outlined"
                       Clearable="true"
-                      AnchorOrigin="Origin.BottomCenter"
                       Class="mb-4">
                 <MudSelectItem T="int?" Value="@((int?)null)">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
@@ -40,15 +39,14 @@
                 }
             </MudSelect>
 
-            <MudSelect T="int" 
-                      SelectedValues="@editedCategoryIds" 
-                      SelectedValuesChanged="@OnCategorySelectedValuesChanged"
-                      Label="Catégories" 
-                      Variant="Variant.Outlined"
-                      MultiSelection="true"
-                      Clearable="true"
-                      AnchorOrigin="Origin.BottomCenter"
-                      Class="mb-4">
+            <MudSelect T="int" ToStringFunc="@ToStringFunc"
+                    SelectedValues="@editedCategoryIds" 
+                    SelectedValuesChanged="@OnCategorySelectedValuesChanged"
+                    Label="Catégories" 
+                    Variant="Variant.Outlined"
+                    MultiSelection="true"
+                    Clearable="true"
+                    Class="mb-4">
                 @foreach (var category in Categories.OrderBy(c => c.Name))
                 {
                     <MudSelectItem T="int" Value="@category.Id">
@@ -66,8 +64,7 @@
             <MudSelect T="SummaryStatus" 
                       @bind-Value="editedStatus" 
                       Label="Statut" 
-                      Variant="Variant.Outlined"
-                      AnchorOrigin="Origin.BottomCenter">
+                      Variant="Variant.Outlined" >
                 <MudSelectItem T="SummaryStatus" Value="@SummaryStatus.ToReview">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
                         <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Default" />
@@ -120,6 +117,11 @@
     private int? editedTravelId;
     private HashSet<int> editedCategoryIds = new();
     private SummaryStatus editedStatus;
+
+    private string ToStringFunc(int categoryId)
+    {
+        return Categories.FirstOrDefault(c => c.Id == categoryId)?.Name ?? string.Empty;
+    }
 
     protected override void OnInitialized()
     {
