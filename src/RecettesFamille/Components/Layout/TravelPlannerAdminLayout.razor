@@ -8,11 +8,11 @@
 <MudPopoverProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="0" Dense="false" Fixed="false" Style="background-color: white; color: #1a1a1a; border-bottom: 1px solid #e0e0e0;">
+    <MudAppBar Elevation="0" Dense="false" Fixed="false">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Default" Edge="Edge.Start" OnClick="DrawerToggle" />
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
             <MudIcon Icon="@Icons.Custom.Brands.YouTube" Color="Color.Error" Size="Size.Large" />
-            <MudText Typo="Typo.h6" Style="font-weight: 600;">YouSummarize - Administration</MudText>
+            <MudText Typo="Typo.h6">YouSummarize - Administration</MudText>
         </MudStack>
 
         <MudSpacer />
@@ -44,7 +44,7 @@
         </MudNavMenu>
     </MudDrawer>
 
-    <MudMainContent Style="padding: 24px; background-color: #f5f5f5;">
+    <MudMainContent Class="pa-6">
         <MudContainer MaxWidth="MaxWidth.ExtraLarge">
             @Body
         </MudContainer>

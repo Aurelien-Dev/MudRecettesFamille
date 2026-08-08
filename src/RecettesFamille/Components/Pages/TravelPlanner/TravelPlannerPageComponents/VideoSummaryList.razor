@@ -1,7 +1,7 @@
-<MudPaper Elevation="2" Class="pa-4" Style="background-color: white; height: 100%;">
+<MudPaper Elevation="2" Class="pa-4 h-100">
     <MudStack Spacing="3">
-        <MudTextField @bind-Value="SearchText" 
-                      Label="Rechercher un résumé" 
+        <MudTextField @bind-Value="SearchText"
+                      Label="Rechercher un résumé"
                       Variant="Variant.Outlined"
                       Placeholder="Titre ou contenu..."
                       Adornment="Adornment.Start"
@@ -20,78 +20,66 @@
 
         @if (!FilteredSummaries.Any())
         {
-            <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Secondary" Class="my-8">
-                <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-2" />
-                <br />
-                Aucun résumé ne correspond aux critères.
-            </MudText>
+            <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="my-8">
+                <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" />
+                <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Secondary">
+                    Aucun résumé ne correspond aux critères.
+                </MudText>
+            </MudStack>
         }
         else
         {
-            <div style="max-height: 60vh; overflow-y: auto;">
+            <MudContainer MaxWidth="MaxWidth.False" Class="overflow-y-auto" Style="max-height: 60vh;">
                 <MudStack Spacing="4">
                     @foreach (var summary in FilteredSummaries.OrderByDescending(x => x.CreatedDate))
                     {
-                        <MudPaper Elevation="@(SelectedSummaryId == summary.Id ? 3 : 1)" 
-                                 Class="@(SelectedSummaryId == summary.Id ? "mud-theme-primary pa-5" : "pa-5")"
-                                 Style="cursor: pointer; transition: all 0.2s;"
-                                 @onclick="@(() => OnSummarySelected.InvokeAsync(summary))">
+                        var cardClass = SelectedSummaryId == summary.Id ? "mud-theme-primary pa-5 cursor-pointer" : "pa-5 cursor-pointer";
+                        <MudPaper Class="@cardClass" @onclick="@(() => OnSummarySelected.InvokeAsync(summary))">
                             <MudStack Row="true" Spacing="3">
-                                @* Left section: Thumbnail *@
-                                <div style="width: 200px; min-width: 200px; position: relative;">
-                                    @if (thumbnailErrors.ContainsKey(summary.Id) && thumbnailErrors[summary.Id])
-                                    {
-                                        @* Placeholder when thumbnail fails to load *@
-                                        <div style="width: 100%; aspect-ratio: 16/9; background-color: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                            <MudIcon Icon="@Icons.Custom.Brands.YouTube" Color="Color.Error" Size="Size.Large" />
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        @* YouTube thumbnail *@
-                                        <MudImage Src="@GetThumbnailUrl(summary.Url)" 
-                                                 Alt="@summary.Title"
-                                                 ObjectFit="ObjectFit.Cover"
-                                                 Style="width: 100%; aspect-ratio: 16/9; border-radius: 8px;"
-                                                 ErrorContent="@(new RenderFragment(builder =>
-                                                 {
-                                                     HandleImageError(summary.Id);
-                                                     StateHasChanged();
-                                                 }))" />
-                                    }
-                                </div>
 
+                                @* <MudPaper Elevation="0" Class="d-flex align-center justify-center rounded" Style="width: 100%; aspect-ratio: 16/9;">
+                                    <MudIcon Icon="@Icons.Custom.Brands.YouTube" Color="Color.Error" Size="Size.Large" />
+                                </MudPaper> *@
+                                @* Left section: Thumbnail *@
+                                <MudImage Src="@GetThumbnailUrl(summary.Url)"
+                                          Alt="@summary.Title"
+                                          Class="rounded"
+                                          Width="150"
+                                          ObjectFit="ObjectFit.Contain" />
+
+                                
                                 @* Right section: Content *@
-                                <MudStack Spacing="3" Justify="Justify.SpaceBetween" Style="flex: 1; min-width: 0;">
+                                <MudStack Spacing="3" Justify="Justify.SpaceBetween" Class="flex-grow-1" Style="min-width: 0;">
                                     @* Top: Title *@
-                                    <div>
-                                        <MudText Typo="Typo.subtitle1" Style="font-size: 1.05rem; font-weight: 600; line-height: 1.3;">
-                                            @summary.Title
-                                        </MudText>
-                                    </div>
+                                    <MudText Typo="Typo.subtitle1">
+                                        @summary.Title
+                                    </MudText>
 
                                     @* Middle: Category chips *@
                                     @if (summary.CategoryNames.Any())
                                     {
-                                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Style="flex-wrap: wrap;">
+                                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="flex-wrap">
                                             @for (int i = 0; i < Math.Min(3, summary.CategoryNames.Count); i++)
                                             {
                                                 var categoryName = summary.CategoryNames[i];
                                                 var categoryColor = summary.CategoryColors.ElementAtOrDefault(i);
-                                                <MudChip T="string" 
-                                                        Size="Size.Small" 
-                                                        Color="@(string.IsNullOrWhiteSpace(categoryColor) ? Color.Primary : Color.Default)"
-                                                        Variant="Variant.Text"
-                                                        Style="@(string.IsNullOrWhiteSpace(categoryColor) ? "" : $"background-color: {categoryColor}30; color: {categoryColor}")">
-                                                    @categoryName
+                                                var iconStyle = !string.IsNullOrWhiteSpace(categoryColor) ? $"color: {categoryColor}; font-size: 10px;" : "font-size: 10px;";
+                                                <MudChip T="string" Size="Size.Small" Variant="Variant.Text">
+                                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                                        @if (!string.IsNullOrWhiteSpace(categoryColor))
+                                                        {
+                                                            <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Style="@iconStyle" />
+                                                        }
+                                                        <span>@categoryName</span>
+                                                    </MudStack>
                                                 </MudChip>
                                             }
                                             @if (summary.CategoryNames.Count > 3)
                                             {
-                                                <MudChip T="string" 
-                                                        Size="Size.Small" 
-                                                        Color="Color.Default" 
-                                                        Variant="Variant.Text">
+                                                <MudChip T="string"
+                                                         Size="Size.Small"
+                                                         Color="Color.Default"
+                                                         Variant="Variant.Text">
                                                     +@(summary.CategoryNames.Count - 3)
                                                 </MudChip>
                                             }
@@ -99,14 +87,14 @@
                                     }
 
                                     @* Bottom: Metadata line *@
-                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Style="flex-wrap: wrap;">
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="flex-wrap">
                                         <MudText Typo="Typo.caption" Color="Color.Secondary">
                                             Ajouté à :
                                         </MudText>
                                         @if (!string.IsNullOrWhiteSpace(summary.TravelName))
                                         {
                                             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                                <MudIcon Icon="@Icons.Material.Filled.Luggage" Size="Size.Small" Style="font-size: 0.9rem;" />
+                                                <MudIcon Icon="@Icons.Material.Filled.Luggage" Size="Size.Small" />
                                                 <MudText Typo="Typo.caption" Color="Color.Secondary">
                                                     @summary.TravelName
                                                 </MudText>
@@ -115,7 +103,7 @@
                                         else
                                         {
                                             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                                <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Size="Size.Small" Style="font-size: 0.9rem;" />
+                                                <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Size="Size.Small" />
                                                 <MudText Typo="Typo.caption" Color="Color.Secondary">
                                                     Non classé
                                                 </MudText>
@@ -125,7 +113,7 @@
                                             •
                                         </MudText>
                                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                            <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Style="font-size: 0.9rem;" />
+                                            <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" />
                                             <MudText Typo="Typo.caption" Color="Color.Secondary">
                                                 À venir
                                             </MudText>
@@ -136,7 +124,7 @@
                         </MudPaper>
                     }
                 </MudStack>
-            </div>
+            </MudContainer>
         }
     </MudStack>
 </MudPaper>

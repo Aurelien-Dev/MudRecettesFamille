@@ -1,9 +1,8 @@
 @using RecettesFamille.Dto.Models
 
-<div style="height: 100%; padding: 16px; overflow-y: auto;">
-    <MudStack Spacing="3">
+<MudStack Spacing="3" Class="pa-4">
         <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2">
-            <MudText Typo="Typo.h6" Style="font-weight: 600; color: #1a1a1a;">Mes voyages</MudText>
+            <MudText Typo="Typo.h6">Mes voyages</MudText>
             <MudIconButton Icon="@Icons.Material.Filled.Add" 
                           Color="Color.Primary" 
                           Size="Size.Small"
@@ -47,13 +46,15 @@
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                             <MudIcon Icon="@Icons.Material.Filled.Luggage" Size="Size.Small" Color="Color.Primary" />
-                            <div style="flex: 1; min-width: 0;">
-                                <MudText Style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@travel.Name</MudText>
+                            @* Wrapper nécessaire pour ellipsis (min-width: 0 requis pour text-overflow dans flexbox) *@
+                            <div class="d-flex flex-grow-1" style="min-width: 0;">
+                                <MudText Class="text-truncate">@travel.Name</MudText>
                             </div>
                         </MudStack>
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
                             <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@count</MudChip>
-                            <div @onclick:stopPropagation="true">
+                            @* Wrapper nécessaire pour empêcher la propagation du clic vers MudListItem parent *@
+                            <div @onclick:stopPropagation="true" class="d-inline-flex">
                                 <MudIconButton Icon="@Icons.Material.Filled.Edit" 
                                               Size="Size.Small" 
                                               OnClick="@(() => OnEditTravel(travel))"
@@ -85,7 +86,7 @@
         <MudDivider Class="my-3" />
 
         <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-            <MudText Typo="Typo.h6" Style="font-weight: 600; color: #1a1a1a;">Filtres</MudText>
+            <MudText Typo="Typo.h6">Filtres</MudText>
             @if (HasActiveFilters)
             {
                 <MudButton Size="Size.Small" 
@@ -102,12 +103,11 @@
             @* Favorites Filter *@
             <MudListItem T="string" 
                         OnClick="ToggleFavoritesFilter"
-                        Class="@(FilterFavoritesOnly ? "mud-selected-item mud-ripple" : "")"
-                        Style="@(FilterFavoritesOnly ? "background-color: rgba(var(--mud-palette-primary-rgb), 0.12) !important;" : "")">
+                        Class="@(FilterFavoritesOnly ? "mud-selected-item mud-ripple" : "")">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small" Color="@(FilterFavoritesOnly ? Color.Warning : Color.Default)" />
-                        <MudText Style="@(FilterFavoritesOnly ? "font-weight: 600;" : "")">Favoris uniquement</MudText>
+                        <MudText>Favoris uniquement</MudText>
                     </MudStack>
                     @if (FavoritesCount > 0)
                     {
@@ -118,16 +118,15 @@
 
             @* Status Filters *@
             <MudDivider Class="my-2" />
-            <MudText Typo="Typo.subtitle2" Class="px-4 py-2" Style="font-weight: 500;">Statut</MudText>
+            <MudText Typo="Typo.subtitle2" Class="px-4 py-2">Statut</MudText>
 
             <MudListItem T="string" 
                         OnClick="@(() => ToggleStatusFilter(SummaryStatus.ToReview))"
-                        Class="@(SelectedStatuses.Contains(SummaryStatus.ToReview) ? "mud-selected-item mud-ripple" : "")"
-                        Style="@(SelectedStatuses.Contains(SummaryStatus.ToReview) ? "background-color: rgba(var(--mud-palette-primary-rgb), 0.12) !important;" : "")">
+                        Class="@(SelectedStatuses.Contains(SummaryStatus.ToReview) ? "mud-selected-item mud-ripple" : "")">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Default" />
-                        <MudText Style="@(SelectedStatuses.Contains(SummaryStatus.ToReview) ? "font-weight: 600;" : "")">À consulter</MudText>
+                        <MudText>À consulter</MudText>
                     </MudStack>
                     @if (StatusCounts.GetValueOrDefault(SummaryStatus.ToReview, 0) > 0)
                     {
@@ -138,12 +137,11 @@
 
             <MudListItem T="string" 
                         OnClick="@(() => ToggleStatusFilter(SummaryStatus.Reviewed))"
-                        Class="@(SelectedStatuses.Contains(SummaryStatus.Reviewed) ? "mud-selected-item mud-ripple" : "")"
-                        Style="@(SelectedStatuses.Contains(SummaryStatus.Reviewed) ? "background-color: rgba(var(--mud-palette-primary-rgb), 0.12) !important;" : "")">
+                        Class="@(SelectedStatuses.Contains(SummaryStatus.Reviewed) ? "mud-selected-item mud-ripple" : "")">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Info" />
-                        <MudText Style="@(SelectedStatuses.Contains(SummaryStatus.Reviewed) ? "font-weight: 600;" : "")">Consulté</MudText>
+                        <MudText>Consulté</MudText>
                     </MudStack>
                     @if (StatusCounts.GetValueOrDefault(SummaryStatus.Reviewed, 0) > 0)
                     {
@@ -154,12 +152,11 @@
 
             <MudListItem T="string" 
                         OnClick="@(() => ToggleStatusFilter(SummaryStatus.Selected))"
-                        Class="@(SelectedStatuses.Contains(SummaryStatus.Selected) ? "mud-selected-item mud-ripple" : "")"
-                        Style="@(SelectedStatuses.Contains(SummaryStatus.Selected) ? "background-color: rgba(var(--mud-palette-primary-rgb), 0.12) !important;" : "")">
+                        Class="@(SelectedStatuses.Contains(SummaryStatus.Selected) ? "mud-selected-item mud-ripple" : "")">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Success" />
-                        <MudText Style="@(SelectedStatuses.Contains(SummaryStatus.Selected) ? "font-weight: 600;" : "")">Retenu</MudText>
+                        <MudText>Retenu</MudText>
                     </MudStack>
                     @if (StatusCounts.GetValueOrDefault(SummaryStatus.Selected, 0) > 0)
                     {
@@ -170,12 +167,11 @@
 
             <MudListItem T="string" 
                         OnClick="@(() => ToggleStatusFilter(SummaryStatus.Rejected))"
-                        Class="@(SelectedStatuses.Contains(SummaryStatus.Rejected) ? "mud-selected-item mud-ripple" : "")"
-                        Style="@(SelectedStatuses.Contains(SummaryStatus.Rejected) ? "background-color: rgba(var(--mud-palette-primary-rgb), 0.12) !important;" : "")">
+                        Class="@(SelectedStatuses.Contains(SummaryStatus.Rejected) ? "mud-selected-item mud-ripple" : "")">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Error" />
-                        <MudText Style="@(SelectedStatuses.Contains(SummaryStatus.Rejected) ? "font-weight: 600;" : "")">Écarté</MudText>
+                        <MudText>Écarté</MudText>
                     </MudStack>
                     @if (StatusCounts.GetValueOrDefault(SummaryStatus.Rejected, 0) > 0)
                     {
@@ -189,7 +185,7 @@
             {
                 <MudDivider Class="my-2" />
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="px-4 py-2">
-                    <MudText Typo="Typo.subtitle2" Style="font-weight: 500;">Catégories</MudText>
+                    <MudText Typo="Typo.subtitle2">Catégories</MudText>
                     <MudIconButton Icon="@Icons.Material.Filled.Add" 
                                   Color="Color.Primary" 
                                   Size="Size.Small"
@@ -201,21 +197,21 @@
                 {
                     var count = CategoryCounts.GetValueOrDefault(category.Id, 0);
                     var isSelected = SelectedCategoryIds.Contains(category.Id);
+                    var iconStyle = !string.IsNullOrWhiteSpace(category.Color) ? $"color: {category.Color}; font-size: 12px;" : "font-size: 12px;";
                     <MudListItem T="string" 
                                 OnClick="@(() => ToggleCategoryFilter(category.Id))"
-                                Class="@(isSelected ? "mud-selected-item mud-ripple" : "")"
-                                Style="@(isSelected ? "background-color: rgba(var(--mud-palette-primary-rgb), 0.12) !important;" : "")">
+                                Class="@(isSelected ? "mud-selected-item mud-ripple" : "")">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                                 @if (!string.IsNullOrWhiteSpace(category.Color))
                                 {
-                                    <div style="width: 12px; height: 12px; border-radius: 50%; background-color: @category.Color; flex-shrink: 0;"></div>
+                                    <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Style="@iconStyle" />
                                 }
                                 else
                                 {
                                     <MudIcon Icon="@Icons.Material.Filled.Label" Size="Size.Small" Color="Color.Primary" />
                                 }
-                                <MudText Style="@($"white-space: nowrap; overflow: hidden; text-overflow: ellipsis;{(isSelected ? " font-weight: 600;" : "")}")">@category.Name</MudText>
+                                <MudText Class="text-truncate">@category.Name</MudText>
                             </MudStack>
                             @if (count > 0)
                             {
@@ -229,7 +225,7 @@
             {
                 <MudDivider Class="my-2" />
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="px-4 py-2">
-                    <MudText Typo="Typo.subtitle2" Style="font-weight: 500;">Catégories</MudText>
+                    <MudText Typo="Typo.subtitle2">Catégories</MudText>
                     <MudIconButton Icon="@Icons.Material.Filled.Add" 
                                   Color="Color.Primary" 
                                   Size="Size.Small"
@@ -241,8 +237,7 @@
                 </MudText>
             }
         </MudList>
-    </MudStack>
-</div>
+</MudStack>
 
 @code {
     [Parameter] public List<TravelDto> Travels { get; set; } = [];

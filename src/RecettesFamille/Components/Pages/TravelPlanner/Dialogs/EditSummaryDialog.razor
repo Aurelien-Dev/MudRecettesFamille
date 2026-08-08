@@ -49,11 +49,12 @@
                     Class="mb-4">
                 @foreach (var category in Categories.OrderBy(c => c.Name))
                 {
+                    var iconStyle = !string.IsNullOrWhiteSpace(category.Color) ? $"color: {category.Color}; font-size: 12px;" : "font-size: 12px;";
                     <MudSelectItem T="int" Value="@category.Id">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
                             @if (!string.IsNullOrWhiteSpace(category.Color))
                             {
-                                <div style="width: 12px; height: 12px; border-radius: 50%; background-color: @category.Color;"></div>
+                                <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Style="@iconStyle" />
                             }
                             <MudText>@category.Name</MudText>
                         </MudStack>

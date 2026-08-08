@@ -9,11 +9,11 @@
 
 <MudLayout>
     @* Header *@
-    <MudAppBar Elevation="0" Dense="false" Fixed="false" Style="background-color: white; color: #1a1a1a; border-bottom: 1px solid #e0e0e0;">
-        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Style="width: 100%;">
+    <MudAppBar Elevation="0" Dense="true" Fixed="false">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="flex-grow-1">
             @* Logo / Branding *@
             <MudIcon Icon="@Icons.Custom.Brands.YouTube" Color="Color.Error" Size="Size.Large" />
-            <MudText Typo="Typo.h6" Style="font-weight: 600;">YouSummarize</MudText>
+            <MudText Typo="Typo.h6">YouSummarize</MudText>
 
             <MudSpacer />
 
@@ -30,7 +30,7 @@
     </MudAppBar>
 
     @* Layout principal avec contenu *@
-    <MudMainContent Style="padding: 0; background-color: #f5f5f5;">
+    <MudMainContent Style="padding: 0;">
         @Body
     </MudMainContent>
 

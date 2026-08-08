@@ -8,11 +8,10 @@
 
 <PageTitle>YouSummarize | Recettes famille</PageTitle>
 
-@* Structure avec sidebar + contenu *@
-<div style="display: flex; min-height: calc(100vh - 64px); overflow: hidden;">
-
-    @* Sidebar gauche fixe *@
-    <div style="width: 280px; background-color: white; border-right: 1px solid #e0e0e0; overflow-y: auto; flex-shrink: 0;">
+@* Structure flex avec sidebar + contenu *@
+<div class="d-flex" style="height: calc(100vh - 64px); overflow: hidden;">
+    @* Sidebar gauche avec scroll indépendant *@
+    <MudPaper Elevation="1" Square="true" Class="overflow-y-auto" Style="width: 280px; min-width: 280px;">
         <TravelSidebar Travels="@travels"
                       Categories="@categories"
                       SummariesCount="@summariesCountByTravel"
@@ -33,18 +32,18 @@
                       OnCreateTravelClicked="@OpenCreateTravelDialog"
                       OnEditTravelClicked="@OpenEditTravelDialog"
                       OnCreateCategoryClicked="@OpenCreateCategoryDialog" />
-    </div>
+    </MudPaper>
 
-    @* Zone de contenu principale *@
-    <div style="flex: 1; overflow-y: auto; padding: 24px;">
-        <div style="margin: 0 auto;">
+    @* Zone de contenu principale avec scroll indépendant *@
+    <div class="flex-grow-1 overflow-y-auto">
+        <MudContainer MaxWidth="MaxWidth.False" Class="pa-6">
             @* <MudText Typo="Typo.h4" GutterBottom="true" Style="font-weight: 600; color: #1a1a1a;">
                 Résumés de vidéos YouTube
             </MudText> *@
 
             @* Formulaire de création de résumé *@
-            <MudPaper Elevation="0" Class="mb-4 pa-4" Style="background-color: white; border: 1px solid #e0e0e0; border-radius: 8px;">
-                <MudText Typo="Typo.h6" Class="mb-4" Style="font-weight: 500;">Créer un nouveau résumé</MudText>
+            <MudPaper Elevation="0" Class="mb-4 pa-4">
+                <MudText Typo="Typo.h6" Class="mb-4">Créer un nouveau résumé</MudText>
                 <MudGrid Spacing="3">
                     <MudItem xs="12" md="6">
                         <MudTextField @bind-Value="currentUrl" 
@@ -121,7 +120,7 @@
             @if (isProcessing)
             {
                 <MudOverlay Visible="true" DarkBackground="true" ZIndex="9999">
-                    <MudPaper Elevation="8" Class="pa-8" Style="background-color: white; border-radius: 8px;">
+                    <MudPaper Elevation="8" Class="pa-8">
                         <MudStack AlignItems="AlignItems.Center" Spacing="4">
                             <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
                             <MudText Typo="Typo.h6">@processingMessage</MudText>
@@ -130,7 +129,7 @@
                     </MudPaper>
                 </MudOverlay>
             }
-        </div>
+        </MudContainer>
     </div>
 </div>
 

@@ -4,11 +4,11 @@
 
 @if (Summary is not null)
 {
-    <MudPaper Elevation="2" Class="pa-4" Style="background-color: white; height: 100%;">
+    <MudPaper Elevation="2" Class="pa-4 h-100">
         <MudStack Spacing="3">
             @* Header with Title, Favorite, Edit, and Menu *@
             <MudStack Row="true" AlignItems="AlignItems.Start" Justify="Justify.SpaceBetween">
-                <MudText Typo="Typo.h5" Style="font-weight: 600; flex: 1;">@Summary.Title</MudText>
+                <MudText Typo="Typo.h5" Class="flex-grow-1">@Summary.Title</MudText>
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
                     <MudIconButton Icon="@(Summary.IsFavorite ? Icons.Material.Filled.Star : Icons.Material.Outlined.StarBorder)" 
                                   Color="@(Summary.IsFavorite ? Color.Warning : Color.Default)" 
@@ -68,16 +68,16 @@
             <MudGrid Spacing="3">
                 @* Left Column: Resume Section *@
                 <MudItem xs="12" md="8">
-                    <MudPaper Elevation="1" Class="pa-4" Style="background-color: white;">
-                        <MudText Typo="Typo.subtitle2" GutterBottom="true" Style="font-weight: 600;">Résumé</MudText>
-                        <div style="max-height: 60vh; overflow-y: auto;">
+                    <MudPaper Elevation="1" Class="pa-4">
+                        <MudText Typo="Typo.subtitle2" GutterBottom="true">Résumé</MudText>
+                        <MudContainer MaxWidth="MaxWidth.False" Class="overflow-y-auto" Style="max-height: 60vh;">
                             <MudMarkdown Value="@Summary.Resume" />
-                        </div>
+                        </MudContainer>
 
                         @* TODO: Future features - Uncomment when data is available
                         <MudDivider Class="my-4" />
 
-                        <MudText Typo="Typo.subtitle2" GutterBottom="true" Style="font-weight: 600;">
+                        <MudText Typo="Typo.subtitle2" GutterBottom="true">
                             Lieux mentionnés (15)
                         </MudText>
                         <MudStack Spacing="1">
@@ -93,7 +93,7 @@
 
                         <MudDivider Class="my-4" />
 
-                        <MudText Typo="Typo.subtitle2" GutterBottom="true" Style="font-weight: 600;">
+                        <MudText Typo="Typo.subtitle2" GutterBottom="true">
                             Conseils utiles
                         </MudText>
                         <MudStack Spacing="1">
@@ -114,8 +114,8 @@
                 <MudItem xs="12" md="4">
                     <MudStack Spacing="3">
                         @* Organisation Panel *@
-                        <MudPaper Elevation="1" Class="pa-4" Style="background-color: white;">
-                            <MudText Typo="Typo.subtitle2" GutterBottom="true" Style="font-weight: 600;">Organisation</MudText>
+                        <MudPaper Elevation="1" Class="pa-4">
+                            <MudText Typo="Typo.subtitle2" GutterBottom="true">Organisation</MudText>
                             <MudStack Spacing="3">
                                 @* Pays détecté - V3.1 *@
                                 <div>
@@ -131,7 +131,7 @@
 
                                     @if (Summary.AiMetadataStatus == AiMetadataStatus.NotAnalyzed)
                                     {
-                                        <MudText Typo="Typo.body2" Color="Color.Tertiary" Style="font-style: italic;">Non analysé</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Tertiary" Class="fst-italic">Non analysé</MudText>
                                     }
                                     else if (Summary.AiMetadataStatus == AiMetadataStatus.Failed)
                                     {
@@ -151,7 +151,7 @@
                                     }
                                     else
                                     {
-                                        <MudText Typo="Typo.body2" Color="Color.Tertiary" Style="font-style: italic;">Non déterminé</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Tertiary" Class="fst-italic">Non déterminé</MudText>
                                     }
                                 </div>
 
@@ -165,11 +165,12 @@
                                             {
                                                 var categoryName = Summary.CategoryNames[i];
                                                 var categoryColor = i < Summary.CategoryColors.Count ? Summary.CategoryColors[i] : null;
+                                                var iconStyle = !string.IsNullOrWhiteSpace(categoryColor) ? $"color: {categoryColor}; font-size: 8px;" : "font-size: 8px;";
 
                                                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
                                                     @if (!string.IsNullOrWhiteSpace(categoryColor))
                                                     {
-                                                        <div style="width: 8px; height: 8px; border-radius: 50%; background-color: @categoryColor;"></div>
+                                                        <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Style="@iconStyle" />
                                                     }
                                                     <MudText Typo="Typo.body2">@categoryName</MudText>
                                                 </MudStack>
@@ -178,7 +179,7 @@
                                     }
                                     else
                                     {
-                                        <MudText Typo="Typo.body2" Color="Color.Tertiary" Style="font-style: italic;">Aucune catégorie</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Tertiary" Class="fst-italic">Aucune catégorie</MudText>
                                     }
                                 </div>
 
@@ -203,13 +204,13 @@
                                 @* Durée de la vidéo - Placeholder *@
                                 <div>
                                     <MudText Typo="Typo.caption" Color="Color.Secondary" GutterBottom="true">Durée de la vidéo</MudText>
-                                    <MudText Typo="Typo.body2" Color="Color.Tertiary" Style="font-style: italic;">À venir</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Tertiary" Class="fst-italic">À venir</MudText>
                                 </div>
 
                                 @* Chaîne - Placeholder *@
                                 <div>
                                     <MudText Typo="Typo.caption" Color="Color.Secondary" GutterBottom="true">Chaîne</MudText>
-                                    <MudText Typo="Typo.body2" Color="Color.Tertiary" Style="font-style: italic;">À venir</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Tertiary" Class="fst-italic">À venir</MudText>
                                 </div>
 
                                 @* Ouvrir sur YouTube Button *@
@@ -225,28 +226,28 @@
                         </MudPaper>
 
                         @* Statistiques Panel *@
-                        <MudPaper Elevation="1" Class="pa-4" Style="background-color: white;">
-                            <MudText Typo="Typo.subtitle2" GutterBottom="true" Style="font-weight: 600;">Statistiques</MudText>
+                        <MudPaper Elevation="1" Class="pa-4">
+                            <MudText Typo="Typo.subtitle2" GutterBottom="true">Statistiques</MudText>
                             <MudStack Spacing="2">
                                 @* Lieux détectés *@
                                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                                     <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Color="Color.Default" />
-                                    <MudText Typo="Typo.body2" Style="flex: 1;">Lieux détectés</MudText>
-                                    <MudText Typo="Typo.body2" Style="font-weight: 500;">-</MudText>
+                                    <MudText Typo="Typo.body2" Class="flex-grow-1">Lieux détectés</MudText>
+                                    <MudText Typo="Typo.body2">-</MudText>
                                 </MudStack>
 
                                 @* Conseils extraits *@
                                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                                     <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Size="Size.Small" Color="Color.Default" />
-                                    <MudText Typo="Typo.body2" Style="flex: 1;">Conseils extraits</MudText>
-                                    <MudText Typo="Typo.body2" Style="font-weight: 500;">-</MudText>
+                                    <MudText Typo="Typo.body2" Class="flex-grow-1">Conseils extraits</MudText>
+                                    <MudText Typo="Typo.body2">-</MudText>
                                 </MudStack>
 
                                 @* Mots-clés *@
                                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                                     <MudIcon Icon="@Icons.Material.Filled.Tag" Size="Size.Small" Color="Color.Default" />
-                                    <MudText Typo="Typo.body2" Style="flex: 1;">Mots-clés</MudText>
-                                    <MudText Typo="Typo.body2" Style="font-weight: 500;">-</MudText>
+                                    <MudText Typo="Typo.body2" Class="flex-grow-1">Mots-clés</MudText>
+                                    <MudText Typo="Typo.body2">-</MudText>
                                 </MudStack>
                             </MudStack>
                         </MudPaper>
@@ -258,12 +259,13 @@
 }
 else
 {
-    <MudPaper Elevation="1" Class="pa-4" Style="background-color: white; height: 100%;">
-        <MudText Typo="Typo.body1" Align="Align.Center" Class="my-8" Color="Color.Secondary">
-            <MudIcon Icon="@Icons.Material.Filled.VideoLibrary" Size="Size.Large" Class="mb-2" />
-            <br />
-            Sélectionnez un résumé dans la liste pour l'afficher ici.
-        </MudText>
+    <MudPaper Elevation="1" Class="pa-4 h-100">
+        <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="my-8">
+            <MudIcon Icon="@Icons.Material.Filled.VideoLibrary" Size="Size.Large" />
+            <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Secondary">
+                Sélectionnez un résumé dans la liste pour l'afficher ici.
+            </MudText>
+        </MudStack>
     </MudPaper>
 }
 
