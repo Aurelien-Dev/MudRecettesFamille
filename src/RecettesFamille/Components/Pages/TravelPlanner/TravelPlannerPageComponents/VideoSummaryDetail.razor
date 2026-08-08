@@ -117,10 +117,42 @@
                         <MudPaper Elevation="1" Class="pa-4" Style="background-color: white;">
                             <MudText Typo="Typo.subtitle2" GutterBottom="true" Style="font-weight: 600;">Organisation</MudText>
                             <MudStack Spacing="3">
-                                @* Pays détecté - Placeholder *@
+                                @* Pays détecté - V3.1 *@
                                 <div>
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary" GutterBottom="true">Pays détecté</MudText>
-                                    <MudText Typo="Typo.body2" Color="Color.Tertiary" Style="font-style: italic;">À venir</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary" GutterBottom="true">
+                                        Pays détecté
+                                        @if (Summary.AiMetadataStatus == AiMetadataStatus.Failed)
+                                        {
+                                            <MudTooltip Text="@Summary.AiMetadataError">
+                                                <MudIcon Icon="@Icons.Material.Filled.ErrorOutline" Size="Size.Small" Color="Color.Error" />
+                                            </MudTooltip>
+                                        }
+                                    </MudText>
+
+                                    @if (Summary.AiMetadataStatus == AiMetadataStatus.NotAnalyzed)
+                                    {
+                                        <MudText Typo="Typo.body2" Color="Color.Tertiary" Style="font-style: italic;">Non analysé</MudText>
+                                    }
+                                    else if (Summary.AiMetadataStatus == AiMetadataStatus.Failed)
+                                    {
+                                        <MudText Typo="Typo.body2" Color="Color.Error">Analyse impossible</MudText>
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(Summary.MainCountryName))
+                                    {
+                                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                            <MudText Typo="Typo.body2">@Summary.MainCountryName</MudText>
+                                            @if (Summary.MainCountryConfidence.HasValue)
+                                            {
+                                                <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Info">
+                                                    @($"{Summary.MainCountryConfidence.Value:P0}")
+                                                </MudChip>
+                                            }
+                                        </MudStack>
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.body2" Color="Color.Tertiary" Style="font-style: italic;">Non déterminé</MudText>
+                                    }
                                 </div>
 
                                 @* Catégories *@
