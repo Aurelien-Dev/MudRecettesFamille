@@ -28,6 +28,16 @@ public class YoutubeRepository(IServiceProvider serviceProvider, IDbContextFacto
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var youtubeResumeEntity = mapper.Map<YoutubeResumeEntity>(youtubeSummary);
 
+        // Charger les catégories depuis la base de données si des CategoryIds sont fournis
+        if (youtubeSummary.CategoryIds != null && youtubeSummary.CategoryIds.Count > 0)
+        {
+            var categories = await context.Categories
+                .Where(c => youtubeSummary.CategoryIds.Contains(c.Id))
+                .ToListAsync(cancellationToken);
+
+            youtubeResumeEntity.Categories = categories;
+        }
+
         await context.YoutubeSummarys.AddAsync(youtubeResumeEntity, cancellationToken);
         _ = await context.SaveChangesAsync(cancellationToken);
 
