@@ -34,17 +34,9 @@
                     {
                         <MudPaper Elevation="@(SelectedSummaryId == summary.Id ? 3 : 1)" 
                                  Class="@(SelectedSummaryId == summary.Id ? "mud-theme-primary pa-5" : "pa-5")"
-                                 Style="cursor: pointer; transition: all 0.2s; position: relative;">
-                            @* Favorite star in top-right corner *@
-                            <div @onclick:stopPropagation="true" style="position: absolute; top: 8px; right: 8px; z-index: 10;">
-                                <MudIconButton Icon="@(summary.IsFavorite ? Icons.Material.Filled.Star : Icons.Material.Outlined.StarBorder)" 
-                                              Color="@(summary.IsFavorite ? Color.Warning : Color.Default)" 
-                                              Size="Size.Medium"
-                                              OnClick="@(() => OnToggleFavorite.InvokeAsync(summary))"
-                                              Title="@(summary.IsFavorite ? "Retirer des favoris" : "Ajouter aux favoris")" />
-                            </div>
-
-                            <MudStack Row="true" Spacing="3" @onclick="@(() => OnSummarySelected.InvokeAsync(summary))">
+                                 Style="cursor: pointer; transition: all 0.2s;"
+                                 @onclick="@(() => OnSummarySelected.InvokeAsync(summary))">
+                            <MudStack Row="true" Spacing="3">
                                 @* Left section: Thumbnail *@
                                 <div style="width: 200px; min-width: 200px; position: relative;">
                                     @if (thumbnailErrors.ContainsKey(summary.Id) && thumbnailErrors[summary.Id])
@@ -156,7 +148,6 @@
     [Parameter] public EventCallback<string> OnSearchChanged { get; set; }
     [Parameter] public EventCallback<YoutubeResumeDto> OnSummarySelected { get; set; }
     [Parameter] public EventCallback<YoutubeResumeDto> OnDeleteSummaryClicked { get; set; }
-    [Parameter] public EventCallback<YoutubeResumeDto> OnToggleFavorite { get; set; }
 
     private Dictionary<int, bool> thumbnailErrors = new();
 

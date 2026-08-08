@@ -1,15 +1,18 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.Repository.IRepositories;
 using RecettesFamille.Dto.Models;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
-public class TravelRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext> contextFactory) : ITravelRepository
+public class TravelRepository(IServiceProvider serviceProvider, IDbContextFactory<ApplicationDbContext> contextFactory) : ITravelRepository
 {
     public async Task<List<TravelDto>> GetAll(CancellationToken cancellationToken = default)
     {
+        using var scope = serviceProvider.CreateScope();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var travels = await context.Travels.ToListAsync(cancellationToken);
         return mapper.Map<List<TravelDto>>(travels);
@@ -17,6 +20,8 @@ public class TravelRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task<TravelDto?> GetById(int id, CancellationToken cancellationToken = default)
     {
+        using var scope = serviceProvider.CreateScope();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var travel = await context.Travels.FindAsync([id], cancellationToken);
         return travel == null ? null : mapper.Map<TravelDto>(travel);
@@ -24,6 +29,8 @@ public class TravelRepository(IMapper mapper, IDbContextFactory<ApplicationDbCon
 
     public async Task<TravelDto> Add(TravelDto travel, CancellationToken cancellationToken = default)
     {
+        using var scope = serviceProvider.CreateScope();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var travelEntity = mapper.Map<TravelEntity>(travel);
         travelEntity.CreatedDate = DateTime.UtcNow;

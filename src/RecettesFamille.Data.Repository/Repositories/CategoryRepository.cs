@@ -1,15 +1,18 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.Repository.IRepositories;
 using RecettesFamille.Dto.Models;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
-public class CategoryRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext> contextFactory) : ICategoryRepository
+public class CategoryRepository(IServiceProvider serviceProvider, IDbContextFactory<ApplicationDbContext> contextFactory) : ICategoryRepository
 {
     public async Task<List<CategoryDto>> GetAll(CancellationToken cancellationToken = default)
     {
+        using var scope = serviceProvider.CreateScope();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var categories = await context.Categories
             .OrderBy(c => c.Name)
@@ -19,6 +22,8 @@ public class CategoryRepository(IMapper mapper, IDbContextFactory<ApplicationDbC
 
     public async Task<CategoryDto?> GetById(int id, CancellationToken cancellationToken = default)
     {
+        using var scope = serviceProvider.CreateScope();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var category = await context.Categories.FindAsync([id], cancellationToken);
         return category == null ? null : mapper.Map<CategoryDto>(category);
@@ -26,6 +31,8 @@ public class CategoryRepository(IMapper mapper, IDbContextFactory<ApplicationDbC
 
     public async Task<CategoryDto> Add(CategoryDto category, CancellationToken cancellationToken = default)
     {
+        using var scope = serviceProvider.CreateScope();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var categoryEntity = mapper.Map<CategoryEntity>(category);
         categoryEntity.CreatedDate = DateTime.UtcNow;

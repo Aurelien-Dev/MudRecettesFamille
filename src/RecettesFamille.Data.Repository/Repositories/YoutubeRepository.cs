@@ -1,15 +1,18 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using RecettesFamille.Data.EntityModel;
 using RecettesFamille.Data.Repository.IRepositories;
 using RecettesFamille.Dto.Models;
 
 namespace RecettesFamille.Data.Repository.Repositories;
 
-public class YoutubeRepository(IMapper mapper, IDbContextFactory<ApplicationDbContext> contextFactory) : IYoutubeRepository
+public class YoutubeRepository(IServiceProvider serviceProvider, IDbContextFactory<ApplicationDbContext> contextFactory) : IYoutubeRepository
 {
     public async Task<List<YoutubeResumeDto>> GetAllSummary(CancellationToken cancellationToken = default)
     {
+        using var scope = serviceProvider.CreateScope();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var summaries = await context.YoutubeSummarys
             .Include(y => y.Travel)
@@ -20,6 +23,8 @@ public class YoutubeRepository(IMapper mapper, IDbContextFactory<ApplicationDbCo
 
     public async Task<YoutubeResumeDto> AddSummary(YoutubeResumeDto youtubeSummary, CancellationToken cancellationToken = default)
     {
+        using var scope = serviceProvider.CreateScope();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
         var youtubeResumeEntity = mapper.Map<YoutubeResumeEntity>(youtubeSummary);
 
