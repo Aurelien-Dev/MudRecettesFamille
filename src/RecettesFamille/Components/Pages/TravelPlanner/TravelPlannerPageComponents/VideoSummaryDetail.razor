@@ -38,38 +38,6 @@
 
             <MudDivider />
 
-            @* Category Chips *@
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Style="flex-wrap: wrap;">
-                @if (Summary.CategoryNames.Any())
-                {
-                    @for (int i = 0; i < Summary.CategoryNames.Count; i++)
-                    {
-                        var categoryName = Summary.CategoryNames[i];
-                        var categoryColor = i < Summary.CategoryColors.Count ? Summary.CategoryColors[i] : null;
-
-                        <MudChip T="string" 
-                                 Size="Size.Medium" 
-                                 Variant="Variant.Text"
-                                 Style="@($"background-color: {categoryColor}1A; color: {categoryColor ?? "#666"};")">
-                            @if (!string.IsNullOrWhiteSpace(categoryColor))
-                            {
-                                <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Style="@($"color: {categoryColor}; margin-right: 4px;")" />
-                            }
-                            @categoryName
-                        </MudChip>
-                    }
-                }
-                else
-                {
-                    <MudChip T="string" 
-                             Size="Size.Small" 
-                             Color="Color.Default" 
-                             Variant="Variant.Text">
-                        Aucune catégorie
-                    </MudChip>
-                }
-            </MudStack>
-
             @* Travel Info Section *@
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                 <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Color="Color.Secondary" />
