@@ -1,4 +1,5 @@
 using RecettesFamille.Services.Models;
+using RecettesFamille.ServicesExternal;
 using System.Text.Json;
 
 namespace RecettesFamille.Services.TravelPlanner.Sources;
@@ -10,7 +11,7 @@ namespace RecettesFamille.Services.TravelPlanner.Sources;
 /// </summary>
 public class YoutubeSourceService : IContentSourceService
 {
-    private readonly HttpClient _supadataClient;
+    private readonly ISupadataService _supadataService;
 
     /// <inheritdoc/>
     public string SourceType => "YouTube";
@@ -18,10 +19,10 @@ public class YoutubeSourceService : IContentSourceService
     /// <summary>
     /// Initialise une nouvelle instance du service YouTube.
     /// </summary>
-    /// <param name="httpClientFactory">Factory pour créer des instances HttpClient configurées.</param>
-    public YoutubeSourceService(IHttpClientFactory httpClientFactory)
+    /// <param name="supadataService">Service pour les appels à l'API Supadata.</param>
+    public YoutubeSourceService(ISupadataService supadataService)
     {
-        _supadataClient = httpClientFactory.CreateClient("Supadata");
+        _supadataService = supadataService;
     }
 
     /// <inheritdoc/>
@@ -37,16 +38,16 @@ public class YoutubeSourceService : IContentSourceService
         var oembedData = await GetVideoMetadataFromOEmbed(normalizedUrl, cancellationToken);
 
         // Récupérer des métadonnées supplémentaires depuis Supadata (nécessite l'ID)
-        var transcriptResponse = await GetTranscriptFromSupadata(videoId, cancellationToken);
+        var transcriptResponse = await _supadataService.GetYoutubeTranscriptAsync(videoId, cancellationToken);
 
-        var title = oembedData?.Title 
-                    ?? transcriptResponse.Title 
+        var title = oembedData?.Title
+                    ?? transcriptResponse.Title
                     ?? $"Vidéo YouTube {videoId}";
 
         var author = oembedData?.AuthorName;
 
-        TimeSpan? duration = transcriptResponse.Duration.HasValue 
-            ? TimeSpan.FromSeconds(transcriptResponse.Duration.Value) 
+        TimeSpan? duration = transcriptResponse.Duration.HasValue
+            ? TimeSpan.FromSeconds(transcriptResponse.Duration.Value)
             : null;
 
         return new ContentMetadata(
@@ -67,7 +68,7 @@ public class YoutubeSourceService : IContentSourceService
         // Extraire l'ID uniquement pour l'API Supadata qui en a besoin
         var videoId = ExtractVideoIdFromUrl(normalizedUrl);
 
-        var transcriptResponse = await GetTranscriptFromSupadata(videoId, cancellationToken);
+        var transcriptResponse = await _supadataService.GetYoutubeTranscriptAsync(videoId, cancellationToken);
         return transcriptResponse.Content;
     }
 
@@ -202,43 +203,5 @@ public class YoutubeSourceService : IContentSourceService
         }
 
         return null;
-    }
-
-    /// <summary>
-    /// Récupère le transcript d'une vidéo YouTube via l'API Supadata.
-    /// </summary>
-    /// <param name="videoId">L'identifiant de la vidéo YouTube.</param>
-    /// <param name="cancellationToken">Token d'annulation pour l'opération asynchrone.</param>
-    /// <returns>La réponse de l'API Supadata contenant le transcript et les métadonnées.</returns>
-    /// <exception cref="HttpRequestException">Lancée si l'appel à l'API échoue.</exception>
-    /// <exception cref="JsonException">Lancée si la désérialisation de la réponse échoue.</exception>
-    private async Task<SupadataTranscriptResponse> GetTranscriptFromSupadata(string videoId, CancellationToken cancellationToken)
-    {
-        // Forcer l'anglais en priorité pour plus de fiabilité dans le traitement AI
-        // Si l'anglais n'est pas disponible, l'API retournera la première langue disponible
-        var requestUrl = $"/v1/youtube/transcript?videoId={videoId}&text=true&lang=en";
-
-        var response = await _supadataClient.GetAsync(requestUrl, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new HttpRequestException(
-                $"L'API Supadata a retourné une erreur {response.StatusCode}: {errorContent}");
-        }
-
-        var content = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        var transcriptResponse = JsonSerializer.Deserialize<SupadataTranscriptResponse>(content, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
-
-        if (transcriptResponse == null || string.IsNullOrWhiteSpace(transcriptResponse.Content))
-        {
-            throw new InvalidOperationException("La réponse de l'API Supadata est vide ou invalide.");
-        }
-
-        return transcriptResponse;
     }
 }

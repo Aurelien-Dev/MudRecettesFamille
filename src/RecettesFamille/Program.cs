@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
+using RecettesFamille.ServicesExternal;
 using RecettesFamille;
 using RecettesFamille.Api;
 using RecettesFamille.Api.TravelPlanner;
@@ -74,6 +75,7 @@ builder.Services.AddHttpClient("Supadata", client =>
         client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
     }
 });
+builder.Services.AddScoped<ISupadataService, SupadataService>();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<EmailManager>();
