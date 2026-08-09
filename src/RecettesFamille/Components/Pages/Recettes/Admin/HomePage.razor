@@ -38,7 +38,7 @@
                     <MudCardContent>
                         <MudStack Spacing="3">
                             <div>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">Recettes enregistrées</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Recettes enregistrÃ©es</MudText>
                                 <MudText Typo="Typo.h5" Color="Color.Primary">@_totalRecipes</MudText>
                             </div>
                         </MudStack>
@@ -60,7 +60,7 @@
                     <MudCardContent>
                         <MudStack Spacing="3">
                             <div>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">Recettes ajoutées</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Recettes ajoutÃ©es</MudText>
                                 <MudText Typo="Typo.h5" Color="Color.Success">@_recipesThisMonth</MudText>
                             </div>
                         </MudStack>
@@ -82,7 +82,7 @@
                     <MudCardContent>
                         <MudStack Spacing="3">
                             <div>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">Préparation + Cuisson</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">PrÃ©paration + Cuisson</MudText>
                                 <MudText Typo="Typo.h5" Color="Color.Info">@_averagePrepTime min</MudText>
                             </div>
                         </MudStack>
@@ -90,21 +90,21 @@
                 </MudCard>
             </MudItem>
 
-            <!-- Card 4: Catégories -->
+            <!-- Card 4: CatÃ©gories -->
             <MudItem xs="12" sm="6" md="3">
                 <MudCard Elevation="3" Style="background-color: white;">
                     <MudCardHeader>
                         <CardHeaderContent>
                             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                                 <MudIcon Icon="@Icons.Material.Filled.Category" Color="Color.Warning" Size="Size.Large" />
-                                <MudText Typo="Typo.h6">Catégories</MudText>
+                                <MudText Typo="Typo.h6">CatÃ©gories</MudText>
                             </MudStack>
                         </CardHeaderContent>
                     </MudCardHeader>
                     <MudCardContent>
                         <MudStack Spacing="3">
                             <div>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">Catégories différentes</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">CatÃ©gories diffÃ©rentes</MudText>
                                 <MudText Typo="Typo.h5" Color="Color.Warning">@_categoriesCount</MudText>
                             </div>
                         </MudStack>
@@ -112,7 +112,7 @@
                 </MudCard>
             </MudItem>
 
-            <!-- Section: Répartition par Catégorie -->
+            <!-- Section: RÃ©partition par CatÃ©gorie -->
             <MudItem xs="12">
                 <MudCard Elevation="3" Style="background-color: white;">
                     <MudCardHeader>
@@ -120,12 +120,12 @@
                             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Justify="Justify.SpaceBetween">
                                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                                     <MudIcon Icon="@Icons.Material.Filled.PieChart" Color="Color.Tertiary" Size="Size.Large" />
-                                    <MudText Typo="Typo.h6">Top 10 Catégories</MudText>
+                                    <MudText Typo="Typo.h6">Top 10 CatÃ©gories</MudText>
                                 </MudStack>
                                 @if (_recipesByCategory.Count > 10)
                                 {
                                     <MudText Typo="Typo.caption" Color="Color.Secondary">
-                                        (@_recipesByCategory.Count) catégories au total
+                                        (@_recipesByCategory.Count) catÃ©gories au total
                                     </MudText>
                                 }
                             </MudStack>
@@ -148,20 +148,20 @@
                         }
                         else
                         {
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">Aucune catégorie disponible</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Aucune catÃ©gorie disponible</MudText>
                         }
                     </MudCardContent>
                 </MudCard>
             </MudItem>
 
-            <!-- Section: Activité Récente - Recettes -->
+            <!-- Section: ActivitÃ© RÃ©cente - Recettes -->
             <MudItem xs="12" md="6">
                 <MudCard Elevation="3" Style="background-color: white;">
                     <MudCardHeader>
                         <CardHeaderContent>
                             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                                 <MudIcon Icon="@Icons.Material.Filled.NewReleases" Color="Color.Success" Size="Size.Large" />
-                                <MudText Typo="Typo.h6">Dernières Recettes</MudText>
+                                <MudText Typo="Typo.h6">DerniÃ¨res Recettes</MudText>
                             </MudStack>
                         </CardHeaderContent>
                     </MudCardHeader>
@@ -193,20 +193,20 @@
                         }
                         else
                         {
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">Aucune recette récente</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Aucune recette rÃ©cente</MudText>
                         }
                     </MudCardContent>
                 </MudCard>
             </MudItem>
 
-            <!-- Section: Activité Récente - Connexions -->
+            <!-- Section: ActivitÃ© RÃ©cente - Connexions -->
             <MudItem xs="12" md="6">
                 <MudCard Elevation="3" Style="background-color: white;">
                     <MudCardHeader>
                         <CardHeaderContent>
                             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                                 <MudIcon Icon="@Icons.Material.Filled.Login" Color="Color.Info" Size="Size.Large" />
-                                <MudText Typo="Typo.h6">Dernières Connexions</MudText>
+                                <MudText Typo="Typo.h6">DerniÃ¨res Connexions</MudText>
                             </MudStack>
                         </CardHeaderContent>
                     </MudCardHeader>
@@ -229,7 +229,7 @@
                                             </MudStack>
                                             <MudText Typo="Typo.caption" Color="Color.Secondary">
                                                 <MudIcon Icon="@Icons.Material.Filled.AccessTime" Size="Size.Small" Class="mr-1" />
-                                                @(connection.LastLogin.HasValue ? connection.LastLogin.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm") : "Jamais connecté")
+                                                @(connection.LastLogin.HasValue ? connection.LastLogin.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm") : "Jamais connectÃ©")
                                             </MudText>
                                         </MudStack>
                                     </MudListItem>
@@ -238,7 +238,7 @@
                         }
                         else
                         {
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">Aucune connexion récente</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Aucune connexion rÃ©cente</MudText>
                         }
                     </MudCardContent>
                 </MudCard>
@@ -349,7 +349,7 @@
                 .Select(r => new RecentRecipeVm(
                     r.Name,
                     r.CreatedDate,
-                    string.IsNullOrEmpty(r.Tags) ? "Sans catégorie" : r.Tags
+                    string.IsNullOrEmpty(r.Tags) ? "Sans catÃ©gorie" : r.Tags
                 ))
                 .ToListAsync();
 

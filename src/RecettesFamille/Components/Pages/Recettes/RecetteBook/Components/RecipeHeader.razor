@@ -19,7 +19,7 @@
         @{
             var instructions = new[]
             {
-                Recipe.PrepTime > 0 ? $"préparation : {Recipe.PrepTime} min" : string.Empty,
+                Recipe.PrepTime > 0 ? $"prÃ©paration : {Recipe.PrepTime} min" : string.Empty,
                 Recipe.CookingTime > 0 ? $"temps de cuisson: {Recipe.CookingTime} min" : string.Empty,
                 GetRestTimeText(Recipe.RestTime),
                 Recipe.Portion > 0 ? $"pour {Recipe.Portion} portions" : string.Empty

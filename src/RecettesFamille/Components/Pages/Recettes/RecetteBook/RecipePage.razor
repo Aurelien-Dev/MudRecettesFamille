@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using RecettesFamille.Components.Pages.Recettes.RecetteBook.BlockDefinitions
 @using RecettesFamille.Components.Pages.Recettes.RecetteBook.Components
+@using RecettesFamille.Components.Pages.Recettes.Shared
 
 <PageTitle>@(Recipe?.Name ?? "Recette") | Recettes famille</PageTitle>
 
@@ -46,7 +47,7 @@
 	</MudGrid>
 
 	<MudStack Spacing="0">
-		<MudText Typo="Typo.caption" Class="ma-0 pa-0" Align="Align.End" GutterBottom="true" Style="@($"color:{Colors.Gray.Default};")">Crée le : @Recipe.CreatedDate</MudText>
+		<MudText Typo="Typo.caption" Class="ma-0 pa-0" Align="Align.End" GutterBottom="true" Style="@($"color:{Colors.Gray.Default};")">CrÃ©e le : @Recipe.CreatedDate</MudText>
 		@if (!string.IsNullOrWhiteSpace(Recipe.CreatedByUserName))
 		{
 			<MudText Typo="Typo.caption" Class="ma-0 pa-0" Align="Align.End" GutterBottom="true" Style="@($"color:{Colors.Gray.Default};")">Par : @Recipe.CreatedByUserName</MudText>
@@ -82,8 +83,8 @@
 		var parameters = new DialogParameters
 		{
 			{ "Title", "Avertissement" },
-			{ "Message", "Supprimer cette recette, c'est comme jeter une pâte à pain levée… Impossible de revenir en arrière !" },
-			{ "ConfirmText", "Tout mettre à la poubelle !" },
+			{ "Message", "Supprimer cette recette, c'est comme jeter une pÃ¢te Ã  pain levÃ©eâ€¦ Impossible de revenir en arriÃ¨re !" },
+			{ "ConfirmText", "Tout mettre Ã  la poubelle !" },
 			{ "CancelText", "Garder la recette" }
 		};
 

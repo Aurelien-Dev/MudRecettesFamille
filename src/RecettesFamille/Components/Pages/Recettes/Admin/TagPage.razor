@@ -12,7 +12,7 @@
 
 <MudList T="TagDto" SelectionMode="SelectionMode.MultiSelection" Dense="true">
     <MudListSubheader>
-        Tags à afficher dans la bar de recherche :
+        Tags Ã  afficher dans la bar de recherche :
     </MudListSubheader>
     @foreach (var item in Tags.EmptyIfNull().OrderBy(c => c.TagName))
     {
@@ -58,7 +58,7 @@
         var parameters = new DialogParameters
         {
             { "Title", "Avertissement" },
-            { "Message", "La suppression supprimera le tag sur la recettes aussi et est irréversible !" },
+            { "Message", "La suppression supprimera le tag sur la recettes aussi et est irrÃ©versible !" },
             { "ConfirmText", "Supprimer !" },
             { "CancelText", "Annuler" }
         };
