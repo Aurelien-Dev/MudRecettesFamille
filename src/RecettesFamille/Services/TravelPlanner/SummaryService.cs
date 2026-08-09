@@ -32,11 +32,12 @@ public class SummaryService : ISummaryService
     /// <inheritdoc/>
     public async Task<YoutubeResumeDto> CreateSummaryFromYoutube(string youtubeUrl, int? travelId = null, CancellationToken cancellationToken = default)
     {
-        // 1. Extraire les métadonnées de la vidéo
+        
+        // 1. Extraire les métadonnées de la vidéo (normalise l'URL au passage)
         var metadata = await _youtubeSourceService.ExtractMetadata(youtubeUrl, cancellationToken);
 
-        // 2. Récupérer le transcript
-        var transcript = await _youtubeSourceService.GetContent(youtubeUrl, cancellationToken);
+        // 2. Récupérer le transcript (réutilise l'URL normalisée depuis les métadonnées)
+        var transcript = await _youtubeSourceService.GetContent(metadata.Url, cancellationToken);
 
         // 3. Créer l'objet de requête pour l'AI Manager
         var youtubeSummaryRequest = new YoutubeSummaryJson

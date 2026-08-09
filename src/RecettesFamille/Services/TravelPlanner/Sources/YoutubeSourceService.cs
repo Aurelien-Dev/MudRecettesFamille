@@ -6,6 +6,7 @@ namespace RecettesFamille.Services.TravelPlanner.Sources;
 /// <summary>
 /// Service pour l'extraction de contenu depuis YouTube.
 /// Gère l'extraction des métadonnées et des transcripts via l'API Supadata et YouTube oEmbed.
+/// Normalise automatiquement les URLs shorts en format /watch?v= standard pour simplifier le traitement.
 /// </summary>
 public class YoutubeSourceService : IContentSourceService
 {
@@ -26,13 +27,16 @@ public class YoutubeSourceService : IContentSourceService
     /// <inheritdoc/>
     public async Task<ContentMetadata> ExtractMetadata(string sourceUrl, CancellationToken cancellationToken = default)
     {
-        var videoId = ExtractVideoId(sourceUrl);
-        var standardUrl = $"https://www.youtube.com/watch?v={videoId}";
+        // Normaliser l'URL (convertit les shorts en /watch?v=)
+        var normalizedUrl = NormalizeYoutubeUrl(sourceUrl);
 
-        // Récupérer les métadonnées via YouTube oEmbed
-        var oembedData = await GetVideoMetadataFromOEmbed(videoId, cancellationToken);
+        // Extraire l'ID uniquement pour l'API Supadata qui en a besoin
+        var videoId = ExtractVideoIdFromUrl(normalizedUrl);
 
-        // Récupérer des métadonnées supplémentaires depuis Supadata (si disponibles)
+        // Récupérer les métadonnées via YouTube oEmbed (passer l'URL normalisée)
+        var oembedData = await GetVideoMetadataFromOEmbed(normalizedUrl, cancellationToken);
+
+        // Récupérer des métadonnées supplémentaires depuis Supadata (nécessite l'ID)
         var transcriptResponse = await GetTranscriptFromSupadata(videoId, cancellationToken);
 
         var title = oembedData?.Title 
@@ -47,7 +51,7 @@ public class YoutubeSourceService : IContentSourceService
 
         return new ContentMetadata(
             Title: title,
-            Url: standardUrl,
+            Url: normalizedUrl, // Utiliser l'URL normalisée (shorts convertis)
             SourceType: SourceType,
             Author: author,
             Duration: duration
@@ -57,18 +61,25 @@ public class YoutubeSourceService : IContentSourceService
     /// <inheritdoc/>
     public async Task<string> GetContent(string sourceUrl, CancellationToken cancellationToken = default)
     {
-        var videoId = ExtractVideoId(sourceUrl);
+        // Normaliser l'URL (convertit les shorts en /watch?v=)
+        var normalizedUrl = NormalizeYoutubeUrl(sourceUrl);
+
+        // Extraire l'ID uniquement pour l'API Supadata qui en a besoin
+        var videoId = ExtractVideoIdFromUrl(normalizedUrl);
+
         var transcriptResponse = await GetTranscriptFromSupadata(videoId, cancellationToken);
         return transcriptResponse.Content;
     }
 
     /// <summary>
-    /// Extrait l'identifiant de la vidéo YouTube depuis différents formats d'URL.
+    /// Valide et normalise une URL YouTube.
+    /// Les shorts sont convertis en format /watch?v= standard pour simplifier le traitement.
+    /// Formats supportés : /watch?v=, /shorts/ (converti), /embed/, et youtu.be/
     /// </summary>
-    /// <param name="url">L'URL YouTube à analyser.</param>
-    /// <returns>L'identifiant de la vidéo (11 caractères).</returns>
-    /// <exception cref="ArgumentException">Lancée si l'URL n'est pas une URL YouTube valide ou si le videoId ne peut pas être extrait.</exception>
-    private static string ExtractVideoId(string url)
+    /// <param name="url">L'URL YouTube à normaliser.</param>
+    /// <returns>L'URL YouTube normalisée (shorts convertis en /watch?v=, autres formats préservés).</returns>
+    /// <exception cref="ArgumentException">Lancée si l'URL n'est pas une URL YouTube valide ou reconnue.</exception>
+    private static string NormalizeYoutubeUrl(string url)
     {
         if (string.IsNullOrWhiteSpace(url))
         {
@@ -87,14 +98,14 @@ public class YoutubeSourceService : IContentSourceService
 
                 if (!string.IsNullOrWhiteSpace(videoId))
                 {
-                    return videoId;
+                    return url; // Déjà au format standard, garder tel quel
                 }
             }
 
             // Format: https://youtu.be/VIDEO_ID
             if (uri.Host == "youtu.be" && uri.AbsolutePath.Length > 1)
             {
-                return uri.AbsolutePath.TrimStart('/');
+                return url; // Format court valide, garder tel quel
             }
 
             // Format: https://www.youtube.com/embed/VIDEO_ID
@@ -103,11 +114,22 @@ public class YoutubeSourceService : IContentSourceService
                 var videoId = uri.AbsolutePath.Replace("/embed/", "");
                 if (!string.IsNullOrWhiteSpace(videoId))
                 {
-                    return videoId;
+                    return url; // Format embed valide, garder tel quel
                 }
             }
 
-            throw new ArgumentException($"Impossible d'extraire l'identifiant de la vidéo depuis l'URL : {url}", nameof(url));
+            // Format: https://www.youtube.com/shorts/VIDEO_ID → Normaliser en /watch?v=
+            if ((uri.Host.Contains("youtube.com") || uri.Host.Contains("www.youtube.com")) && uri.AbsolutePath.StartsWith("/shorts/"))
+            {
+                var videoId = uri.AbsolutePath.Replace("/shorts/", "");
+                if (!string.IsNullOrWhiteSpace(videoId))
+                {
+                    // Convertir en format standard /watch?v=
+                    return $"https://www.youtube.com/watch?v={videoId}";
+                }
+            }
+
+            throw new ArgumentException($"L'URL YouTube n'est pas dans un format reconnu : {url}", nameof(url));
         }
         catch (UriFormatException)
         {
@@ -116,16 +138,50 @@ public class YoutubeSourceService : IContentSourceService
     }
 
     /// <summary>
+    /// Extrait l'identifiant de la vidéo YouTube depuis une URL normalisée.
+    /// Cette méthode suppose que l'URL a déjà été normalisée par NormalizeYoutubeUrl.
+    /// Les shorts ont déjà été convertis en /watch?v= à ce stade.
+    /// </summary>
+    /// <param name="url">L'URL YouTube normalisée.</param>
+    /// <returns>L'identifiant de la vidéo (11 caractères).</returns>
+    private static string ExtractVideoIdFromUrl(string url)
+    {
+        var uri = new Uri(url);
+
+        // Format: https://www.youtube.com/watch?v=VIDEO_ID (inclut les shorts normalisés)
+        if ((uri.Host.Contains("youtube.com") || uri.Host.Contains("www.youtube.com")) && uri.AbsolutePath == "/watch")
+        {
+            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            return query["v"]!;
+        }
+
+        // Format: https://youtu.be/VIDEO_ID
+        if (uri.Host == "youtu.be")
+        {
+            return uri.AbsolutePath.TrimStart('/');
+        }
+
+        // Format: https://www.youtube.com/embed/VIDEO_ID
+        if ((uri.Host.Contains("youtube.com") || uri.Host.Contains("www.youtube.com")) && uri.AbsolutePath.StartsWith("/embed/"))
+        {
+            return uri.AbsolutePath.Replace("/embed/", "");
+        }
+
+        // Ne devrait jamais arriver si l'URL a été normalisée
+        throw new InvalidOperationException($"Impossible d'extraire l'ID de l'URL normalisée : {url}");
+    }
+
+    /// <summary>
     /// Récupère les métadonnées d'une vidéo YouTube via l'API oEmbed (gratuite, sans clé).
     /// </summary>
-    /// <param name="videoId">L'identifiant de la vidéo YouTube.</param>
+    /// <param name="youtubeUrl">L'URL complète de la vidéo YouTube.</param>
     /// <param name="cancellationToken">Token d'annulation pour l'opération asynchrone.</param>
     /// <returns>Les métadonnées oEmbed ou null si non disponibles.</returns>
-    private async Task<YoutubeOEmbedResponse?> GetVideoMetadataFromOEmbed(string videoId, CancellationToken cancellationToken)
+    private async Task<YoutubeOEmbedResponse?> GetVideoMetadataFromOEmbed(string youtubeUrl, CancellationToken cancellationToken)
     {
         try
         {
-            var oembedUrl = $"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={videoId}&format=json";
+            var oembedUrl = $"https://www.youtube.com/oembed?url={Uri.EscapeDataString(youtubeUrl)}&format=json";
             using var httpClient = new HttpClient();
             var response = await httpClient.GetAsync(oembedUrl, cancellationToken);
 
