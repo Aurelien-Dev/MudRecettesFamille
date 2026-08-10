@@ -247,7 +247,7 @@ Réponds uniquement au format json répondant à ce schéma:
         return GptMapper.ConvertToRecipeDto(result);
     }
 
-    public async Task<string> GetYoutubeResume(YoutubeSummaryJson request, int? travelId = null, CancellationToken cancellationToken = default)
+    public async Task<YoutubeResumeDto> GetYoutubeResume(string transcript, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -264,7 +264,7 @@ Réponds uniquement au format json répondant à ce schéma:
             // 4. Construire le message utilisateur avec le transcript
             var userMessage = $@"
 === Début du transcript ===
-{request.Transcript}
+{transcript}
 === Fin du transcript ===";
 
             var messages = new ChatMessage[]
@@ -286,9 +286,6 @@ Réponds uniquement au format json répondant à ce schéma:
             var summaryDto = new YoutubeResumeDto
             {
                 Resume = result.Summary,
-                Title = request.Title,
-                Url = request.Url,
-                TravelId = travelId,
                 CreatedDate = DateTime.UtcNow,
 
                 // Métadonnées IA - Pays
@@ -304,10 +301,7 @@ Réponds uniquement au format json répondant à ce schéma:
                 CategoryIds = validatedCategories.Select(c => c.Id).ToList()
             };
 
-            // 9. Sauvegarder en base de données
-            await youtubeRepository.AddSummary(summaryDto, cancellationToken);
-
-            return result.Summary;
+            return summaryDto;
         }
         catch (JsonException ex)
         {
@@ -315,7 +309,6 @@ Réponds uniquement au format json répondant à ce schéma:
             var errorMessage = "Erreur de désérialisation du résultat IA";
             Console.WriteLine($"[ERROR] {errorMessage}: {ex.Message}");
 
-            await SaveFailedSummary(request, travelId, errorMessage, cancellationToken);
             throw new InvalidOperationException(errorMessage, ex);
         }
         catch (Exception ex)
@@ -324,35 +317,7 @@ Réponds uniquement au format json répondant à ce schéma:
             var errorMessage = "Erreur lors de l'analyse IA des métadonnées";
             Console.WriteLine($"[ERROR] {errorMessage}: {ex.Message}");
 
-            await SaveFailedSummary(request, travelId, errorMessage, cancellationToken);
             throw;
-        }
-    }
-
-    /// <summary>
-    /// Sauvegarde un résumé avec un statut Failed en cas d'erreur d'analyse IA.
-    /// </summary>
-    private async Task SaveFailedSummary(YoutubeSummaryJson request, int? travelId, string errorMessage, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var failedSummary = new YoutubeResumeDto
-            {
-                Resume = "Résumé non disponible en raison d'une erreur d'analyse.",
-                Title = request.Title,
-                Url = request.Url,
-                TravelId = travelId,
-                CreatedDate = DateTime.UtcNow,
-                AiMetadataStatus = AiMetadataStatus.Failed,
-                AiMetadataError = errorMessage,
-                AiMetadataAnalyzedAt = DateTime.UtcNow
-            };
-
-            await youtubeRepository.AddSummary(failedSummary, cancellationToken);
-        }
-        catch (Exception saveEx)
-        {
-            Console.WriteLine($"[ERROR] Failed to save failed summary: {saveEx.Message}");
         }
     }
 

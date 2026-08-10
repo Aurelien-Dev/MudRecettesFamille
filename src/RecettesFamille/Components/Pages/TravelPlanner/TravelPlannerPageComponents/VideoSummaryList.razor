@@ -41,7 +41,7 @@
                                     <MudIcon Icon="@Icons.Custom.Brands.YouTube" Color="Color.Error" Size="Size.Large" />
                                 </MudPaper> *@
                                 @* Left section: Thumbnail *@
-                                <MudImage Src="@GetThumbnailUrl(summary.Url)"
+                                <MudImage Src="@(summary.ThumbnailUrl ?? GetThumbnailUrl(summary.Url))"
                                           Alt="@summary.Title"
                                           Class="rounded"
                                           Width="150"

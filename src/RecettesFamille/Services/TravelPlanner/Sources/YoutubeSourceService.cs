@@ -40,22 +40,13 @@ public class YoutubeSourceService : IContentSourceService
         // Récupérer des métadonnées supplémentaires depuis Supadata (nécessite l'ID)
         var transcriptResponse = await _supadataService.GetYoutubeTranscriptAsync(videoId, cancellationToken);
 
-        var title = oembedData?.Title
-                    ?? transcriptResponse.Title
-                    ?? $"Vidéo YouTube {videoId}";
-
-        var author = oembedData?.AuthorName;
-
-        TimeSpan? duration = transcriptResponse.Duration.HasValue
-            ? TimeSpan.FromSeconds(transcriptResponse.Duration.Value)
-            : null;
-
         return new ContentMetadata(
-            Title: title,
-            Url: normalizedUrl, // Utiliser l'URL normalisée (shorts convertis)
+            Title: oembedData?.Title ?? $"Vidéo YouTube {videoId}",
+            Url: normalizedUrl,
             SourceType: SourceType,
-            Author: author,
-            Duration: duration
+            Author: oembedData?.AuthorName,
+            Duration: null,
+            ThumbnailUrl: oembedData?.ThumbnailUrl
         );
     }
 

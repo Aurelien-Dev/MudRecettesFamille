@@ -49,4 +49,39 @@ public class SupadataService : ISupadataService
 
         return transcriptResponse;
     }
+
+    /// <inheritdoc/>
+    public async Task<SupadataTranscriptResponse> GetTranscriptAsync(string url, string lang = "en", string mode = "auto", CancellationToken cancellationToken = default)
+    {
+        var encodedUrl = Uri.EscapeDataString(url);
+        var requestUrl = $"/v1/transcript?url={encodedUrl}&text=true&lang={lang}&mode={mode}";
+
+        var response = await _httpClient.GetAsync(requestUrl, cancellationToken);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Accepted)
+        {
+            throw new NotSupportedException("L'API Supadata a retourné un job asynchrone (HTTP 202). Le polling n'est pas pris en charge.");
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new HttpRequestException(
+                $"L'API Supadata a retourné une erreur {response.StatusCode}: {errorContent}");
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        var transcriptResponse = JsonSerializer.Deserialize<SupadataTranscriptResponse>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        if (transcriptResponse == null || string.IsNullOrWhiteSpace(transcriptResponse.Content))
+        {
+            throw new InvalidOperationException("La réponse de l'API Supadata est vide ou invalide.");
+        }
+
+        return transcriptResponse;
+    }
 }

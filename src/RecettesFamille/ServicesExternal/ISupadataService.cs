@@ -14,4 +14,15 @@ public interface ISupadataService
     /// <param name="cancellationToken">Token d'annulation pour l'opération asynchrone.</param>
     /// <returns>La réponse de l'API Supadata contenant le transcript et les métadonnées.</returns>
     Task<SupadataTranscriptResponse> GetYoutubeTranscriptAsync(string videoId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Récupère le transcript d'un contenu via l'endpoint générique Supadata.
+    /// Supporte YouTube, TikTok, Instagram, X (Twitter), Facebook et fichiers publics.
+    /// </summary>
+    /// <param name="url">L'URL complète du contenu (doit être encodée si nécessaire).</param>
+    /// <param name="lang">Code de langue ISO 639-1 préféré (défaut : "en").</param>
+    /// <param name="mode">Mode de transcription : "native", "generate" ou "auto" (défaut : "auto").</param>
+    /// <param name="cancellationToken">Token d'annulation pour l'opération asynchrone.</param>
+    /// <returns>La réponse de l'API Supadata contenant le transcript.</returns>
+    Task<SupadataTranscriptResponse> GetTranscriptAsync(string url, string lang = "en", string mode = "auto", CancellationToken cancellationToken = default);
 }

@@ -1,5 +1,6 @@
 using RecettesFamille.Api;
 using RecettesFamille.Data.Repository.IRepositories;
+using RecettesFamille.Data.Repository.Repositories;
 using RecettesFamille.Dto.Models;
 using RecettesFamille.Managers.AiGenerators;
 using RecettesFamille.Services.TravelPlanner.Sources;
@@ -32,7 +33,6 @@ public class SummaryService : ISummaryService
     /// <inheritdoc/>
     public async Task<YoutubeResumeDto> CreateSummaryFromYoutube(string youtubeUrl, int? travelId = null, CancellationToken cancellationToken = default)
     {
-        
         // 1. Extraire les métadonnées de la vidéo (normalise l'URL au passage)
         var metadata = await _youtubeSourceService.ExtractMetadata(youtubeUrl, cancellationToken);
 
@@ -48,17 +48,18 @@ public class SummaryService : ISummaryService
         };
 
         // 4. Générer le résumé via l'AI Manager (qui gère aussi la sauvegarde en base)
-        var resumeText = await _aiManager.GetYoutubeResume(youtubeSummaryRequest, travelId, cancellationToken);
+        var youtubeResume = await _aiManager.GetYoutubeResume(transcript, cancellationToken);
 
-        // 5. Retourner le résumé complet
-        return new YoutubeResumeDto
-        {
-            Resume = resumeText,
-            Url = metadata.Url,
-            Title = metadata.Title,
-            CreatedDate = DateTime.UtcNow,
-            TravelId = travelId
-        };
+        youtubeResume.Title = metadata.Title;
+        youtubeResume.TravelId = travelId;
+        youtubeResume.Url = metadata.Url;
+        youtubeResume.ThumbnailUrl = metadata.ThumbnailUrl;
+
+        // 5. Sauvegarder en base de données
+        await _youtubeRepository.AddSummary(youtubeResume, cancellationToken);
+
+        // 6. Retourner le résumé complet
+        return youtubeResume;
     }
 
     /// <inheritdoc/>

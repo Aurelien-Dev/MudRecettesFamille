@@ -45,5 +45,5 @@ public interface IAiManager
     /// <param name="travelId">Identifiant optionnel du voyage à associer au résumé.</param>
     /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
     /// <returns>Le résumé généré de la vidéo YouTube.</returns>
-    Task<string> GetYoutubeResume(YoutubeSummaryJson request, int? travelId = null, CancellationToken cancellationToken = default);
+    Task<YoutubeResumeDto> GetYoutubeResume(string transcript, CancellationToken cancellationToken = default);
 }

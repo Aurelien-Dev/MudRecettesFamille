@@ -59,5 +59,10 @@
         /// Date et heure de l'analyse IA des métadonnées.
         /// </summary>
         public DateTime? AiMetadataAnalyzedAt { get; set; }
+
+        /// <summary>
+        /// URL de la miniature de la vidéo YouTube (nullable si non disponible).
+        /// </summary>
+        public string? ThumbnailUrl { get; set; }
     }
 }

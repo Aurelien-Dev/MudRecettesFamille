@@ -11,17 +11,7 @@ public class SupadataTranscriptResponse
     public required string Content { get; set; }
 
     /// <summary>
-    /// Le titre de la vidéo YouTube (optionnel selon l'API).
+    /// Le code de langue ISO 639-1 du transcript retourné.
     /// </summary>
-    public string? Title { get; set; }
-
-    /// <summary>
-    /// L'identifiant de la vidéo YouTube.
-    /// </summary>
-    public string? VideoId { get; set; }
-
-    /// <summary>
-    /// La durée de la vidéo en secondes (optionnel).
-    /// </summary>
-    public int? Duration { get; set; }
+    public string? Lang { get; set; }
 }

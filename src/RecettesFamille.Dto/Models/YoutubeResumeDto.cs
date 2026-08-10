@@ -4,8 +4,8 @@ public class YoutubeResumeDto
 {
     public int Id { get; set; }
     public required string Resume { get; set; }
-    public required string Url { get; set; }
-    public required string Title { get; set; }
+    public string Url { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
     // V2 Features
@@ -69,4 +69,9 @@ public class YoutubeResumeDto
     /// Date et heure de l'analyse IA des métadonnées.
     /// </summary>
     public DateTime? AiMetadataAnalyzedAt { get; set; }
+
+    /// <summary>
+    /// URL de la miniature de la vidéo YouTube (si disponible).
+    /// </summary>
+    public string? ThumbnailUrl { get; set; }
 }

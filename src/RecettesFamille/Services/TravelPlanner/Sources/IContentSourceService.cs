@@ -15,8 +15,8 @@ public record ContentMetadata(
     string SourceType,
     string? Author = null,
     DateTime? PublishedDate = null,
-    TimeSpan? Duration = null
-);
+    TimeSpan? Duration = null,
+    string? ThumbnailUrl = null);
 
 /// <summary>
 /// Generic interface for extracting content from various sources (YouTube, articles, podcasts, etc.)
