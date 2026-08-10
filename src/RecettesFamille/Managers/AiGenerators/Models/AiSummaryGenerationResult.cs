@@ -6,9 +6,19 @@ namespace RecettesFamille.Managers.AiGenerators.Models;
 public sealed class AiSummaryGenerationResult
 {
     /// <summary>
-    /// Le résumé Markdown de la vidéo YouTube.
+    /// Paragraphe d'introduction du résumé (sans titre Markdown).
     /// </summary>
-    public required string Summary { get; init; }
+    public required string SummaryIntro { get; init; }
+
+    /// <summary>
+    /// Conseils et astuces pratiques mentionnés dans la vidéo (contenu Markdown, sans titre).
+    /// </summary>
+    public required string Tips { get; init; }
+
+    /// <summary>
+    /// Lieux mentionnés dans la vidéo (contenu Markdown, sans titre).
+    /// </summary>
+    public required string Places { get; init; }
 
     /// <summary>
     /// Le pays principal détecté dans la vidéo (nullable si non identifiable).

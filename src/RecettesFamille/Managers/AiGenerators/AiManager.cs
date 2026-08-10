@@ -35,37 +35,23 @@ public class AiManager(IServiceProvider serviceProvider, IConfiguration config, 
 Ta mission :
 Analyse le transcript d'une vidéo YouTube et génère un résumé structuré en JSON.
 
-## Instructions pour le résumé (champ ""summary"") :
+## Instructions pour le champ ""summaryIntro"" :
+Rédige un paragraphe d'introduction de 3 à 5 lignes résumant la vidéo.
+Commence directement par le texte, sans aucun titre Markdown (pas de # ou ##).
+Sois factuel et synthétique. N'invente rien, utilise uniquement les informations du transcript.
 
-**IMPORTANT : Le champ ""summary"" doit contenir UNE SEULE chaîne de texte Markdown complète.**
-**Ne crée PAS deux clés ""summary"" différentes dans le JSON.**
-**Tout le contenu (paragraphe + conseils + lieux) doit être dans la même valeur du champ ""summary"".**
-
-Le résumé Markdown doit avoir EXACTEMENT cette structure en 3 parties :
-
-### Partie 1 : Paragraphe d'introduction (SANS titre)
-Commence directement par le texte (3-5 lignes) sans aucun titre Markdown.
-Ne mets PAS de ## ou # avant ce paragraphe.
-
-### Partie 2 : Conseils et astuces pratiques (AVEC titre ######)
-Utilise EXACTEMENT ce format : ###### Conseils et astuces pratiques
-(Six dièses ###### suivis d'un espace)
-
-Liste à puces des informations utiles mentionnées dans la vidéo :
+## Instructions pour le champ ""tips"" :
+Liste à puces des conseils et astuces pratiques mentionnés dans la vidéo :
 - **Transport** : comment se déplacer, coûts, cartes de transport, conseils
 - **Logement** : où dormir, quartiers recommandés, prix, réservations
 - **Budget** : prix des repas, entrées, activités, coût de la vie
 - **Erreurs à éviter** : pièges à touristes, arnaques, choses à ne pas faire
 - **Astuces pratiques** : meilleurs moments pour visiter, applications utiles, conseils locaux
 
-Si AUCUN conseil n'est mentionné, écris :
-###### Conseils et astuces pratiques
+Si AUCUN conseil n'est mentionné dans la vidéo, écris exactement :
 Aucun conseil pratique spécifique mentionné dans cette vidéo.
 
-### Partie 3 : Lieux mentionnés (AVEC titre ######)
-Utilise EXACTEMENT ce format : ###### Lieux mentionnés
-(Six dièses ###### suivis d'un espace)
-
+## Instructions pour le champ ""places"" :
 Liste structurée des lieux cités dans la vidéo avec leurs noms exacts et adresses si disponibles :
 - **Restaurants, cafés, bars** : nom complet + adresse si mentionnée
 - **Hôtels, auberges, logements** : nom + quartier
@@ -75,32 +61,21 @@ Liste structurée des lieux cités dans la vidéo avec leurs noms exacts et adre
 
 Format : ""**Nom du lieu** (Adresse) - Type/description""
 
-Si AUCUN lieu n'est cité, écris :
-###### Lieux mentionnés
+Si AUCUN lieu n'est cité, écris exactement :
 Aucun lieu spécifique mentionné dans cette vidéo.
 
 **Règles absolues :**
 - Sois factuel et synthétique
 - N'invente RIEN, utilise uniquement les informations présentes dans la vidéo
-- Les 3 parties sont OBLIGATOIRES même si vides
-- Les titres utilisent ###### (six dièses + espace)
-- Tout doit être dans UNE SEULE valeur ""summary"" en Markdown
+- Les 3 champs sont OBLIGATOIRES, même si leur contenu est vide
 
-**Exemple complet du champ ""summary"" attendu :**
+**Exemple de valeurs attendues :**
 
-La vidéo présente un voyage à Tokyo pendant la saison des cerisiers en fleurs, avec un focus sur la gastronomie locale et les quartiers traditionnels.
+""summaryIntro"" : ""La vidéo présente un voyage à Tokyo pendant la saison des cerisiers en fleurs, avec un focus sur la gastronomie locale et les quartiers traditionnels.""
 
-###### Conseils et astuces pratiques
-- **Transport** : Acheter une Suica Card dès l'arrivée à l'aéroport pour tous les transports en commun
-- **Budget** : Prévoir 15-25€ par repas dans les restaurants locaux
-- **Astuces** : Éviter les restaurants proches des grandes gares touristiques, souvent plus chers
-- **Réservations** : Réserver les restaurants populaires 2-3 jours à l'avance via Tabelog
+""tips"" : ""- **Transport** : Acheter une Suica Card dès l'arrivée à l'aéroport pour tous les transports en commun\n- **Budget** : Prévoir 15-25€ par repas dans les restaurants locaux\n- **Réservations** : Réserver les restaurants populaires 2-3 jours à l'avance via Tabelog""
 
-###### Lieux mentionnés
-- **Yakiniku Jumbo Hanare** (3-14-9 Roppongi, Minato-ku) - Restaurant de viande grillée primé
-- **Jardin Shinjuku Gyoen** - Parc célèbre pour observer les cerisiers en fleurs
-- **Quartier de Shimokitazawa** - Zone vintage avec boutiques et cafés alternatifs
-- **Tsuta Ramen** (1-14-1 Sugamo, Toshima-ku) - Premier ramen étoilé Michelin
+""places"" : ""- **Yakiniku Jumbo Hanare** (3-14-9 Roppongi, Minato-ku) - Restaurant de viande grillée primé\n- **Jardin Shinjuku Gyoen** - Parc célèbre pour observer les cerisiers en fleurs\n- **Tsuta Ramen** (1-14-1 Sugamo, Toshima-ku) - Premier ramen étoilé Michelin""
 
 ## Instructions pour le pays principal (champ ""mainCountry"") :
 - Identifie le pays qui constitue le SUJET PRINCIPAL de la vidéo
@@ -127,7 +102,9 @@ Réponds UNIQUEMENT avec un objet JSON valide, sans texte supplémentaire, sans 
 
 Schéma JSON :
 {
-  ""summary"": ""string (résumé Markdown structuré)"",
+  ""summaryIntro"": ""string (paragraphe d'introduction, sans titre Markdown)"",
+  ""tips"": ""string (conseils et astuces en Markdown, sans titre)"",
+  ""places"": ""string (lieux mentionnés en Markdown, sans titre)"",
   ""mainCountry"": {
     ""name"": ""string"",
     ""isoCode"": ""string (2 lettres) ou null"",
@@ -276,16 +253,19 @@ Réponds uniquement au format json répondant à ce schéma:
             // 5. Appeler l'IA avec JSON structuré
             var result = await GetChatResponse<AiSummaryGenerationResult>(messages, AiClientType.OpenAi, cancellationToken);
 
-            // 6. Valider le pays détecté
+            // 6. Reconstruire le Markdown final à partir des 3 champs distincts
+            var fullMarkdown = $"{result.SummaryIntro}\n\n###### Conseils et astuces pratiques\n{result.Tips}\n\n###### Lieux mentionnés\n{result.Places}";
+
+            // 7. Valider le pays détecté
             var validatedCountry = ValidateCountry(result.MainCountry);
 
-            // 7. Valider et filtrer les catégories détectées
+            // 8. Valider et filtrer les catégories détectées
             var validatedCategories = ValidateAndFilterCategories(result.Categories, categories);
 
-            // 8. Construire le DTO avec toutes les métadonnées
+            // 9. Construire le DTO avec toutes les métadonnées
             var summaryDto = new YoutubeResumeDto
             {
-                Resume = result.Summary,
+                Resume = fullMarkdown,
                 CreatedDate = DateTime.UtcNow,
 
                 // Métadonnées IA - Pays
