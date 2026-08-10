@@ -13,7 +13,7 @@ namespace RecettesFamille.Services.TravelPlanner;
 /// </summary>
 public class SummaryService : ISummaryService
 {
-    private readonly YoutubeSourceService _youtubeSourceService;
+    private readonly ContentSourceResolver _contentSourceResolver;
     private readonly IAiManager _aiManager;
     private readonly IYoutubeRepository _youtubeRepository;
 
@@ -21,11 +21,11 @@ public class SummaryService : ISummaryService
     /// Initialise une nouvelle instance du service de résumés.
     /// </summary>
     public SummaryService(
-        YoutubeSourceService youtubeSourceService,
+        ContentSourceResolver contentSourceResolver,
         IAiManager aiManager,
         IYoutubeRepository youtubeRepository)
     {
-        _youtubeSourceService = youtubeSourceService;
+        _contentSourceResolver = contentSourceResolver;
         _aiManager = aiManager;
         _youtubeRepository = youtubeRepository;
     }
@@ -33,11 +33,11 @@ public class SummaryService : ISummaryService
     /// <inheritdoc/>
     public async Task<YoutubeResumeDto> CreateSummaryFromYoutube(string youtubeUrl, int? travelId = null, CancellationToken cancellationToken = default)
     {
-        // 1. Extraire les métadonnées de la vidéo (normalise l'URL au passage)
-        var metadata = await _youtubeSourceService.ExtractMetadata(youtubeUrl, cancellationToken);
+        // 1. Extraire les métadonnées (le resolver choisit le service adapté avec fallback)
+        var metadata = await _contentSourceResolver.ExtractMetadata(youtubeUrl, cancellationToken);
 
         // 2. Récupérer le transcript (réutilise l'URL normalisée depuis les métadonnées)
-        var transcript = await _youtubeSourceService.GetContent(metadata.Url, cancellationToken);
+        var transcript = await _contentSourceResolver.GetContent(metadata.Url, cancellationToken);
 
         // 3. Créer l'objet de requête pour l'AI Manager
         var youtubeSummaryRequest = new YoutubeSummaryJson

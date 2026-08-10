@@ -1,12 +1,11 @@
 using RecettesFamille.Services.Models;
 using RecettesFamille.ServicesExternal;
-using System.Text.Json;
 
 namespace RecettesFamille.Services.TravelPlanner.Sources;
 
 /// <summary>
 /// Service pour l'extraction de contenu depuis YouTube.
-/// Gère l'extraction des métadonnées et des transcripts via l'API Supadata et YouTube oEmbed.
+/// Gère l'extraction des métadonnées et des transcripts via l'API Supadata.
 /// Normalise automatiquement les URLs shorts en format /watch?v= standard pour simplifier le traitement.
 /// </summary>
 public class YoutubeSourceService : IContentSourceService
@@ -15,6 +14,18 @@ public class YoutubeSourceService : IContentSourceService
 
     /// <inheritdoc/>
     public string SourceType => "YouTube";
+
+    /// <summary>
+    /// Indique si ce service peut traiter l'URL donnée.
+    /// Supporte les formats youtube.com et youtu.be.
+    /// </summary>
+    public bool CanHandle(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return false;
+
+        return uri.Host.Contains("youtube.com") || uri.Host == "youtu.be";
+    }
 
     /// <summary>
     /// Initialise une nouvelle instance du service YouTube.
@@ -28,38 +39,35 @@ public class YoutubeSourceService : IContentSourceService
     /// <inheritdoc/>
     public async Task<ContentMetadata> ExtractMetadata(string sourceUrl, CancellationToken cancellationToken = default)
     {
-        // Normaliser l'URL (convertit les shorts en /watch?v=)
         var normalizedUrl = NormalizeYoutubeUrl(sourceUrl);
 
-        // Extraire l'ID uniquement pour l'API Supadata qui en a besoin
-        var videoId = ExtractVideoIdFromUrl(normalizedUrl);
+        var metadataResponse = await _supadataService.GetMetadataAsync(normalizedUrl, cancellationToken);
 
-        // Récupérer les métadonnées via YouTube oEmbed (passer l'URL normalisée)
-        var oembedData = await GetVideoMetadataFromOEmbed(normalizedUrl, cancellationToken);
+        var duration = metadataResponse.Media?.Duration is int seconds
+            ? TimeSpan.FromSeconds(seconds)
+            : (TimeSpan?)null;
 
-        // Récupérer des métadonnées supplémentaires depuis Supadata (nécessite l'ID)
-        var transcriptResponse = await _supadataService.GetYoutubeTranscriptAsync(videoId, cancellationToken);
+        var publishedDate = DateTime.TryParse(metadataResponse.CreatedAt, out var dt)
+            ? dt
+            : (DateTime?)null;
 
         return new ContentMetadata(
-            Title: oembedData?.Title ?? $"Vidéo YouTube {videoId}",
+            Title: metadataResponse.Title ?? $"Vidéo YouTube {normalizedUrl}",
             Url: normalizedUrl,
             SourceType: SourceType,
-            Author: oembedData?.AuthorName,
-            Duration: null,
-            ThumbnailUrl: oembedData?.ThumbnailUrl
+            Author: metadataResponse.Author?.DisplayName,
+            PublishedDate: publishedDate,
+            Duration: duration,
+            ThumbnailUrl: metadataResponse.Media?.ThumbnailUrl
         );
     }
 
     /// <inheritdoc/>
     public async Task<string> GetContent(string sourceUrl, CancellationToken cancellationToken = default)
     {
-        // Normaliser l'URL (convertit les shorts en /watch?v=)
         var normalizedUrl = NormalizeYoutubeUrl(sourceUrl);
 
-        // Extraire l'ID uniquement pour l'API Supadata qui en a besoin
-        var videoId = ExtractVideoIdFromUrl(normalizedUrl);
-
-        var transcriptResponse = await _supadataService.GetYoutubeTranscriptAsync(videoId, cancellationToken);
+        var transcriptResponse = await _supadataService.GetTranscriptAsync(normalizedUrl, cancellationToken: cancellationToken);
         return transcriptResponse.Content;
     }
 
@@ -161,38 +169,5 @@ public class YoutubeSourceService : IContentSourceService
 
         // Ne devrait jamais arriver si l'URL a été normalisée
         throw new InvalidOperationException($"Impossible d'extraire l'ID de l'URL normalisée : {url}");
-    }
-
-    /// <summary>
-    /// Récupère les métadonnées d'une vidéo YouTube via l'API oEmbed (gratuite, sans clé).
-    /// </summary>
-    /// <param name="youtubeUrl">L'URL complète de la vidéo YouTube.</param>
-    /// <param name="cancellationToken">Token d'annulation pour l'opération asynchrone.</param>
-    /// <returns>Les métadonnées oEmbed ou null si non disponibles.</returns>
-    private async Task<YoutubeOEmbedResponse?> GetVideoMetadataFromOEmbed(string youtubeUrl, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var oembedUrl = $"https://www.youtube.com/oembed?url={Uri.EscapeDataString(youtubeUrl)}&format=json";
-            using var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync(oembedUrl, cancellationToken);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadAsStringAsync(cancellationToken);
-                var oembedResponse = JsonSerializer.Deserialize<YoutubeOEmbedResponse>(content, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                return oembedResponse;
-            }
-        }
-        catch
-        {
-            // Si l'appel échoue, on retournera null
-        }
-
-        return null;
     }
 }

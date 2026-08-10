@@ -84,4 +84,34 @@ public class SupadataService : ISupadataService
 
         return transcriptResponse;
     }
+
+    /// <inheritdoc/>
+    public async Task<SupadataMetadataResponse> GetMetadataAsync(string url, CancellationToken cancellationToken = default)
+    {
+        var encodedUrl = Uri.EscapeDataString(url);
+        var requestUrl = $"/v1/metadata?url={encodedUrl}";
+
+        var response = await _httpClient.GetAsync(requestUrl, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new HttpRequestException(
+                $"L'API Supadata a retourné une erreur {response.StatusCode}: {errorContent}");
+        }
+
+        var content = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        var metadataResponse = JsonSerializer.Deserialize<SupadataMetadataResponse>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+
+        if (metadataResponse == null)
+        {
+            throw new InvalidOperationException("La réponse de l'API Supadata est vide ou invalide.");
+        }
+
+        return metadataResponse;
+    }
 }

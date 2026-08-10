@@ -30,6 +30,11 @@ public interface IContentSourceService
     string SourceType { get; }
 
     /// <summary>
+    /// Indicates whether this service can handle the given URL.
+    /// </summary>
+    bool CanHandle(string url);
+
+    /// <summary>
     /// Extracts metadata from the content source URL
     /// </summary>
     /// <param name="sourceUrl">The URL of the content</param>

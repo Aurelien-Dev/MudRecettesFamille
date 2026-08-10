@@ -84,6 +84,12 @@ builder.Services.AddScoped<RecettesFamille.Services.UserApprovalEmailService>();
 
 // TravelPlanner (YouSummarize) services
 builder.Services.AddScoped<RecettesFamille.Services.TravelPlanner.Sources.YoutubeSourceService>();
+builder.Services.AddScoped<RecettesFamille.Services.TravelPlanner.Sources.GenericSourceService>();
+builder.Services.AddScoped<IEnumerable<RecettesFamille.Services.TravelPlanner.Sources.IContentSourceService>>(sp =>
+[
+    sp.GetRequiredService<RecettesFamille.Services.TravelPlanner.Sources.YoutubeSourceService>(),
+]);
+builder.Services.AddScoped<RecettesFamille.Services.TravelPlanner.Sources.ContentSourceResolver>();
 builder.Services.AddScoped<RecettesFamille.Services.TravelPlanner.ISummaryService, RecettesFamille.Services.TravelPlanner.SummaryService>();
 
 builder.Services.AddRepository();

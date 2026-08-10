@@ -25,4 +25,13 @@ public interface ISupadataService
     /// <param name="cancellationToken">Token d'annulation pour l'opération asynchrone.</param>
     /// <returns>La réponse de l'API Supadata contenant le transcript.</returns>
     Task<SupadataTranscriptResponse> GetTranscriptAsync(string url, string lang = "en", string mode = "auto", CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Récupère les métadonnées d'un contenu via l'API Supadata.
+    /// Supporte YouTube, TikTok, Instagram, X (Twitter) et Facebook.
+    /// </summary>
+    /// <param name="url">L'URL complète du contenu.</param>
+    /// <param name="cancellationToken">Token d'annulation pour l'opération asynchrone.</param>
+    /// <returns>La réponse de l'API Supadata contenant les métadonnées.</returns>
+    Task<SupadataMetadataResponse> GetMetadataAsync(string url, CancellationToken cancellationToken = default);
 }
