@@ -73,16 +73,6 @@
         }
     </MudStack>
 
-    @* Favoris *@
-    <MudPaper Outlined="true" Class="@PillClass(FilterFavoritesOnly)" @onclick="@(() => OnFavoritesFilterChanged.InvokeAsync(!FilterFavoritesOnly))">
-        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
-            <MudIcon Icon="@(FilterFavoritesOnly ? Icons.Material.Filled.Star : Icons.Material.Outlined.StarBorder)"
-                     Color="@(FilterFavoritesOnly ? Color.Warning : Color.Default)" Size="Size.Small" Class="ma-2" />
-            <MudText Class="flex-grow-1">Favoris</MudText>
-            @if (FavoritesCount > 0) { <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pr-3">@FavoritesCount</MudText> }
-        </MudStack>
-    </MudPaper>
-
     @* Statut *@
     <MudText Typo="Typo.subtitle2" Class="px-1 pt-2">Statut</MudText>
     <MudStack Spacing="2">
@@ -147,21 +137,18 @@
     [Parameter] public Dictionary<SummaryStatus, int> StatusCounts { get; set; } = new();
     [Parameter] public int TotalCount { get; set; }
     [Parameter] public int UnclassifiedCount { get; set; }
-    [Parameter] public int FavoritesCount { get; set; }
     [Parameter] public int? SelectedTravelId { get; set; }
     [Parameter] public string SelectedFilterType { get; set; } = "all";
-    [Parameter] public bool FilterFavoritesOnly { get; set; }
     [Parameter] public HashSet<int> SelectedCategoryIds { get; set; } = new();
     [Parameter] public HashSet<SummaryStatus> SelectedStatuses { get; set; } = new();
     [Parameter] public EventCallback<(int? travelId, string filterType)> OnFilterChanged { get; set; }
-    [Parameter] public EventCallback<bool> OnFavoritesFilterChanged { get; set; }
     [Parameter] public EventCallback<HashSet<int>> OnCategoryFiltersChanged { get; set; }
     [Parameter] public EventCallback<HashSet<SummaryStatus>> OnStatusFiltersChanged { get; set; }
     [Parameter] public EventCallback OnCreateTravelClicked { get; set; }
     [Parameter] public EventCallback<TravelDto> OnEditTravelClicked { get; set; }
     [Parameter] public EventCallback OnCreateCategoryClicked { get; set; }
 
-    private bool HasActiveFilters => FilterFavoritesOnly || SelectedCategoryIds.Any() || SelectedStatuses.Any();
+    private bool HasActiveFilters => SelectedCategoryIds.Any() || SelectedStatuses.Any();
 
     private static readonly (SummaryStatus, string, Color)[] StatusFilters =
     [
@@ -193,7 +180,6 @@
 
     private async Task ResetSecondaryFilters()
     {
-        await OnFavoritesFilterChanged.InvokeAsync(false);
         await OnCategoryFiltersChanged.InvokeAsync([]);
         await OnStatusFiltersChanged.InvokeAsync([]);
     }

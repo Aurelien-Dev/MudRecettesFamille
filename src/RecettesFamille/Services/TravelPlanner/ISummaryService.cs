@@ -51,15 +51,6 @@ public interface ISummaryService
     Task<bool> UpdateSummaryTravel(int summaryId, int? travelId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Met à jour l'état favori d'un résumé.
-    /// </summary>
-    /// <param name="summaryId">L'identifiant du résumé.</param>
-    /// <param name="isFavorite">True pour marquer comme favori, false sinon.</param>
-    /// <param name="cancellationToken">Token d'annulation.</param>
-    /// <returns>True si la mise à jour a réussi, false sinon.</returns>
-    Task<bool> UpdateFavorite(int summaryId, bool isFavorite, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Met à jour le statut d'un résumé.
     /// </summary>
     /// <param name="summaryId">L'identifiant du résumé.</param>

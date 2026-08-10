@@ -10,11 +10,6 @@ public class YoutubeResumeDto
 
     // V2 Features
     /// <summary>
-    /// Indique si le résumé est marqué comme favori.
-    /// </summary>
-    public bool IsFavorite { get; set; } = false;
-
-    /// <summary>
     /// Statut de traitement du résumé.
     /// </summary>
     public SummaryStatus Status { get; set; } = SummaryStatus.ToReview;

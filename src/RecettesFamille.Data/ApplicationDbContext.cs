@@ -93,7 +93,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<YoutubeResumeEntity>(entity =>
         {
             entity.Property(c => c.Id).ValueGeneratedOnAdd();
-            entity.Property(c => c.IsFavorite).HasDefaultValue(false);
             entity.Property(c => c.Status).HasDefaultValue(SummaryStatus.ToReview);
 
             // Many-to-many relationship with Categories

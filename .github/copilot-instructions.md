@@ -1,5 +1,25 @@
 # Instructions globales – MudRecettesFamille
 
+## Architecture — deux domaines métier
+
+Ce projet héberge **deux domaines métier distincts** dans la même solution `RecettesFamille.sln` :
+
+### 1. Recettes Famille
+- Pages Blazor : `src/RecettesFamille/Components/Pages/Recettes/`
+- Entités EF : `src/RecettesFamille.Data/EntityModel/` (RecipeEntity, TagEntity, BlockBaseEntity…)
+- DTOs : `src/RecettesFamille.Dto/` — sous-dossier `Recettes/`
+- Repository : `src/RecettesFamille.Data.Repository/` — sous-dossier `Recettes/`
+
+### 2. TravelPlanner
+- Pages Blazor : `src/RecettesFamille/Components/Pages/TravelPlanner/`
+- Entités EF : `src/RecettesFamille.Data/EntityModel/` (TravelEntity, CategoryEntity…)
+- DTOs : `src/RecettesFamille.Dto/` — sous-dossier `TravelPlanner/`
+- Repository : `src/RecettesFamille.Data.Repository/` — sous-dossier `TravelPlanner/`
+
+Quand l'utilisateur mentionne **"Recettes"** → chercher dans les dossiers `Recettes/`.
+Quand l'utilisateur mentionne **"TravelPlanner"** → chercher dans les dossiers `TravelPlanner/`.
+Les deux domaines partagent le même `ApplicationDbContext` et les mêmes projets `.Data`, `.Dto`, `.Data.Repository`.
+
 ## Stack technique
 - Blazor .NET 10, composants Server-side
 - MudBlazor pour TOUS les composants UI : ne jamais utiliser Bootstrap, HTML natif (`<div>`, `<button>`, `<input>`, etc.) ou CSS custom quand un équivalent MudBlazor existe

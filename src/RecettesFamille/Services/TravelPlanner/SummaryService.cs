@@ -88,12 +88,6 @@ public class SummaryService : ISummaryService
     }
 
     /// <inheritdoc/>
-    public async Task<bool> UpdateFavorite(int summaryId, bool isFavorite, CancellationToken cancellationToken = default)
-    {
-        return await _youtubeRepository.UpdateFavorite(summaryId, isFavorite, cancellationToken);
-    }
-
-    /// <inheritdoc/>
     public async Task<bool> UpdateStatus(int summaryId, SummaryStatus status, CancellationToken cancellationToken = default)
     {
         return await _youtubeRepository.UpdateStatus(summaryId, status, cancellationToken);

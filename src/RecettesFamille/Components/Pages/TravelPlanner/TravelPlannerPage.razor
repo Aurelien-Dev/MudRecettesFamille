@@ -19,14 +19,11 @@
                       StatusCounts="@GetContextualStatusCounts()"
                       TotalCount="@ytResume.Count"
                       UnclassifiedCount="@GetUnclassifiedCount()"
-                      FavoritesCount="@GetContextualFavoritesCount()"
                       SelectedTravelId="@selectedTravelId"
                       SelectedFilterType="@selectedFilterType"
-                      FilterFavoritesOnly="@filterFavoritesOnly"
                       SelectedCategoryIds="@selectedCategoryIds"
                       SelectedStatuses="@selectedStatuses"
                       OnFilterChanged="@HandleFilterChanged"
-                      OnFavoritesFilterChanged="@HandleFavoritesFilterChanged"
                       OnCategoryFiltersChanged="@HandleCategoryFiltersChanged"
                       OnStatusFiltersChanged="@HandleStatusFiltersChanged"
                       OnCreateTravelClicked="@OpenCreateTravelDialog"
@@ -108,7 +105,6 @@
                                        Travels="@travels"
                                        Categories="@categories"
                                        OnTravelChanged="@UpdateSummaryTravel"
-                                       OnFavoriteToggled="@ToggleFavorite"
                                        OnStatusChanged="@UpdateSummaryStatus"
                                        OnCategoriesChanged="@UpdateSummaryCategories"
                                        OnTitleChanged="@UpdateSummaryTitle"
@@ -161,7 +157,6 @@
     private int? selectedTravelIdForCreation { get; set; }
 
     // V2 Filter states
-    private bool filterFavoritesOnly { get; set; } = false;
     private HashSet<int> selectedCategoryIds { get; set; } = new();
     private HashSet<SummaryStatus> selectedStatuses { get; set; } = new();
 
@@ -213,11 +208,6 @@
         var query = baseSummaries.AsEnumerable();
 
         // V2 Filters
-        if (filterFavoritesOnly)
-        {
-            query = query.Where(s => s.IsFavorite);
-        }
-
         if (selectedCategoryIds.Any())
         {
             query = query.Where(s => s.CategoryIds.Any(catId => selectedCategoryIds.Contains(catId)));
@@ -254,16 +244,6 @@
         return ytResume.Count(s => s.TravelId == null);
     }
 
-    private int GetFavoritesCount()
-    {
-        return ytResume.Count(s => s.IsFavorite);
-    }
-
-    private int GetContextualFavoritesCount()
-    {
-        return baseSummaries.Count(s => s.IsFavorite);
-    }
-
     private Dictionary<SummaryStatus, int> GetContextualStatusCounts()
     {
         return baseSummaries
@@ -283,12 +263,6 @@
     {
         selectedTravelId = filter.travelId;
         selectedFilterType = filter.filterType;
-        ApplyFilters();
-    }
-
-    private void HandleFavoritesFilterChanged(bool enabled)
-    {
-        filterFavoritesOnly = enabled;
         ApplyFilters();
     }
 
@@ -313,46 +287,6 @@
     private void HandleSummarySelected(YoutubeResumeDto summary)
     {
         CurrentResume = summary;
-    }
-
-    private async Task ToggleFavorite(YoutubeResumeDto summary)
-    {
-        try
-        {
-            var newFavoriteState = !summary.IsFavorite;
-            var success = await youtubeRepository.UpdateFavorite(summary.Id, newFavoriteState);
-
-            if (success)
-            {
-                // Update local data
-                summary.IsFavorite = newFavoriteState;
-                var summaryInList = ytResume.FirstOrDefault(s => s.Id == summary.Id);
-                if (summaryInList != null)
-                {
-                    summaryInList.IsFavorite = newFavoriteState;
-                }
-
-                // Reapply filters (may remove item if favorites filter is active)
-                var wasCurrentlySelected = CurrentResume?.Id == summary.Id;
-                ApplyFilters();
-
-                // If the item was removed from filtered list, select next
-                if (wasCurrentlySelected && !filteredSummaries.Any(s => s.Id == summary.Id))
-                {
-                    CurrentResume = filteredSummaries.FirstOrDefault();
-                }
-
-                Snackbar.Add(newFavoriteState ? "Ajouté aux favoris" : "Retiré des favoris", Severity.Success);
-            }
-            else
-            {
-                Snackbar.Add("Erreur lors de la mise à jour du favori", Severity.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Erreur : {ex.Message}", Severity.Error);
-        }
     }
 
     private async Task UpdateSummaryStatus((YoutubeResumeDto summary, SummaryStatus status) data)

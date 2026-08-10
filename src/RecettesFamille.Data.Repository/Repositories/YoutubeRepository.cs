@@ -77,23 +77,6 @@ public class YoutubeRepository(IServiceProvider serviceProvider, IDbContextFacto
         return true;
     }
 
-    public async Task<bool> UpdateFavorite(int summaryId, bool isFavorite, CancellationToken cancellationToken = default)
-    {
-        using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-        var youtubeResumeEntity = await context.YoutubeSummarys.FindAsync([summaryId], cancellationToken);
-
-        if (youtubeResumeEntity == null)
-        {
-            return false;
-        }
-
-        youtubeResumeEntity.IsFavorite = isFavorite;
-        context.YoutubeSummarys.Update(youtubeResumeEntity);
-        await context.SaveChangesAsync(cancellationToken);
-
-        return true;
-    }
-
     public async Task<bool> UpdateStatus(int summaryId, Dto.Models.SummaryStatus status, CancellationToken cancellationToken = default)
     {
         using var context = await contextFactory.CreateDbContextAsync(cancellationToken);

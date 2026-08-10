@@ -10,11 +10,6 @@
             <MudStack Row="true" AlignItems="AlignItems.Start" Justify="Justify.SpaceBetween">
                 <MudText Typo="Typo.h5" Class="flex-grow-1">@Summary.Title</MudText>
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                    <MudIconButton Icon="@(Summary.IsFavorite ? Icons.Material.Filled.Star : Icons.Material.Outlined.StarBorder)" 
-                                  Color="@(Summary.IsFavorite ? Color.Warning : Color.Default)" 
-                                  Size="Size.Medium"
-                                  OnClick="@ToggleFavorite"
-                                  Title="@(Summary.IsFavorite ? "Retirer des favoris" : "Ajouter aux favoris")" />
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" 
                                   Color="Color.Default" 
                                   Size="Size.Medium"
@@ -274,7 +269,6 @@ else
     [Parameter] public List<TravelDto> Travels { get; set; } = [];
     [Parameter] public List<CategoryDto> Categories { get; set; } = [];
     [Parameter] public EventCallback<YoutubeResumeDto> OnTravelChanged { get; set; }
-    [Parameter] public EventCallback<YoutubeResumeDto> OnFavoriteToggled { get; set; }
     [Parameter] public EventCallback<(YoutubeResumeDto, SummaryStatus)> OnStatusChanged { get; set; }
     [Parameter] public EventCallback<(YoutubeResumeDto, List<int>)> OnCategoriesChanged { get; set; }
     [Parameter] public EventCallback<YoutubeResumeDto> OnTitleChanged { get; set; }
@@ -300,15 +294,6 @@ else
         {
             Summary.TravelId = selectedTravelId;
             await OnTravelChanged.InvokeAsync(Summary);
-        }
-    }
-
-    private async Task ToggleFavorite()
-    {
-        if (Summary != null)
-        {
-            Summary.IsFavorite = !Summary.IsFavorite;
-            await OnFavoriteToggled.InvokeAsync(Summary);
         }
     }
 
