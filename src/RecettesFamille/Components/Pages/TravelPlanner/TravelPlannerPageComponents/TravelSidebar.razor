@@ -1,242 +1,142 @@
-@using RecettesFamille.Dto.Models
-
 <MudStack Spacing="3" Class="pa-4">
-        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2">
-            <MudText Typo="Typo.h6">Mes voyages</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Add" 
-                          Color="Color.Primary" 
-                          Size="Size.Small"
-                          OnClick="OnCreateTravel"
-                          Title="Créer un voyage" />
+
+    @* ── Mes voyages ── *@
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudText Typo="Typo.h6">Mes voyages</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Size="Size.Small"
+                       OnClick="OnCreateTravelClicked" Title="Créer un voyage" />
+    </MudStack>
+
+    <MudDivider />
+
+    <MudStack Spacing="2">
+        <MudPaper Outlined="true" Class="@PillClass(IsSelected(null, "all"))" @onclick="@(() => OnFilterChanged.InvokeAsync((null, "all")))">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
+                <MudIcon Icon="@(IsSelected(null, "all") ? Icons.Material.Filled.List : Icons.Material.Outlined.List)"
+                         Color="@(IsSelected(null, "all") ? Color.Primary : Color.Default)" Size="Size.Small" Class="ma-2" />
+                <MudText Class="flex-grow-1">Tous les résumés</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pr-3">@TotalCount</MudText>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Outlined="true" Class="@PillClass(IsSelected(null, "unclassified"))" @onclick="@(() => OnFilterChanged.InvokeAsync((null, "unclassified")))">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
+                <MudIcon Icon="@(IsSelected(null, "unclassified") ? Icons.Material.Filled.HelpOutline : Icons.Material.Outlined.HelpOutline)"
+                         Color="@(IsSelected(null, "unclassified") ? Color.Primary : Color.Default)" Size="Size.Small" Class="ma-2" />
+                <MudText Class="flex-grow-1">Non classés</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pr-3">@UnclassifiedCount</MudText>
+            </MudStack>
+        </MudPaper>
+
+        @foreach (var travel in Travels.Where(t => !t.IsArchived).OrderByDescending(t => t.CreatedDate))
+        {
+            var isActive = IsSelected(travel.Id, "travel");
+            var count    = SummariesCount.GetValueOrDefault(travel.Id, 0);
+            <MudPaper Outlined="true" Class="@PillClass(isActive)" @onclick="@(() => OnFilterChanged.InvokeAsync((travel.Id, "travel")))">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
+                    <MudIcon Icon="@(isActive ? Icons.Material.Filled.Luggage : Icons.Material.Outlined.Luggage)"
+                             Color="@(isActive ? Color.Primary : Color.Default)" Size="Size.Small" Class="ma-2" />
+                    <MudText Class="flex-grow-1 text-truncate">@travel.Name</MudText>
+                    @if (count > 0) { <MudText Typo="Typo.body2" Color="Color.Secondary">@count</MudText> }
+                    <div @onclick:stopPropagation="true" class="d-inline-flex">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                       OnClick="@(() => OnEditTravelClicked.InvokeAsync(travel))" Title="Modifier" />
+                    </div>
+                </MudStack>
+            </MudPaper>
+        }
+
+        @if (Travels.Any(t => t.IsArchived))
+        {
+            <MudPaper Outlined="true" Class="@PillClass(IsSelected(null, "archived"))" @onclick="@(() => OnFilterChanged.InvokeAsync((null, "archived")))">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
+                    <MudIcon Icon="@(IsSelected(null, "archived") ? Icons.Material.Filled.Archive : Icons.Material.Outlined.Archive)"
+                             Color="@(IsSelected(null, "archived") ? Color.Primary : Color.Default)" Size="Size.Small" Class="ma-2" />
+                    <MudText Class="flex-grow-1">Archivés</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pr-3">@Travels.Count(t => t.IsArchived)</MudText>
+                </MudStack>
+            </MudPaper>
+        }
+    </MudStack>
+
+    @* ── Filtres ── *@
+    <MudDivider Class="my-3" />
+
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudText Typo="Typo.h6">Filtres</MudText>
+        @if (HasActiveFilters)
+        {
+            <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Secondary"
+                       OnClick="ResetSecondaryFilters" StartIcon="@Icons.Material.Filled.FilterAltOff">
+                Réinitialiser
+            </MudButton>
+        }
+    </MudStack>
+
+    @* Favoris *@
+    <MudPaper Outlined="true" Class="@PillClass(FilterFavoritesOnly)" @onclick="@(() => OnFavoritesFilterChanged.InvokeAsync(!FilterFavoritesOnly))">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
+            <MudIcon Icon="@(FilterFavoritesOnly ? Icons.Material.Filled.Star : Icons.Material.Outlined.StarBorder)"
+                     Color="@(FilterFavoritesOnly ? Color.Warning : Color.Default)" Size="Size.Small" Class="ma-2" />
+            <MudText Class="flex-grow-1">Favoris</MudText>
+            @if (FavoritesCount > 0) { <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pr-3">@FavoritesCount</MudText> }
         </MudStack>
+    </MudPaper>
 
-        <MudDivider />
-
-        <MudList T="string" Dense="true" Class="pa-0">
-            <MudListItem T="string" 
-                        OnClick="@(() => OnFilterChange(null, "all"))"
-                        Class="@GetListItemClass(null, "all")">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                        <MudIcon Icon="@Icons.Material.Filled.List" Size="Size.Small" />
-                        <MudText>Tous les résumés</MudText>
-                    </MudStack>
-                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@TotalCount</MudChip>
+    @* Statut *@
+    <MudText Typo="Typo.subtitle2" Class="px-1 pt-2">Statut</MudText>
+    <MudStack Spacing="2">
+        @foreach (var (status, label, color) in StatusFilters)
+        {
+            var isActive = SelectedStatuses.Contains(status);
+            var count    = StatusCounts.GetValueOrDefault(status, 0);
+            <MudPaper Outlined="true" Class="@PillClass(isActive)" @onclick="@(() => ToggleStatusFilter(status))">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
+                    <MudIcon Icon="@(isActive ? Icons.Material.Filled.Circle : Icons.Material.Outlined.Circle)"
+                             Color="@color" Size="Size.Small" Class="ma-2" />
+                    <MudText Class="flex-grow-1">@label</MudText>
+                    @if (count > 0) { <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pr-3">@count</MudText> }
                 </MudStack>
-            </MudListItem>
+            </MudPaper>
+        }
+    </MudStack>
 
-            <MudListItem T="string" 
-                        OnClick="@(() => OnFilterChange(null, "unclassified"))"
-                        Class="@GetListItemClass(null, "unclassified")">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                        <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Size="Size.Small" Color="Color.Default" />
-                        <MudText>Non classés</MudText>
-                    </MudStack>
-                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@UnclassifiedCount</MudChip>
-                </MudStack>
-            </MudListItem>
+    @* Catégories *@
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="px-1 pt-2">
+        <MudText Typo="Typo.subtitle2">Catégories</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Size="Size.Small"
+                       OnClick="OnCreateCategoryClicked" Title="Créer une catégorie" />
+    </MudStack>
 
-            @foreach (var travel in Travels.Where(t => !t.IsArchived).OrderByDescending(t => t.CreatedDate))
+    @if (Categories.Any())
+    {
+        <MudStack Spacing="2">
+            @foreach (var category in Categories.OrderBy(c => c.Name))
             {
-                var count = SummariesCount.GetValueOrDefault(travel.Id, 0);
-                <MudListItem T="string" 
-                            OnClick="@(() => OnFilterChange(travel.Id, "travel"))"
-                            Class="@GetListItemClass(travel.Id, "travel")">
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                            <MudIcon Icon="@Icons.Material.Filled.Luggage" Size="Size.Small" Color="Color.Primary" />
-                            @* Wrapper nécessaire pour ellipsis (min-width: 0 requis pour text-overflow dans flexbox) *@
-                            <div class="d-flex flex-grow-1" style="min-width: 0;">
-                                <MudText Class="text-truncate">@travel.Name</MudText>
-                            </div>
-                        </MudStack>
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                            <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@count</MudChip>
-                            @* Wrapper nécessaire pour empêcher la propagation du clic vers MudListItem parent *@
-                            <div @onclick:stopPropagation="true" class="d-inline-flex">
-                                <MudIconButton Icon="@Icons.Material.Filled.Edit" 
-                                              Size="Size.Small" 
-                                              OnClick="@(() => OnEditTravel(travel))"
-                                              Title="Modifier" />
-                            </div>
-                        </MudStack>
+                var isActive  = SelectedCategoryIds.Contains(category.Id);
+                var count     = CategoryCounts.GetValueOrDefault(category.Id, 0);
+                var hasColor  = !string.IsNullOrWhiteSpace(category.Color);
+                var iconStyle = hasColor ? $"color: {category.Color};" : string.Empty;
+                var icon      = isActive
+                    ? (hasColor ? Icons.Material.Filled.Circle   : Icons.Material.Filled.Label)
+                    : (hasColor ? Icons.Material.Outlined.Circle : Icons.Material.Outlined.Label);
+                <MudPaper Outlined="true" Class="@PillClass(isActive)" @onclick="@(() => ToggleCategoryFilter(category.Id))">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
+                        <MudIcon Icon="@icon" Size="Size.Small" Style="@iconStyle" Class="ma-2" />
+                        <MudText Class="flex-grow-1 text-truncate">@category.Name</MudText>
+                        @if (count > 0) { <MudText Typo="Typo.body2" Color="Color.Secondary" Class="pr-3">@count</MudText> }
                     </MudStack>
-                </MudListItem>
-            }
-
-            @if (Travels.Any(t => t.IsArchived))
-            {
-                <MudDivider Class="my-2" />
-                <MudListItem T="string" 
-                            OnClick="@(() => OnFilterChange(null, "archived"))"
-                            Class="@GetListItemClass(null, "archived")">
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                            <MudIcon Icon="@Icons.Material.Filled.Archive" Size="Size.Small" />
-                            <MudText>Archivés</MudText>
-                        </MudStack>
-                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@Travels.Count(t => t.IsArchived)</MudChip>
-                    </MudStack>
-                </MudListItem>
-            }
-        </MudList>
-
-        @* Filtres Section *@
-        <MudDivider Class="my-3" />
-
-        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-            <MudText Typo="Typo.h6">Filtres</MudText>
-            @if (HasActiveFilters)
-            {
-                <MudButton Size="Size.Small" 
-                          Variant="Variant.Text" 
-                          Color="Color.Secondary"
-                          OnClick="ResetSecondaryFilters"
-                          StartIcon="@Icons.Material.Filled.FilterAltOff">
-                    Réinitialiser
-                </MudButton>
+                </MudPaper>
             }
         </MudStack>
+    }
+    else
+    {
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="px-1 py-2">
+            Aucune catégorie. Cliquez sur + pour en créer.
+        </MudText>
+    }
 
-        <MudList T="string" Dense="true" Class="pa-0">
-            @* Favorites Filter *@
-            <MudListItem T="string" 
-                        OnClick="ToggleFavoritesFilter"
-                        Class="@(FilterFavoritesOnly ? "mud-selected-item mud-ripple" : "")">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                        <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small" Color="@(FilterFavoritesOnly ? Color.Warning : Color.Default)" />
-                        <MudText>Favoris uniquement</MudText>
-                    </MudStack>
-                    @if (FavoritesCount > 0)
-                    {
-                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@FavoritesCount</MudChip>
-                    }
-                </MudStack>
-            </MudListItem>
-
-            @* Status Filters *@
-            <MudDivider Class="my-2" />
-            <MudText Typo="Typo.subtitle2" Class="px-4 py-2">Statut</MudText>
-
-            <MudListItem T="string" 
-                        OnClick="@(() => ToggleStatusFilter(SummaryStatus.ToReview))"
-                        Class="@(SelectedStatuses.Contains(SummaryStatus.ToReview) ? "mud-selected-item mud-ripple" : "")">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                        <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Default" />
-                        <MudText>À consulter</MudText>
-                    </MudStack>
-                    @if (StatusCounts.GetValueOrDefault(SummaryStatus.ToReview, 0) > 0)
-                    {
-                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@StatusCounts[SummaryStatus.ToReview]</MudChip>
-                    }
-                </MudStack>
-            </MudListItem>
-
-            <MudListItem T="string" 
-                        OnClick="@(() => ToggleStatusFilter(SummaryStatus.Reviewed))"
-                        Class="@(SelectedStatuses.Contains(SummaryStatus.Reviewed) ? "mud-selected-item mud-ripple" : "")">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                        <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Info" />
-                        <MudText>Consulté</MudText>
-                    </MudStack>
-                    @if (StatusCounts.GetValueOrDefault(SummaryStatus.Reviewed, 0) > 0)
-                    {
-                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@StatusCounts[SummaryStatus.Reviewed]</MudChip>
-                    }
-                </MudStack>
-            </MudListItem>
-
-            <MudListItem T="string" 
-                        OnClick="@(() => ToggleStatusFilter(SummaryStatus.Selected))"
-                        Class="@(SelectedStatuses.Contains(SummaryStatus.Selected) ? "mud-selected-item mud-ripple" : "")">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                        <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Success" />
-                        <MudText>Retenu</MudText>
-                    </MudStack>
-                    @if (StatusCounts.GetValueOrDefault(SummaryStatus.Selected, 0) > 0)
-                    {
-                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@StatusCounts[SummaryStatus.Selected]</MudChip>
-                    }
-                </MudStack>
-            </MudListItem>
-
-            <MudListItem T="string" 
-                        OnClick="@(() => ToggleStatusFilter(SummaryStatus.Rejected))"
-                        Class="@(SelectedStatuses.Contains(SummaryStatus.Rejected) ? "mud-selected-item mud-ripple" : "")">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                        <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Color="Color.Error" />
-                        <MudText>Écarté</MudText>
-                    </MudStack>
-                    @if (StatusCounts.GetValueOrDefault(SummaryStatus.Rejected, 0) > 0)
-                    {
-                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@StatusCounts[SummaryStatus.Rejected]</MudChip>
-                    }
-                </MudStack>
-            </MudListItem>
-
-            @* Categories Filters *@
-            @if (Categories.Any())
-            {
-                <MudDivider Class="my-2" />
-                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="px-4 py-2">
-                    <MudText Typo="Typo.subtitle2">Catégories</MudText>
-                    <MudIconButton Icon="@Icons.Material.Filled.Add" 
-                                  Color="Color.Primary" 
-                                  Size="Size.Small"
-                                  OnClick="OnCreateCategory"
-                                  Title="Créer une catégorie" />
-                </MudStack>
-
-                @foreach (var category in Categories.OrderBy(c => c.Name))
-                {
-                    var count = CategoryCounts.GetValueOrDefault(category.Id, 0);
-                    var isSelected = SelectedCategoryIds.Contains(category.Id);
-                    var iconStyle = !string.IsNullOrWhiteSpace(category.Color) ? $"color: {category.Color}; font-size: 12px;" : "font-size: 12px;";
-                    <MudListItem T="string" 
-                                OnClick="@(() => ToggleCategoryFilter(category.Id))"
-                                Class="@(isSelected ? "mud-selected-item mud-ripple" : "")">
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                                @if (!string.IsNullOrWhiteSpace(category.Color))
-                                {
-                                    <MudIcon Icon="@Icons.Material.Filled.Circle" Size="Size.Small" Style="@iconStyle" />
-                                }
-                                else
-                                {
-                                    <MudIcon Icon="@Icons.Material.Filled.Label" Size="Size.Small" Color="Color.Primary" />
-                                }
-                                <MudText Class="text-truncate">@category.Name</MudText>
-                            </MudStack>
-                            @if (count > 0)
-                            {
-                                <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@count</MudChip>
-                            }
-                        </MudStack>
-                    </MudListItem>
-                }
-            }
-            else
-            {
-                <MudDivider Class="my-2" />
-                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="px-4 py-2">
-                    <MudText Typo="Typo.subtitle2">Catégories</MudText>
-                    <MudIconButton Icon="@Icons.Material.Filled.Add" 
-                                  Color="Color.Primary" 
-                                  Size="Size.Small"
-                                  OnClick="OnCreateCategory"
-                                  Title="Créer une catégorie" />
-                </MudStack>
-                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="px-4 py-2">
-                    Aucune catégorie. Cliquez sur + pour en créer.
-                </MudText>
-            }
-        </MudList>
 </MudStack>
 
 @code {
@@ -263,64 +163,38 @@
 
     private bool HasActiveFilters => FilterFavoritesOnly || SelectedCategoryIds.Any() || SelectedStatuses.Any();
 
-    private string GetListItemClass(int? travelId, string filterType)
-    {
-        var isSelected = (SelectedFilterType == filterType && 
-                         (filterType != "travel" || SelectedTravelId == travelId));
-        return isSelected ? "mud-selected-item mud-ripple" : "";
-    }
+    private static readonly (SummaryStatus, string, Color)[] StatusFilters =
+    [
+        (SummaryStatus.ToReview, "À consulter", Color.Default),
+        (SummaryStatus.Reviewed, "Consulté",    Color.Info),
+        (SummaryStatus.Selected, "Retenu",      Color.Success),
+        (SummaryStatus.Rejected, "Écarté",      Color.Error),
+    ];
 
-    private async Task OnFilterChange(int? travelId, string filterType)
-    {
-        await OnFilterChanged.InvokeAsync((travelId, filterType));
-    }
+    private bool IsSelected(int? travelId, string filterType) =>
+        SelectedFilterType == filterType && (filterType != "travel" || SelectedTravelId == travelId);
 
-    private async Task OnCreateTravel()
-    {
-        await OnCreateTravelClicked.InvokeAsync();
-    }
-
-    private async Task OnEditTravel(TravelDto travel)
-    {
-        await OnEditTravelClicked.InvokeAsync(travel);
-    }
-
-    private async Task OnCreateCategory()
-    {
-        await OnCreateCategoryClicked.InvokeAsync();
-    }
-
-    private async Task ToggleFavoritesFilter()
-    {
-        await OnFavoritesFilterChanged.InvokeAsync(!FilterFavoritesOnly);
-    }
+    private static string PillClass(bool isActive) =>
+        $"pa-1 rounded-xl cursor-pointer{(isActive ? " mud-border-primary" : "")}";
 
     private async Task ToggleCategoryFilter(int categoryId)
     {
         var newSet = new HashSet<int>(SelectedCategoryIds);
-        if (newSet.Contains(categoryId))
-            newSet.Remove(categoryId);
-        else
-            newSet.Add(categoryId);
-
+        if (!newSet.Add(categoryId)) newSet.Remove(categoryId);
         await OnCategoryFiltersChanged.InvokeAsync(newSet);
     }
 
     private async Task ToggleStatusFilter(SummaryStatus status)
     {
         var newSet = new HashSet<SummaryStatus>(SelectedStatuses);
-        if (newSet.Contains(status))
-            newSet.Remove(status);
-        else
-            newSet.Add(status);
-
+        if (!newSet.Add(status)) newSet.Remove(status);
         await OnStatusFiltersChanged.InvokeAsync(newSet);
     }
 
     private async Task ResetSecondaryFilters()
     {
         await OnFavoritesFilterChanged.InvokeAsync(false);
-        await OnCategoryFiltersChanged.InvokeAsync(new HashSet<int>());
-        await OnStatusFiltersChanged.InvokeAsync(new HashSet<SummaryStatus>());
+        await OnCategoryFiltersChanged.InvokeAsync([]);
+        await OnStatusFiltersChanged.InvokeAsync([]);
     }
 }
