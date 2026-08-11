@@ -83,6 +83,7 @@ builder.Services.AddScoped<RecettesFamille.Services.ApprovalTokenService>();
 builder.Services.AddScoped<RecettesFamille.Services.UserApprovalEmailService>();
 
 // TravelPlanner (YouSummarize) services
+builder.Services.AddSingleton<YtDlpAudioExtractor>();
 builder.Services.AddScoped<RecettesFamille.Services.TravelPlanner.Sources.YoutubeSourceService>();
 builder.Services.AddScoped<RecettesFamille.Services.TravelPlanner.Sources.GenericSourceService>();
 builder.Services.AddScoped<IEnumerable<RecettesFamille.Services.TravelPlanner.Sources.IContentSourceService>>(sp =>

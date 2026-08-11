@@ -5,12 +5,13 @@ namespace RecettesFamille.Services.TravelPlanner.Sources;
 
 /// <summary>
 /// Service pour l'extraction de contenu depuis YouTube.
-/// Gère l'extraction des métadonnées et des transcripts via l'API Supadata.
+/// Gère l'extraction des métadonnées via yt-dlp et des transcripts via l'API Supadata.
 /// Normalise automatiquement les URLs shorts en format /watch?v= standard pour simplifier le traitement.
 /// </summary>
 public class YoutubeSourceService : IContentSourceService
 {
     private readonly ISupadataService _supadataService;
+    private readonly YtDlpAudioExtractor _ytDlpAudioExtractor;
 
     /// <inheritdoc/>
     public string SourceType => "YouTube";
@@ -31,9 +32,11 @@ public class YoutubeSourceService : IContentSourceService
     /// Initialise une nouvelle instance du service YouTube.
     /// </summary>
     /// <param name="supadataService">Service pour les appels à l'API Supadata.</param>
-    public YoutubeSourceService(ISupadataService supadataService)
+    /// <param name="ytDlpAudioExtractor">Extracteur yt-dlp pour les métadonnées.</param>
+    public YoutubeSourceService(ISupadataService supadataService, YtDlpAudioExtractor ytDlpAudioExtractor)
     {
         _supadataService = supadataService;
+        _ytDlpAudioExtractor = ytDlpAudioExtractor;
     }
 
     /// <inheritdoc/>
@@ -41,24 +44,16 @@ public class YoutubeSourceService : IContentSourceService
     {
         var normalizedUrl = NormalizeYoutubeUrl(sourceUrl);
 
-        var metadataResponse = await _supadataService.GetMetadataAsync(normalizedUrl, cancellationToken);
-
-        var duration = metadataResponse.Media?.Duration is int seconds
-            ? TimeSpan.FromSeconds(seconds)
-            : (TimeSpan?)null;
-
-        var publishedDate = DateTime.TryParse(metadataResponse.CreatedAt, out var dt)
-            ? dt
-            : (DateTime?)null;
+        var metadata = await _ytDlpAudioExtractor.GetMetadataAsync(normalizedUrl, cancellationToken);
 
         return new ContentMetadata(
-            Title: metadataResponse.Title ?? $"Vidéo YouTube {normalizedUrl}",
-            Url: normalizedUrl,
+            Title: metadata.Title ?? $"Vidéo YouTube {normalizedUrl}",
+            Url: metadata.WebpageUrl ?? normalizedUrl,
             SourceType: SourceType,
-            Author: metadataResponse.Author?.DisplayName,
-            PublishedDate: publishedDate,
-            Duration: duration,
-            ThumbnailUrl: metadataResponse.Media?.ThumbnailUrl
+            Author: metadata.Channel ?? metadata.Uploader,
+            PublishedDate: null,
+            Duration: metadata.Duration,
+            ThumbnailUrl: metadata.Thumbnail
         );
     }
 

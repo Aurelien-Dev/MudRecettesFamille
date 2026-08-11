@@ -11,6 +11,7 @@ namespace RecettesFamille.Services.TravelPlanner.Sources;
 public class GenericSourceService : IContentSourceService
 {
     private readonly ISupadataService _supadataService;
+    private readonly YtDlpAudioExtractor _ytDlpAudioExtractor;
 
     /// <inheritdoc/>
     public string SourceType => "Generic";
@@ -19,9 +20,11 @@ public class GenericSourceService : IContentSourceService
     /// Initialise une nouvelle instance du service générique.
     /// </summary>
     /// <param name="supadataService">Service pour les appels à l'API Supadata.</param>
-    public GenericSourceService(ISupadataService supadataService)
+    /// <param name="ytDlpAudioExtractor">Extracteur yt-dlp pour les métadonnées.</param>
+    public GenericSourceService(ISupadataService supadataService, YtDlpAudioExtractor ytDlpAudioExtractor)
     {
         _supadataService = supadataService;
+        _ytDlpAudioExtractor = ytDlpAudioExtractor;
     }
 
     /// <summary>
@@ -33,24 +36,16 @@ public class GenericSourceService : IContentSourceService
     /// <inheritdoc/>
     public async Task<ContentMetadata> ExtractMetadata(string sourceUrl, CancellationToken cancellationToken = default)
     {
-        var metadataResponse = await _supadataService.GetMetadataAsync(sourceUrl, cancellationToken);
-
-        var duration = metadataResponse.Media?.Duration is int seconds
-            ? TimeSpan.FromSeconds(seconds)
-            : (TimeSpan?)null;
-
-        var publishedDate = DateTime.TryParse(metadataResponse.CreatedAt, out var dt)
-            ? dt
-            : (DateTime?)null;
+        var metadata = await _ytDlpAudioExtractor.GetMetadataAsync(sourceUrl, cancellationToken);
 
         return new ContentMetadata(
-            Title: metadataResponse.Title ?? sourceUrl,
-            Url: metadataResponse.Url ?? sourceUrl,
-            SourceType: metadataResponse.Platform ?? SourceType,
-            Author: metadataResponse.Author?.DisplayName,
-            PublishedDate: publishedDate,
-            Duration: duration,
-            ThumbnailUrl: metadataResponse.Media?.ThumbnailUrl
+            Title: metadata.Title ?? sourceUrl,
+            Url: metadata.WebpageUrl ?? sourceUrl,
+            SourceType: metadata.Extractor ?? SourceType,
+            Author: metadata.Channel ?? metadata.Uploader,
+            PublishedDate: null,
+            Duration: metadata.Duration,
+            ThumbnailUrl: metadata.Thumbnail
         );
     }
 

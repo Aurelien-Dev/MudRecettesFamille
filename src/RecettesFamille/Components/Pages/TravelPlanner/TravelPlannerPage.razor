@@ -13,22 +13,22 @@
     @* Sidebar gauche avec scroll indépendant *@
     <MudPaper Elevation="1" Square="true" Class="overflow-y-auto" Style="width: 280px; min-width: 280px;">
         <TravelSidebar Travels="@travels"
-                      Categories="@categories"
-                      SummariesCount="@summariesCountByTravel"
-                      CategoryCounts="@GetContextualCategoryCounts()"
-                      StatusCounts="@GetContextualStatusCounts()"
-                      TotalCount="@ytResume.Count"
-                      UnclassifiedCount="@GetUnclassifiedCount()"
-                      SelectedTravelId="@selectedTravelId"
-                      SelectedFilterType="@selectedFilterType"
-                      SelectedCategoryIds="@selectedCategoryIds"
-                      SelectedStatuses="@selectedStatuses"
-                      OnFilterChanged="@HandleFilterChanged"
-                      OnCategoryFiltersChanged="@HandleCategoryFiltersChanged"
-                      OnStatusFiltersChanged="@HandleStatusFiltersChanged"
-                      OnCreateTravelClicked="@OpenCreateTravelDialog"
-                      OnEditTravelClicked="@OpenEditTravelDialog"
-                      OnCreateCategoryClicked="@OpenCreateCategoryDialog" />
+                       Categories="@categories"
+                       SummariesCount="@summariesCountByTravel"
+                       CategoryCounts="@GetContextualCategoryCounts()"
+                       StatusCounts="@GetContextualStatusCounts()"
+                       TotalCount="@ytResume.Count"
+                       UnclassifiedCount="@GetUnclassifiedCount()"
+                       SelectedTravelId="@selectedTravelId"
+                       SelectedFilterType="@selectedFilterType"
+                       SelectedCategoryIds="@selectedCategoryIds"
+                       SelectedStatuses="@selectedStatuses"
+                       OnFilterChanged="@HandleFilterChanged"
+                       OnCategoryFiltersChanged="@HandleCategoryFiltersChanged"
+                       OnStatusFiltersChanged="@HandleStatusFiltersChanged"
+                       OnCreateTravelClicked="@OpenCreateTravelDialog"
+                       OnEditTravelClicked="@OpenEditTravelDialog"
+                       OnCreateCategoryClicked="@OpenCreateCategoryDialog" />
     </MudPaper>
 
     @* Zone de contenu principale avec scroll indépendant *@
@@ -43,8 +43,8 @@
                 <MudText Typo="Typo.h6" Class="mb-4">Créer un nouveau résumé</MudText>
                 <MudGrid Spacing="3">
                     <MudItem xs="12" md="6">
-                        <MudTextField @bind-Value="currentUrl" 
-                                      Label="URL de la vidéo YouTube" 
+                        <MudTextField @bind-Value="currentUrl"
+                                      Label="URL de la vidéo YouTube"
                                       Variant="Variant.Outlined"
                                       Placeholder="https://www.youtube.com/watch?v=..."
                                       Disabled="@isProcessing"
@@ -53,12 +53,12 @@
                                       AdornmentColor="Color.Error" />
                     </MudItem>
                     <MudItem xs="12" md="3">
-                        <MudSelect T="int?" 
-                                  @bind-Value="selectedTravelIdForCreation" 
-                                  Label="Ajouter au voyage (optionnel)" 
-                                  Variant="Variant.Outlined"
-                                  Clearable="true"
-                                  Disabled="@isProcessing">
+                        <MudSelect T="int?"
+                                   @bind-Value="selectedTravelIdForCreation"
+                                   Label="Ajouter au voyage (optionnel)"
+                                   Variant="Variant.Outlined"
+                                   Clearable="true"
+                                   Disabled="@isProcessing">
                             <MudSelectItem T="int?" Value="@((int?)null)">Non classé</MudSelectItem>
                             @foreach (var travel in travels.Where(t => !t.IsArchived).OrderBy(t => t.Name))
                             {
@@ -67,8 +67,8 @@
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="12" md="3" Class="d-flex align-center">
-                        <MudButton Variant="Variant.Filled" 
-                                   Color="Color.Primary" 
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
                                    FullWidth="true"
                                    Disabled="@(isProcessing)"
                                    OnClick="ProcessYoutubeUrl"
@@ -92,23 +92,23 @@
                 @* Colonne centrale : Liste des résumés avec recherche *@
                 <MudItem xs="12" md="5">
                     <VideoSummaryList FilteredSummaries="@filteredSummaries"
-                                     SelectedSummaryId="@CurrentResume?.Id"
-                                     SearchText="@searchText"
-                                     OnSearchChanged="@HandleSearchChanged"
-                                     OnSummarySelected="@HandleSummarySelected"
-                                     OnDeleteSummaryClicked="@DeleteSummaryWithConfirmation" />
+                                      SelectedSummaryId="@CurrentResume?.Id"
+                                      SearchText="@searchText"
+                                      OnSearchChanged="@HandleSearchChanged"
+                                      OnSummarySelected="@HandleSummarySelected"
+                                      OnDeleteSummaryClicked="@DeleteSummaryWithConfirmation" />
                 </MudItem>
 
                 @* Panneau de détail à droite *@
                 <MudItem xs="12" md="7">
                     <VideoSummaryDetail Summary="@CurrentResume"
-                                       Travels="@travels"
-                                       Categories="@categories"
-                                       OnTravelChanged="@UpdateSummaryTravel"
-                                       OnStatusChanged="@UpdateSummaryStatus"
-                                       OnCategoriesChanged="@UpdateSummaryCategories"
-                                       OnTitleChanged="@UpdateSummaryTitle"
-                                       OnDeleteClicked="@DeleteSummaryWithConfirmation" />
+                                        Travels="@travels"
+                                        Categories="@categories"
+                                        OnTravelChanged="@UpdateSummaryTravel"
+                                        OnStatusChanged="@UpdateSummaryStatus"
+                                        OnCategoriesChanged="@UpdateSummaryCategories"
+                                        OnTitleChanged="@UpdateSummaryTitle"
+                                        OnDeleteClicked="@DeleteSummaryWithConfirmation" />
                 </MudItem>
             </MudGrid>
 
@@ -221,8 +221,8 @@
         // Recherche textuelle
         if (!string.IsNullOrWhiteSpace(searchText))
         {
-            query = query.Where(s => 
-                s.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) || 
+            query = query.Where(s =>
+                s.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
                 s.Resume.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -514,8 +514,8 @@
 
                     if (filteredSummaries.Any())
                     {
-                        CurrentResume = index < filteredSummaries.Count 
-                            ? filteredSummaries[index] 
+                        CurrentResume = index < filteredSummaries.Count
+                            ? filteredSummaries[index]
                             : filteredSummaries.LastOrDefault();
                     }
                     else
@@ -564,15 +564,15 @@
     {
         var parameters = new DialogParameters<TravelDialog>
         {
-            { x => x.Travel, new TravelDto 
-                { 
-                    Id = travel.Id, 
-                    Name = travel.Name, 
-                    StartDate = travel.StartDate, 
-                    EndDate = travel.EndDate, 
+            { x => x.Travel, new TravelDto
+                {
+                    Id = travel.Id,
+                    Name = travel.Name,
+                    StartDate = travel.StartDate,
+                    EndDate = travel.EndDate,
                     IsArchived = travel.IsArchived,
                     CreatedDate = travel.CreatedDate
-                } 
+                }
             }
         };
 
@@ -617,8 +617,8 @@
             if (summaryToUpdate != null)
             {
                 summaryToUpdate.TravelId = summary.TravelId;
-                summaryToUpdate.TravelName = summary.TravelId.HasValue 
-                    ? travels.FirstOrDefault(t => t.Id == summary.TravelId.Value)?.Name 
+                summaryToUpdate.TravelName = summary.TravelId.HasValue
+                    ? travels.FirstOrDefault(t => t.Id == summary.TravelId.Value)?.Name
                     : null;
             }
 
