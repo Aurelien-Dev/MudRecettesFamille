@@ -207,7 +207,7 @@ public sealed class YtDlpAudioExtractor
                 "Tools",
                 "yt-dlp",
                 "linux-x64",
-                "yt-dlp_linux");
+                "yt-dlp_musllinux");
         }
 
         throw new PlatformNotSupportedException($"yt-dlp is not configured for {Environment.OSVersion.Platform}.");

@@ -57,7 +57,7 @@
     <Folder Include="Tools\yt-dlp\win-x64\" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="Tools\yt-dlp\linux-x64\yt-dlp_linux">
+    <None Update="Tools\yt-dlp\linux-x64\yt-dlp_musllinux">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
