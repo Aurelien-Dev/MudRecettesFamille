@@ -3,8 +3,8 @@
 # ===== Runtime (Alpine) =====
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS base
 USER root
-# Client PostgreSQL 17 + SSH (pour les backups)
-RUN apk add --no-cache postgresql17-client openssh-client
+# Client PostgreSQL 17 + SSH (pour les backups) + Node.js (pour yt-dlp challenge solver)
+RUN apk add --no-cache postgresql17-client openssh-client nodejs
 # repasser à l'utilisateur applicatif
 USER $APP_UID
 WORKDIR /app

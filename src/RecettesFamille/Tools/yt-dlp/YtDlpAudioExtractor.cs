@@ -131,8 +131,6 @@ public sealed class YtDlpAudioExtractor
 
         startInfo.ArgumentList.Add("--dump-json");
         startInfo.ArgumentList.Add("--no-playlist");
-        startInfo.ArgumentList.Add("--extractor-args");
-        startInfo.ArgumentList.Add("youtube:player_skip=webpage,config");
 
         if (File.Exists(_cookiesPath))
         {

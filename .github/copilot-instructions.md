@@ -47,3 +47,4 @@ Les deux domaines partagent le même `ApplicationDbContext` et les mêmes projet
 - Privilégier les `EventCallback` pour la communication enfant → parent
 - Toujours utiliser les DTOs (suffixe `Dto`) pour les échanges entre couches
 - Pas de logique métier dans les composants UI : déléguer aux services injectés
+- Avant de proposer des modifications importantes (changement d'image de base, refactoring architectural, etc.), toujours discuter des options et demander confirmation à l'utilisateur avant de toucher au code.
