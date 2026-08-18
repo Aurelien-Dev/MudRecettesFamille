@@ -61,6 +61,8 @@ public sealed class YtDlpAudioExtractor
         // Demande à yt-dlp d'afficher le chemin final du fichier
         startInfo.ArgumentList.Add("--print");
         startInfo.ArgumentList.Add("after_move:filepath");
+        startInfo.ArgumentList.Add("--js-runtimes");
+        startInfo.ArgumentList.Add("node");
 
         if (File.Exists(_cookiesPath))
         {
@@ -131,6 +133,8 @@ public sealed class YtDlpAudioExtractor
 
         startInfo.ArgumentList.Add("--dump-json");
         startInfo.ArgumentList.Add("--no-playlist");
+        startInfo.ArgumentList.Add("--js-runtimes");
+        startInfo.ArgumentList.Add("node");
 
         if (File.Exists(_cookiesPath))
         {
