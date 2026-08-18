@@ -31,6 +31,7 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 USER root
+RUN ls -la /app/Tools/yt-dlp/linux-x64/
 RUN chmod +x /app/Tools/yt-dlp/linux-x64/yt-dlp_linux
 USER $APP_UID
 VOLUME ["/app/data"]
