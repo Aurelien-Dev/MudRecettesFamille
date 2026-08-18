@@ -57,14 +57,13 @@
     <Folder Include="Tools\yt-dlp\win-x64\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="C:\Users\acret\Downloads\yt-dlp_linux" Link="Tools\yt-dlp\linux-x64\yt-dlp_linux" />
-  </ItemGroup>
-  <ItemGroup>
     <None Update="Tools\yt-dlp\linux-x64\yt-dlp_linux">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
     <None Update="Tools\yt-dlp\win-x64\yt-dlp.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
   </ItemGroup>
 </Project>
