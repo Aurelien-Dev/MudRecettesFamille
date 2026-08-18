@@ -95,8 +95,7 @@ public sealed class YtDlpAudioExtractor
 
         if (!File.Exists(_ytDlpPath))
         {
-            throw new FileNotFoundException(
-                $"yt-dlp executable not found: {_ytDlpPath}");
+            throw new FileNotFoundException($"yt-dlp executable not found: {_ytDlpPath}");
         }
 
         var startInfo = new ProcessStartInfo
@@ -208,7 +207,7 @@ public sealed class YtDlpAudioExtractor
                 "Tools",
                 "yt-dlp",
                 "linux-x64",
-                "yt-dlp");
+                "yt-dlp_linux");
         }
 
         throw new PlatformNotSupportedException($"yt-dlp is not configured for {Environment.OSVersion.Platform}.");
