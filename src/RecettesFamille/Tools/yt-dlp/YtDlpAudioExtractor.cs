@@ -4,10 +4,25 @@ using System.Text.Json;
 public sealed class YtDlpAudioExtractor
 {
     private readonly string _ytDlpPath;
+    private readonly string? _cookiesPath;
 
     public YtDlpAudioExtractor()
     {
         _ytDlpPath = GetYtDlpPath();
+        _cookiesPath = BuildCookiesFile();
+    }
+
+    // Écrit le contenu de YTDLP_COOKIES dans un fichier temporaire et retourne son chemin.
+    // Retourne null si la variable d'environnement n'est pas définie.
+    private static string? BuildCookiesFile()
+    {
+        var cookiesContent = Environment.GetEnvironmentVariable("YTDLP_COOKIES");
+        if (string.IsNullOrWhiteSpace(cookiesContent))
+            return null;
+
+        var path = Path.Combine(Path.GetTempPath(), "yt-dlp-cookies.txt");
+        File.WriteAllText(path, cookiesContent);
+        return path;
     }
 
     public async Task<string> DownloadAudioAsync(string url, string outputDirectory, CancellationToken cancellationToken = default)
@@ -45,6 +60,12 @@ public sealed class YtDlpAudioExtractor
         // Demande à yt-dlp d'afficher le chemin final du fichier
         startInfo.ArgumentList.Add("--print");
         startInfo.ArgumentList.Add("after_move:filepath");
+
+        if (File.Exists(_cookiesPath))
+        {
+            startInfo.ArgumentList.Add("--cookies");
+            startInfo.ArgumentList.Add(_cookiesPath);
+        }
 
         startInfo.ArgumentList.Add(url);
 
@@ -109,6 +130,13 @@ public sealed class YtDlpAudioExtractor
 
         startInfo.ArgumentList.Add("--dump-json");
         startInfo.ArgumentList.Add("--no-playlist");
+
+        if (File.Exists(_cookiesPath))
+        {
+            startInfo.ArgumentList.Add("--cookies");
+            startInfo.ArgumentList.Add(_cookiesPath);
+        }
+
         startInfo.ArgumentList.Add(url);
 
         using var process = new Process
