@@ -54,3 +54,10 @@ jobs:
 
             docker compose -f RecettesFamille.Docker/docker-compose-light.yml down
             docker compose -f RecettesFamille.Docker/docker-compose-light.yml --env-file .env up --build -d
+
+            echo "=== Espace disque avant prune ==="
+            df -h /
+            docker image prune -f
+            docker builder prune -f
+            echo "=== Espace disque après prune ==="
+            df -h /
