@@ -62,7 +62,7 @@ public sealed class YtDlpAudioExtractor
         startInfo.ArgumentList.Add("--print");
         startInfo.ArgumentList.Add("after_move:filepath");
         startInfo.ArgumentList.Add("--js-runtimes");
-        startInfo.ArgumentList.Add("node");
+        startInfo.ArgumentList.Add("node:/usr/bin/node");
 
         if (File.Exists(_cookiesPath))
         {
@@ -134,7 +134,7 @@ public sealed class YtDlpAudioExtractor
         startInfo.ArgumentList.Add("--dump-json");
         startInfo.ArgumentList.Add("--no-playlist");
         startInfo.ArgumentList.Add("--js-runtimes");
-        startInfo.ArgumentList.Add("node");
+        startInfo.ArgumentList.Add("node:/usr/bin/node");
 
         if (File.Exists(_cookiesPath))
         {
