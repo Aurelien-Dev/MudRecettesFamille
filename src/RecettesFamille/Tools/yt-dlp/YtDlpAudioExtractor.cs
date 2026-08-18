@@ -12,14 +12,15 @@ public sealed class YtDlpAudioExtractor
         _cookiesPath = BuildCookiesFile();
     }
 
-    // Écrit le contenu de YTDLP_COOKIES dans un fichier temporaire et retourne son chemin.
+    // Décode le contenu base64 de YTDLP_COOKIES, l'écrit dans un fichier temporaire et retourne son chemin.
     // Retourne null si la variable d'environnement n'est pas définie.
     private static string? BuildCookiesFile()
     {
-        var cookiesContent = Environment.GetEnvironmentVariable("YTDLP_COOKIES");
-        if (string.IsNullOrWhiteSpace(cookiesContent))
+        var cookiesBase64 = Environment.GetEnvironmentVariable("YTDLP_COOKIES");
+        if (string.IsNullOrWhiteSpace(cookiesBase64))
             return null;
 
+        var cookiesContent = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(cookiesBase64));
         var path = Path.Combine(Path.GetTempPath(), "yt-dlp-cookies.txt");
         File.WriteAllText(path, cookiesContent);
         return path;
