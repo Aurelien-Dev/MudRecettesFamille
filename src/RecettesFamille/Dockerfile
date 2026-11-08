@@ -3,36 +3,38 @@
 # ===== Runtime (Alpine) =====
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS base
 USER root
-# Client PostgreSQL 17 + SSH (pour les backups) + Node.js (pour yt-dlp challenge solver)
-RUN apk add --no-cache postgresql17-client openssh-client nodejs
-# repasser à l'utilisateur applicatif
+# PostgreSQL client and SSH for backups
+RUN apk add --no-cache postgresql17-client openssh-client
+# repasser Ã  l'utilisateur applicatif
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-# Étape 2 : Build l’application
+# Ã©tape 2 : Build l'application
 FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["../RecettesFamille/RecettesFamille.csproj", "RecettesFamille/"]
+COPY ["nuget.config", "./"]
+COPY ["RecettesFamille/RecettesFamille.csproj", "RecettesFamille/"]
+COPY ["RecettesFamille.Data/RecettesFamille.Data.csproj", "RecettesFamille.Data/"]
+COPY ["RecettesFamille.Dto/RecettesFamille.Dto.csproj", "RecettesFamille.Dto/"]
+COPY ["RecettesFamille.Data.Repository/RecettesFamille.Data.Repository.csproj", "RecettesFamille.Data.Repository/"]
+COPY ["RecettesFamille.Rag/RecettesFamille.Rag.csproj", "RecettesFamille.Rag/"]
 RUN dotnet restore "./RecettesFamille/RecettesFamille.csproj"
 COPY . .
 WORKDIR "/src/RecettesFamille"
 RUN dotnet build "./RecettesFamille.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Étape 3 : Publish
+# Ã©tape 3 : Publish
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./RecettesFamille.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Étape 4 : Conteneur final
+# Ã©tape 4 : Conteneur final
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-USER root
-RUN chmod +x /app/Tools/yt-dlp/linux-x64/yt-dlp_musllinux
-USER $APP_UID
 VOLUME ["/app/data"]
 
 ENTRYPOINT ["dotnet", "RecettesFamille.dll"]

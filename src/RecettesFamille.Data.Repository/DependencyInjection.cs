@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using RecettesFamille.Data.Repository.IRepositories;
 using RecettesFamille.Data.Repository.Mappers;
@@ -17,9 +17,6 @@ public static class DependencyInjection
         services.AddScoped<ITechnicalDbRepository, TechnicalDbRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IYoutubeRepository, YoutubeRepository>();
-        services.AddScoped<ITravelRepository, TravelRepository>();
-        services.AddScoped<ICategoryRepository, CategoryRepository>();
 
         //AutoMapper
         services.AddAutoMapper(cfg =>

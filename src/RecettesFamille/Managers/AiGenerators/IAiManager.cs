@@ -1,4 +1,4 @@
-﻿using RecettesFamille.Api;
+using RecettesFamille.Api;
 using RecettesFamille.Dto.Models;
 using RecettesFamille.Dto.Models.Blocks;
 using RecettesFamille.Managers.AiGenerators.Models;
@@ -7,7 +7,7 @@ namespace RecettesFamille.Managers.AiGenerators;
 
 /// <summary>
 /// Interface pour la gestion des fonctionnalités d'intelligence artificielle.
-/// Fournit des méthodes pour convertir des recettes, générer des images, calculer des calories et créer des résumés YouTube.
+/// Fournit des méthodes pour convertir des recettes, générer des images et calculer des calories.
 /// </summary>
 public interface IAiManager
 {
@@ -38,12 +38,4 @@ public interface IAiManager
     /// <returns>Le nombre total de calories estimé.</returns>
     Task<int> AskCalories(List<IngredientDto> ingredients, AiClientType aiClientTypeEnum, CancellationToken cancellationToken = default);
 
-    /// <summary>
-    /// Génère un résumé d'une vidéo YouTube à partir des données fournies.
-    /// </summary>
-    /// <param name="request">Les données JSON de la vidéo YouTube à résumer.</param>
-    /// <param name="travelId">Identifiant optionnel du voyage à associer au résumé.</param>
-    /// <param name="cancellationToken">Token d'annulation pour les opérations asynchrones.</param>
-    /// <returns>Le résumé généré de la vidéo YouTube.</returns>
-    Task<YoutubeResumeDto> GetYoutubeResume(string transcript, CancellationToken cancellationToken = default);
 }
