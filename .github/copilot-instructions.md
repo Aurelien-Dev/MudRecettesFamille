@@ -1,24 +1,21 @@
 # Instructions globales – MudRecettesFamille
 
-## Architecture — deux domaines métier
+## Architecture - Recettes Famille
 
-Ce projet héberge **deux domaines métier distincts** dans la même solution `RecettesFamille.sln` :
+Cette solution contient le site recettes et ses dependances autonomes.
 
-### 1. Recettes Famille
+### Recettes Famille
 - Pages Blazor : `src/RecettesFamille/Components/Pages/Recettes/`
 - Entités EF : `src/RecettesFamille.Data/EntityModel/` (RecipeEntity, TagEntity, BlockBaseEntity…)
-- DTOs : `src/RecettesFamille.Dto/` — sous-dossier `Recettes/`
-- Repository : `src/RecettesFamille.Data.Repository/` — sous-dossier `Recettes/`
+- DTOs : `src/RecettesFamille.Dto/Models/` et `ModelByPage/`
+- Repository : `src/RecettesFamille.Data.Repository/Repositories/`
 
-### 2. TravelPlanner
-- Pages Blazor : `src/RecettesFamille/Components/Pages/TravelPlanner/`
-- Entités EF : `src/RecettesFamille.Data/EntityModel/` (TravelEntity, CategoryEntity…)
-- DTOs : `src/RecettesFamille.Dto/` — sous-dossier `TravelPlanner/`
-- Repository : `src/RecettesFamille.Data.Repository/` — sous-dossier `TravelPlanner/`
-
-Quand l'utilisateur mentionne **"Recettes"** → chercher dans les dossiers `Recettes/`.
-Quand l'utilisateur mentionne **"TravelPlanner"** → chercher dans les dossiers `TravelPlanner/`.
-Les deux domaines partagent le même `ApplicationDbContext` et les mêmes projets `.Data`, `.Dto`, `.Data.Repository`.
+YouSummarize (TravelPlanner) est une solution distincte dans `D:\01_dev\YouSummarize`.
+Ne pas ajouter de references de projets ou de fichiers entre les deux solutions.
+La base PostgreSQL reste partagee. Le modele EF et l'historique des migrations de
+ce depot sont conserves : ne pas retirer les mappings voyages ni generer de
+migration destructive pour nettoyer le code. Aucun changement de donnees n'est
+necessaire pour le split.
 
 ## Stack technique
 - Blazor .NET 10, composants Server-side

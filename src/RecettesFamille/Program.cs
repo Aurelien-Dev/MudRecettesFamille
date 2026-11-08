@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
-using RecettesFamille.ServicesExternal;
+
 using RecettesFamille;
 using RecettesFamille.Api;
-using RecettesFamille.Api.TravelPlanner;
+
 using RecettesFamille.Components;
 using RecettesFamille.Data;
 using RecettesFamille.Data.EntityModel;
@@ -63,35 +63,10 @@ builder.Services.AddScoped(sp =>
     return new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };
 });
 
-// Configurer HttpClient pour l'API Supadata (extraction de transcripts YouTube)
-builder.Services.AddHttpClient("Supadata", client =>
-{
-    client.BaseAddress = new Uri("https://api.supadata.ai");
-    client.Timeout = TimeSpan.FromSeconds(60);
-
-    var apiKey = builder.Configuration["SUPADATA_API_KEY"];
-    if (!string.IsNullOrWhiteSpace(apiKey))
-    {
-        client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
-    }
-});
-builder.Services.AddScoped<ISupadataService, SupadataService>();
-
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<EmailManager>();
 builder.Services.AddScoped<RecettesFamille.Services.ApprovalTokenService>();
 builder.Services.AddScoped<RecettesFamille.Services.UserApprovalEmailService>();
-
-// TravelPlanner (YouSummarize) services
-builder.Services.AddSingleton<YtDlpAudioExtractor>();
-builder.Services.AddScoped<RecettesFamille.Services.TravelPlanner.Sources.YoutubeSourceService>();
-builder.Services.AddScoped<RecettesFamille.Services.TravelPlanner.Sources.GenericSourceService>();
-builder.Services.AddScoped<IEnumerable<RecettesFamille.Services.TravelPlanner.Sources.IContentSourceService>>(sp =>
-[
-    sp.GetRequiredService<RecettesFamille.Services.TravelPlanner.Sources.YoutubeSourceService>(),
-]);
-builder.Services.AddScoped<RecettesFamille.Services.TravelPlanner.Sources.ContentSourceResolver>();
-builder.Services.AddScoped<RecettesFamille.Services.TravelPlanner.ISummaryService, RecettesFamille.Services.TravelPlanner.SummaryService>();
 
 builder.Services.AddRepository();
 
@@ -230,11 +205,6 @@ app.MapAuthEndpoints();
 // Enregistrer les endpoints d'approbation utilisateur
 app.MapUserApprovalEndpoints();
 
-// Enregistrer les endpoints utilitaires
-app.MapUtilityEndpoints();
-
-// Enregistrer les endpoints TravelPlanner (YouSummarize)
-app.MapTravelPlannerEndpoints();
 
 await app.RunAsync();
 

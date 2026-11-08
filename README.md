@@ -21,9 +21,32 @@ RecettesFamille est une application web pour gérer et partager des recettes de 
 - `src/RecettesFamille.Data.Repository` : Contient les interfaces et implémentations des dépôts de données
 - `src/RecettesFamille.Docker` : Contient les fichiers de configuration Docker
 
+## Separation de YouSummarize
+
+Le front et les services TravelPlanner ont ete extraits dans une solution autonome
+situee dans `D:\01_dev\YouSummarize`. Ce depot conserve uniquement le site recettes
+et ses services. Aucun projet ne reference la solution YouSummarize.
+
+Les deux applications utilisent encore la meme base PostgreSQL et les memes
+comptes et roles Identity. Le projet Data et les migrations recettes sont conserves
+sans changement : les mappings du schema partage restent necessaires pour eviter
+qu'une future migration propose de supprimer les tables voyages.
+
+Le split ne necessite aucune migration, aucun transfert et aucun nettoyage de donnees.
+Le demarrage recettes conserve son comportement existant d'initialisation RAG et
+d'application des migrations ; ne pas le lancer pour une verification hors base.
+YouSummarize n'applique aucune migration au demarrage.
+
+Les compilations, publications Release, references locales et snapshots EF des deux
+applications ont ete verifies sans connexion a la base. Les deux images Docker
+ont ete construites. YouSummarize demarre dans un conteneur sans reseau avec des
+parametres factices et sert ses ressources statiques ; ce conteneur a ete supprime.
+Les parcours authentifies et le deploiement reel restent a valider dans leur
+environnement habituel.
+
 ## Prérequis
 
-- .NET 9.0 SDK
+- .NET 10 SDK
 - PostgreSQL
 - Docker (optionnel)
 
